@@ -15,8 +15,6 @@
 
 Built to handle heterogeneous schemas, enforce **LGPD data protection**, and protect against CSV Injection, providing a backend-centric architecture suitable for production environments.
 
----
-
 ## Project Purpose
 
 This system was originally developed to solve a real business problem: users frequently uploaded CSV files with inconsistent structures, repeated keys, missing fields, or schema drift. Existing online tools could not be used due to:
@@ -182,22 +180,17 @@ For detailed implementation guides, please refer to:
 These align with real-world ingestion & data engineering pipelines:
 
 * [] Chunked file processing for huge datasets
-* RFC 4180-compliant CSV parser
-* Data transformation layer (cleaning, mapping, enrichment)
-* Data analysis & pattern detection
-* Conversion to XLSX, JSON, Parquet
-* Versioning of processed datasets
-* Background workers (Celery + Redis) for async heavy workloads
-* User authentication + RBAC
-* Admin dashboard (React or Vue)
-* Rule engine to define extraction/transformation logic
+* [] RFC 4180-compliant CSV parser
+* []Data transformation layer (cleaning, mapping, enrichment)
+* []Data analysis & pattern detection
+* [] Conversion to XLSX, JSON, Parquet
+* []Versioning of processed datasets
+* [] Background workers (Celery + Redis) for async heavy workloads
+* [] User authentication + RBAC
+* [] Admin dashboard (React or Vue)
+* [] Rule engine to define extraction/transformation logic
 * [] Report generation (PDF / HTML)
 
-[ ] Chunked Processing: For multi-gigabyte datasets.
-[ ] RFC 4180 Compliance: Stricter CSV parsing.
-[ ] Export Options: Convert to Parquet/JSON/XLSX.
-[ ] Background Workers: Celery + Redis for async processing.
-[ ] RBAC: User roles and permissions.
 ---
 
 ## License
