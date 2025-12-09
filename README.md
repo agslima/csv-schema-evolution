@@ -1,5 +1,6 @@
 # CSV Ingestion & Processing Engine
-### ## Backend-Focused Full Stack Application (FastAPI + MongoDB GridFS)
+
+### Backend-Focused Full Stack Application (FastAPI + MongoDB GridFS)
 
 <p align="left">
   <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/agslima/csv_schema_evolution/ci.yml?label=CI%2FCD">
@@ -10,8 +11,11 @@
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
-A secure, extensible, and compliance-oriented engine for ingesting, sanitizing, normalizing, and analyzing CSV files at scale.
-Built to handle heterogeneous schemas, protect user data (LGPD), and provide a backend-centric architecture suitable for real production environments.
+> **A secure, compliance-oriented engine for ingesting, sanitizing, and normalizing CSV files at scale.**
+
+Built to handle heterogeneous schemas, enforce **LGPD data protection**, and protect against CSV Injection, providing a backend-centric architecture suitable for production environments.
+
+---
 
 ## Project Purpose
 
@@ -46,39 +50,23 @@ This allows teams to:
 
 ---
 
-## Architecture Overview
+## Architecture & Design
 
-This application is designed with a backend-first mindset, following clean, modular design and production-grade patterns.
+This application is designed with a **Backend-first** mindset, following clean, modular design and production-grade patterns.
 
-```text
-backend/
-├── app/
-│   ├── main.py              # FastAPI entrypoint
-│   ├── api/v1/              # REST endpoints
-│   ├── services/            # Core business logic
-│   │   ├── csv_processor.py # Schema inference, sanitization, transforms
-│   │   ├── sanitize.py      # CSV Injection protection
-│   │   └── storage.py       # GridFS IO layer
-│   ├── db/mongo.py          # MongoDB client + GridFS handler
-│   ├── models/              # Pydantic models
-│   └── utils/validators.py  # Input validation
+### System Flow
+
+```mermaid
+graph LR
+    A[User Upload] -->|Stream| B(FastAPI Endpoint)
+    B -->|Validation| C{Sanitizer}
+    C -->|Safe Content| D[Processor Engine]
+    D -->|Schema Inference| E[Normalizer]
+    E -->|Structured Data| F[(MongoDB / GridFS)]
+    C -->|Malicious Input| X[Reject Request]
 ```
 
-<!--
-mermaid
-flowchart TD
-    A[Web UI<br>(HTML + JS)] -->|Upload/Download| B[FastAPI API<br>Uvicorn]
-
-    B --> C1[CSV Processor<br>- Schema Inference<br>- Delimiter Detect]
-    B --> C2[Sanitizer<br>- CSV Injection Check]
-    B --> C3[Storage Layer<br>GridFS Handler]
-
-    C1 --> D[MongoDB + GridFS]
-    C2 --> D
-    C3 --> D
--->
-
-## Key Backend Engineering Decisions
+### Key Backend Engineering Decisions
 
 | Decision |	Rationale |
 | -- | -- |
@@ -87,6 +75,41 @@ flowchart TD
 | Schema Inference Engine	| Converts inconsistent key-value patterns into relational tables |
 | CSV Injection Sanitization |	Prevents spreadsheet attacks (=, +, @, -) |
 | Test suite (unit + integration) |	Ensures correctness for processors, sanitizers, and API |
+
+### Project Structure
+
+```text
+backend/
+├── app/
+│   ├── main.py              # FastAPI entrypoint
+│   ├── api/v1/              # REST endpoints
+│   ├── services/            # Core business logic
+│   │   ├── csv_processor.py # Schema inference & transforms
+│   │   ├── sanitize.py      # Security layer
+│   │   └── storage.py       # GridFS IO abstraction
+│   ├── db/mongo.py          # Database connection
+│   └── models/              # Pydantic data models
+```
+
+---
+
+## Quick Start
+
+Run the entire stack (API + Database) locally using Docker.
+
+### Prerequisites
+* Docker & Docker Compose
+  
+#### 1. Run the application
+
+```bash
+docker-compose up -d --build
+```
+
+#### 2. Access the Interfaces
+
+* **Web UI:** http://localhost:3000 (if frontend is included)
+* **API Documentation (Swagger):** http://localhost:8000/docs
 
 ---
 
@@ -120,7 +143,16 @@ flowchart TD
 * Isolated modules for pipeline execution
 * Reproducible environment via Docker Compose
 
+----
+
+<!--
 ### Demonstration:
+1. Secure Upload
+
+Users upload files via a clean interface with immediate validation.
+2. Automated Processing
+
+The system ingests, cleans, and presents the data.
 
 Upload Flow
 ![Upload Interface](docs/demo/screenshots/upload_page.png)
@@ -130,18 +162,18 @@ Processed Table Preview
 
 GIF Demo
 ![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
-
+-->
 ---
 
 ## Documentation
 
-For more details about the documentation of this project, please access:
+For detailed implementation guides, please refer to:
 
-- ![System Architecture](docs/architecture.md)
-- ![Setup Guide](/docs/setup.md)
-- ![API Reference](docs/api_reference.md)
-- ![Tests guide](docs/test.md)
-- ![CSV Processing Engine](/docs/processing_engine.md)
+* ![System Architecture](docs/architecture.md)
+* ![Setup & Installation Guide](/docs/setup.md)
+* ![API Reference](docs/api_reference.md)
+* ![Testing Strategy](docs/test.md)
+* ![Processing Engine Logic](/docs/processing_engine.md)
 
 ---
 
@@ -149,7 +181,7 @@ For more details about the documentation of this project, please access:
 
 These align with real-world ingestion & data engineering pipelines:
 
-* Chunked file processing for huge datasets
+* [] Chunked file processing for huge datasets
 * RFC 4180-compliant CSV parser
 * Data transformation layer (cleaning, mapping, enrichment)
 * Data analysis & pattern detection
@@ -159,9 +191,15 @@ These align with real-world ingestion & data engineering pipelines:
 * User authentication + RBAC
 * Admin dashboard (React or Vue)
 * Rule engine to define extraction/transformation logic
-* Report generation (PDF / HTML)
+* [] Report generation (PDF / HTML)
 
+[ ] Chunked Processing: For multi-gigabyte datasets.
+[ ] RFC 4180 Compliance: Stricter CSV parsing.
+[ ] Export Options: Convert to Parquet/JSON/XLSX.
+[ ] Background Workers: Celery + Redis for async processing.
+[ ] RBAC: User roles and permissions.
 ---
 
 ## License
 
+Distributed under the MIT License.
