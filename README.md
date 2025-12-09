@@ -1,8 +1,49 @@
-# CSV Ingestion & Processing Engine – Full Stack App (FastAPI + MongoDB)
+# CSV Ingestion & Processing Engine
 
 ![Status](https://github.com/agslima/csv_schema_evolution/actions/workflows/ci.yml/badge.svg)
+<p align="left">
+  <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/agslima/csv_schema_evolution/ci.yml?label=CI%2FCD">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
+  <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
+  <img alt="LGPD Safe" src="https://img.shields.io/badge/Data%20Protection-LGPD%20Safe-orange">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
+</p>
 
-This project demonstrates a production-ready architecture for handling data ingestion. It goes beyond simple file uploads by implementing security sanitization (prevention of CSV Injection), dynamic schema generation, and scalable storage using MongoDB GridFS.
+## Backend-Focused Full Stack Application (FastAPI + MongoDB GridFS)
+A secure, extensible, and compliance-oriented engine for ingesting, sanitizing, normalizing, and analyzing CSV files at scale.
+Built to handle heterogeneous schemas, protect user data (LGPD), and provide a backend-centric architecture suitable for real production environments.
+
+## Project Purpose
+
+This system was originally developed to solve a real business problem: users frequently uploaded CSV files with inconsistent structures, repeated keys, missing fields, or schema drift. Existing online tools could not be used due to:
+
+* **LGPD/compliance restrictions**
+* **Sensitive client data**
+* **Lack of ownership/control over data processing**
+* **No guarantees of CSV Injection protection**
+* **Inability to infer schemas or normalize data safely**
+
+### ✔ What the engine does
+
+It performs secure ingestion and converts unstructured CSV key-value patterns into proper, user-friendly tables.
+
+Example input:
+Name, John
+Age, 23
+Name, Mary
+Age, 30
+City, NY
+
+### ✔ Why this matters
+
+This allows teams to:
+
+* Analyze inconsistent data sources
+* Generate structured tables automatically
+* Avoid dangerous online tools that leak data
+* Comply with LGPD and other regulations
+* Prepare data for analytics or migration pipelines
 
 
 ---
@@ -251,13 +292,5 @@ Para agentes AI e desenvolvedores trabalhando neste repositório, veja `.github/
 - Comandos úteis de desenvolvimento
 - Exemplos de requests HTTP
 - Guia de testes
-
-## Autor
-
-Agnaldo Silva Lima
-
-🔗 [LinkedIn](https://www.linkedin.com/in/agslima)
-
-💡 Projeto desenvolvido com foco em usabilidade, segurança e boas práticas de engenharia de software.
 
 ---
