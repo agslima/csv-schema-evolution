@@ -1,4 +1,5 @@
 # CSV Ingestion & Processing Engine
+### ## Backend-Focused Full Stack Application (FastAPI + MongoDB GridFS)
 
 <p align="left">
   <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/agslima/csv_schema_evolution/ci.yml?label=CI%2FCD">
@@ -9,7 +10,6 @@
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
-## Backend-Focused Full Stack Application (FastAPI + MongoDB GridFS)
 A secure, extensible, and compliance-oriented engine for ingesting, sanitizing, normalizing, and analyzing CSV files at scale.
 Built to handle heterogeneous schemas, protect user data (LGPD), and provide a backend-centric architecture suitable for real production environments.
 
@@ -63,7 +63,9 @@ backend/
 │   ├── models/              # Pydantic models
 │   └── utils/validators.py  # Input validation
 ```
-```mermaid
+
+<!--
+mermaid
 flowchart TD
     A[Web UI<br>(HTML + JS)] -->|Upload/Download| B[FastAPI API<br>Uvicorn]
 
@@ -74,7 +76,7 @@ flowchart TD
     C1 --> D[MongoDB + GridFS]
     C2 --> D
     C3 --> D
-```
+-->
 
 ## Key Backend Engineering Decisions
 
@@ -112,7 +114,7 @@ flowchart TD
 * Metadata + structured output stored as documents
 * Supports large file ingestion without memory overload
 
-###🔁 CI/CD
+### 🔁 CI/CD
 
 * GitHub Actions (tests + Docker build)
 * Isolated modules for pipeline execution
@@ -121,10 +123,10 @@ flowchart TD
 ### Demonstration:
 
 Upload Flow
-![Upload Interface](docs/screenshots/upload_page.png)
+![Upload Interface](docs/demo/screenshots/upload_page.png)
 
 Processed Table Preview
-![Processed CSV Output](docs/screenshots/table_output.png)
+![Processed CSV Output](docs/demo/screenshots/table_output.png)
 
 GIF Demo
 ![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
@@ -135,10 +137,10 @@ GIF Demo
 
 For more details about the documentation of this project, please access:
 
-- ![System Architecture](docs/demo/architecture.md)
+- ![System Architecture](docs/architecture.md)
 - ![Setup Guide](/docs/setup.md)
-- ![API Reference](docs/demo//docs/api_reference.md)
-- ![Tests guide](docs/demo/test.md)
+- ![API Reference](docs/api_reference.md)
+- ![Tests guide](docs/test.md)
 - ![CSV Processing Engine](/docs/processing_engine.md)
 
 ---
