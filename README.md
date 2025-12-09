@@ -179,18 +179,12 @@ For detailed implementation guides, please refer to:
 
 These align with real-world ingestion & data engineering pipelines:
 
-* [] Chunked file processing for huge datasets
-* [] RFC 4180-compliant CSV parser
-* []Data transformation layer (cleaning, mapping, enrichment)
-* []Data analysis & pattern detection
-* [] Conversion to XLSX, JSON, Parquet
-* []Versioning of processed datasets
-* [] Background workers (Celery + Redis) for async heavy workloads
-* [] User authentication + RBAC
-* [] Admin dashboard (React or Vue)
-* [] Rule engine to define extraction/transformation logic
-* [] Report generation (PDF / HTML)
-
+* [] **Chunked Processing:** for huge datasets
+* [] **RFC 4180 Compliance:** Stricter CSV parsing.
+* [] **Export Options:** Convert to Parquet/JSON/XLSX.
+* [] **Data analysis** & pattern detection
+* [] **Background Workers:** Celery + Redis for async processing.
+* [] **RBAC:** User roles and permissions. 
 ---
 
 ## License
