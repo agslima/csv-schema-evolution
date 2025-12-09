@@ -138,7 +138,7 @@ docker-compose up -d --build
 * Isolated modules for pipeline execution
 * Reproducible environment via Docker Compose
 
-----
+---
 
 <!--
 ### Demonstration:
@@ -158,6 +158,7 @@ Processed Table Preview
 GIF Demo
 ![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
 -->
+
 ---
 
 ## Documentation
