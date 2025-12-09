@@ -46,6 +46,23 @@ This allows teams to:
 * Comply with LGPD and other regulations
 * Prepare data for analytics or migration pipelines
 
+
+## 🎯 Project Purpose
+
+This system was developed to solve a critical business problem: **Safe Ingestion of Unstructured Data.**
+
+Users frequently upload CSVs with inconsistent structures, repeated keys, or schema drift. Using public online tools was impossible due to:
+* 🔒 **Compliance:** LGPD restrictions and sensitive client data.
+* 🛡️ **Security:** No guarantees against CSV Injection or data leaks.
+* ⚙️ **Control:** Lack of ownership over the processing logic.
+
+### The Solution
+An engine that ingests raw, messy CSVs and transforms them into structured, safe assets.
+
+| Raw Input (Messy) | Engine Process | Structured Output (Clean) |
+| :--- | :---: | :--- |
+| `Name, John` <br> `Age, 23` <br> `City, NY` | **1. Sanitization** <br> **2. Schema Inference** <br> **3. Normalization** | **Table: Users** <br> `[ { "name": "John", "age": 23, "city": "NY" } ]` |
+
 ---
 
 ## Architecture & Design
