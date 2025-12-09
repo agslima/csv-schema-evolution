@@ -1,6 +1,5 @@
 # CSV Ingestion & Processing Engine
 
-![Status](https://github.com/agslima/csv_schema_evolution/actions/workflows/ci.yml/badge.svg)
 <p align="left">
   <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/agslima/csv_schema_evolution/ci.yml?label=CI%2FCD">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
@@ -64,7 +63,7 @@ backend/
 │   ├── models/              # Pydantic models
 │   └── utils/validators.py  # Input validation
 ```
-
+```mermaid
 flowchart TD
     A[Web UI<br>(HTML + JS)] -->|Upload/Download| B[FastAPI API<br>Uvicorn]
 
@@ -75,6 +74,7 @@ flowchart TD
     C1 --> D[MongoDB + GridFS]
     C2 --> D
     C3 --> D
+```
 
 ## Key Backend Engineering Decisions
 
