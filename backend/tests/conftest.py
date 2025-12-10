@@ -74,7 +74,6 @@ def setup_patches(mock_oid):
     # Setup mock methods for fs_bucket
     mock_fs_bucket.open_upload_stream = MagicMock()
     mock_fs_bucket.open_download_stream_by_name = MagicMock()
-    
     # Setup generic GridOut read
     mock_grid_out = MagicMock()
     mock_grid_out.read.return_value = b"field1,value1\nfield2,value2\n"
@@ -91,7 +90,6 @@ def setup_patches(mock_oid):
     patcher_client.start()
     patcher_db.start()
     patcher_fs.start()
-    
     # Configure class mock to return our instance mock
     mock_cls = patcher_gridfs_cls.start()
     mock_cls.return_value = mock_fs_bucket
