@@ -96,8 +96,8 @@ def setup_patches():
 # For now, we keep the import here to match your structure.
 
 # pylint: disable=wrong-import-position
-from fastapi.testclient import TestClient
-from app.main import app
+from fastapi.testclient import TestClient  # noqa: E402
+from app.main import app  # noqa: E402
 
 
 @pytest.fixture
