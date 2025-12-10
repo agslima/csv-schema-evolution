@@ -24,6 +24,7 @@ def test_sanitize_value():
     from app.services.sanitize import sanitize_value
     assert sanitize_value("=CMD") == "'=CMD"
 
+
 def test_sanitize_value_edge_cases():
     from app.services.sanitize import sanitize_value
     assert sanitize_value("normal") == "normal"
