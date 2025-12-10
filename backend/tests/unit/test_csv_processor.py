@@ -1,6 +1,7 @@
 """
 Unit tests for CSV processor service.
 """
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from bson import ObjectId
@@ -22,11 +23,13 @@ def mock_mongo():
 # ... (keep existing synchronize tests like test_sanitize_value) ...
 def test_sanitize_value():
     from app.services.sanitize import sanitize_value
+
     assert sanitize_value("=CMD") == "'=CMD"
 
 
 def test_sanitize_value_edge_cases():
     from app.services.sanitize import sanitize_value
+
     assert sanitize_value("normal") == "normal"
 
 

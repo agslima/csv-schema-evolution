@@ -2,6 +2,7 @@
 Pytest configuration and fixtures for the backend.
 Sets up MongoDB mocks and environment variables.
 """
+
 import sys
 import os
 from unittest.mock import AsyncMock, MagicMock, patch

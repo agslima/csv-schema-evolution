@@ -19,6 +19,14 @@ pytest-asyncio==0.21.1
 uvicorn[standard]==0.24.0
 httpx==0.27.2
 motor==3.3.2
+bson
+
+# Testing dependencies
+pytest-cov==4.1.0
+responses==0.23.1
+coverage==7.2.7
+mock
+
 
 # Security Add
 dnspython>=2.6.1 # not directly required, pinned by Snyk to avoid a vulnerability
