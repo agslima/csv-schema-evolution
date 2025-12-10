@@ -115,7 +115,7 @@ docker-compose up -d --build
 
 * LGPD-friendly processing (no third-party tools)
 * CSV Injection protection
-* File size limit (50 MB)
+* File size limit (100 MB)
 * Strict content-type validation
 * Sanitized metadata stored separately from raw file streams
 
@@ -182,8 +182,7 @@ These align with real-world ingestion & data engineering pipelines:
 
 * [] **Chunked Processing:** for huge datasets
 * [] **RFC 4180 Compliance:** Stricter CSV parsing.
-* [] **Export Options:** Convert to Parquet/JSON/XLSX.
-* [] **Data analysis** & pattern detection
+* [] **Export Options:** Convert to JSON/XLSX.
 * [] **Background Workers:** Celery + Redis for async processing.
 * [] **RBAC:** User roles and permissions.
 
