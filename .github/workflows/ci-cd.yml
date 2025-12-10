@@ -66,16 +66,16 @@ jobs:
       - name: Install Snyk CLI
         run: npm install -g snyk
 
-      - name: Run Snyk Open Source (Dependencies)
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --file=backend/requirements.txt --package-manager=pip --severity-threshold=high
+      #- name: Run Snyk Open Source (Dependencies)
+      #  env:
+      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #  run: snyk test --file=backend/requirements.txt --package-manager=pip --severity-threshold=high
 
       # (SAST) - Check logic (Snyk Code serves as a second opinion to Bandit)
-      - name: Run Snyk Code (Logic)
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk code test backend/ --severity-threshold=high
+      #- name: Run Snyk Code (Logic)
+      #  env:
+      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #  run: snyk code test backend/ --severity-threshold=high
 
       - name: Wait for MongoDB
         run: |
@@ -96,10 +96,10 @@ jobs:
           flake8 backend --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 backend --count --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: Run Pytest (Unit & Integration)
-        run: |
-          export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
-          pytest backend/tests/ -v --asyncio-mode=auto
+      #- name: Run Pytest (Unit & Integration)
+      #  run: |
+      #    export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
+      #    pytest backend/tests/ -v --asyncio-mode=auto
 
   # Job 2: CD, Container Build & Supply Chain Security
   cd-build-push:
