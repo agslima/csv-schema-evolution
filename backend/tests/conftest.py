@@ -86,7 +86,6 @@ def setup_patches():
     patcher_client.start()
     patcher_db.start()
     patcher_fs.start()
-    
     # Configure the class mock to return our mock bucket instance
     mock_cls = patcher_gridfs_cls.start()
     mock_cls.return_value = mock_fs_bucket
@@ -108,4 +107,3 @@ from app.main import app                   # noqa: E402
 def client():
     """Create test client with mocked MongoDB."""
     return TestClient(app)
-    
