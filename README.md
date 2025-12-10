@@ -3,7 +3,7 @@
 ### Backend-Focused Full Stack Application (FastAPI + MongoDB GridFS)
 
 <p align="left">
-  <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/agslima/csv_schema_evolution/ci.yml?label=CI%2FCD">
+  <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/agslima/csv_schema_evolution/ci-cd.yml">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
@@ -63,13 +63,13 @@ graph LR
 
 ### Key Backend Engineering Decisions
 
-| Decision |	Rationale |
+| Decision | Rationale |
 | -- | -- |
 | FastAPI + Async I/O (Motor) | High throughput for file-heavy workloads |
-| MongoDB + GridFS |	Stores arbitrarily large CSVs and avoids RAM bottlenecks |
-| Schema Inference Engine	| Converts inconsistent key-value patterns into relational tables |
-| CSV Injection Sanitization |	Prevents spreadsheet attacks (=, +, @, -) |
-| Test suite (unit + integration) |	Ensures correctness for processors, sanitizers, and API |
+| MongoDB + GridFS | Stores arbitrarily large CSVs and avoids RAM bottlenecks |
+| Schema Inference Engine | Converts inconsistent key-value patterns into relational tables |
+| CSV Injection Sanitization | Prevents spreadsheet attacks (=, +, @, -) |
+| Test suite (unit + integration) | Ensures correctness for processors, sanitizers, and API |
 
 ### Project Structure
 
@@ -93,6 +93,7 @@ backend/
 Run the entire stack (API + Database) locally using Docker.
 
 ### Prerequisites
+
 * Docker & Docker Compose
   
 #### 1. Run the application
@@ -184,7 +185,8 @@ These align with real-world ingestion & data engineering pipelines:
 * [] **Export Options:** Convert to Parquet/JSON/XLSX.
 * [] **Data analysis** & pattern detection
 * [] **Background Workers:** Celery + Redis for async processing.
-* [] **RBAC:** User roles and permissions. 
+* [] **RBAC:** User roles and permissions.
+
 ---
 
 ## License
