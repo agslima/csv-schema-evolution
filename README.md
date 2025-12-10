@@ -169,11 +169,11 @@ GIF Demo
 
 For detailed implementation guides, please refer to:
 
-* [System Architecture](blob/main/docs/architecture.md)
-* [Setup & Installation Guide](blob/main/docs/setup.md)
-* [API Reference](blob/main/docs/api_reference.md)
-* [Testing Strategy](blob/main/docs/test.md)
-* [Processing Engine Logic](blob/main/docs/processing_engine.md)
+* [System Architecture](https://github.com/agslima/csv-schema-evolution/blob/main/docs/architecture.md)
+* [Setup & Installation Guide](https://github.com/agslima/csv-schema-evolution/blob/main/docs/setup.md)
+* [API Reference](https://github.com/agslima/csv-schema-evolution/blob/main/docs/api_reference.md)
+* [Testing Strategy](https://github.com/agslima/csv-schema-evolution/blob/main/docs/tests.md)
+* [Processing Engine Logic](https://github.com/agslima/csv-schema-evolution/blob/main/docs/sprocessing_engine.md)
 
 ---
 
