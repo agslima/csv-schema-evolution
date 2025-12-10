@@ -41,7 +41,8 @@ This allows teams to:
 * Generate structured tables automatically
 * Avoid dangerous online tools that leak data
 * Comply with LGPD and other regulations
-* Prepare data for analytics or migration pipelines
+* Prepare data for analytics, migration, BI or compliance workflows
+
 
 ---
 
