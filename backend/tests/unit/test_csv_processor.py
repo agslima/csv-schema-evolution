@@ -1,6 +1,7 @@
 """
 Unit tests for CSV processor service.
 """
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from bson import ObjectId
@@ -10,18 +11,20 @@ from app.services import csv_processor
 # But the autouse fixture in conftest handles the global patching.
 # We will rely on patch context managers for specific test overrides.
 
+
 @pytest.mark.asyncio
 async def test_process_csv_sync_gridfs():
     """Test the PyMongo (Sync) path where fs_bucket returns a list."""
     file_id = str(ObjectId())
-    
+
     # Define content
     csv_content = b"col_a,col_b\nval_a,val_b\n"
 
     # We must patch again to get access to the specific mocks for configuration
-    with patch("app.services.csv_processor.db") as mock_db, \
-         patch("app.services.csv_processor.fs_bucket") as mock_fs:
-        
+    with patch("app.services.csv_processor.db") as mock_db, patch(
+        "app.services.csv_processor.fs_bucket"
+    ) as mock_fs:
+
         # Mock DB Return
         mock_db.files.find_one.return_value = {
             "_id": ObjectId(file_id),
@@ -31,7 +34,7 @@ async def test_process_csv_sync_gridfs():
         # Mock Sync GridFS
         mock_out = MagicMock()
         # CRITICAL FIX: side_effect prevents infinite loops if code calls read() repeatedly
-        mock_out.read.side_effect = [csv_content, b""] 
+        mock_out.read.side_effect = [csv_content, b""]
         mock_fs.find.return_value = [mock_out]
 
         # Run
@@ -48,8 +51,9 @@ async def test_process_csv_async_gridfs():
     file_id = str(ObjectId())
     csv_content = b"col_a,col_b\nval_a,val_b\n"
 
-    with patch("app.services.csv_processor.db") as mock_db, \
-         patch("app.services.csv_processor.fs_bucket") as mock_fs:
+    with patch("app.services.csv_processor.db") as mock_db, patch(
+        "app.services.csv_processor.fs_bucket"
+    ) as mock_fs:
 
         mock_db.files.find_one.return_value = {
             "_id": ObjectId(file_id),
@@ -78,8 +82,9 @@ async def test_process_csv_with_injection():
     file_id = str(ObjectId())
     csv_content = b"formula,safe\n=CMD|' /C calc'!A0,normal_value\n"
 
-    with patch("app.services.csv_processor.db") as mock_db, \
-         patch("app.services.csv_processor.fs_bucket") as mock_fs:
+    with patch("app.services.csv_processor.db") as mock_db, patch(
+        "app.services.csv_processor.fs_bucket"
+    ) as mock_fs:
 
         mock_db.files.find_one.return_value = {
             "_id": ObjectId(file_id),

@@ -1,6 +1,7 @@
 """
 Pytest configuration and fixtures for the backend.
 """
+
 import sys
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -36,7 +37,7 @@ def setup_patches():
     mock_db.files.insert_one = AsyncMock(
         return_value=MagicMock(inserted_id=ObjectId("507f1f77bcf86cd799439011"))
     )
-    
+
     # Setup find_one to return a valid document (awaited)
     mock_db.files.find_one = AsyncMock(
         return_value={
@@ -53,24 +54,24 @@ def setup_patches():
     # Setup find to return a cursor
     mock_cursor = MagicMock()
     mock_cursor.sort.return_value = mock_cursor
-    mock_cursor.__aiter__.return_value = iter([]) # Default empty
+    mock_cursor.__aiter__.return_value = iter([])  # Default empty
     mock_db.files.find.return_value = mock_cursor
 
     # --- GRIDFS MOCK SETUP ---
     mock_fs_bucket.open_upload_stream = MagicMock()
     mock_fs_bucket.open_download_stream_by_name = MagicMock()
     mock_fs_bucket.delete = MagicMock()
-    
+
     # Generic generic GridOut read side_effect (to stop infinite loops)
     # Returns b"" by default
     mock_grid_out = MagicMock()
-    mock_grid_out.read.return_value = b"" 
+    mock_grid_out.read.return_value = b""
     mock_fs_bucket.find.return_value = [mock_grid_out]
 
     # --- APPLY PATCHES ---
-    # CRITICAL: We patch the references in 'app.services' and 'app.api' 
+    # CRITICAL: We patch the references in 'app.services' and 'app.api'
     # because they have already imported the real 'db' object.
-    
+
     patches = [
         patch("app.services.storage.db", mock_db),
         patch("app.services.storage.fs_bucket", mock_fs_bucket),
