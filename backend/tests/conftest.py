@@ -1,6 +1,7 @@
 """
 Pytest configuration and fixtures for the backend.
 """
+
 import sys
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -39,7 +40,7 @@ def setup_patches():
         "status": "processed",
         "records_count": 0,
         "fields": ["col1", "col2"],
-        "uploadDate": "2023-01-01T00:00:00"
+        "uploadDate": "2023-01-01T00:00:00",
     }
 
     mock_db.files.insert_one = AsyncMock(
@@ -64,9 +65,9 @@ def setup_patches():
     # --- 3. GridFS Returns ---
     mock_fs_bucket.open_upload_stream = MagicMock()
     mock_fs_bucket.delete = MagicMock()
-    
+
     mock_grid_out = MagicMock()
-    mock_grid_out.read.return_value = b"" 
+    mock_grid_out.read.return_value = b""
     mock_fs_bucket.find.return_value = [mock_grid_out]
 
     # --- 4. APPLY PATCHES ---
