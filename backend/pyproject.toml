@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# --- Pylint Configuration ---
+[tool.pylint.main]
+# Fail if the code score is below 10/10
+fail-under = 10.0
+# Enable the McCabe complexity checker (equivalent to flake8 --max-complexity)
+load-plugins = ["pylint.extensions.mccabe"]
+
+[tool.pylint.format]
+# Match your previous Flake8 setting
+max-line-length = 127
+
+[tool.pylint.design]
+# Complexity limit (Cyclomatic Complexity)
+max-complexity = 10
+
+# Other design limits (optional but recommended for code quality)
+max-args = 5
+max-attributes = 7
+max-bool-expr = 5
+max-branches = 12
+max-locals = 15
+max-parents = 7
+max-public-methods = 20
+max-returns = 6
+max-statements = 50
+
+[tool.pylint.messages_control]
+# Disable specific errors if needed (example: 'C0114' is missing module docstring)
+disable = [
+    "C0114", 
+    "C0115"
+]
