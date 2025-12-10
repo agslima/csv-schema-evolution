@@ -5,6 +5,7 @@ from bson import ObjectId
 import io
 import inspect
 
+
 async def process_csv(file_id: str, id_field: str = None):
     # Support db being either a Database (with .files) or a collection-like object (db itself)
     files_coll = getattr(db, "files", db)
@@ -88,7 +89,7 @@ async def process_csv(file_id: str, id_field: str = None):
         "$set": {
             "status": "processed",
             "fields": list(fields_set),
-            "records_count": len(records)
+            "records_count": len(records),
         }
     }
     if inspect.iscoroutinefunction(update_one_fn):

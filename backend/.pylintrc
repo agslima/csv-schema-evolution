@@ -1,0 +1,7 @@
+[MASTER]
+# This line tells Pylint to look in the current directory for imports
+init-hook='import sys; sys.path.append(".")'
+
+[MESSAGES CONTROL]
+# You can also disable specific errors here if you want
+disable=C0114,C0115
