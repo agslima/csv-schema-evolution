@@ -169,11 +169,11 @@ GIF Demo
 
 For detailed implementation guides, please refer to:
 
-* ![System Architecture](docs/architecture.md)
-* ![Setup & Installation Guide](/docs/setup.md)
-* ![API Reference](docs/api_reference.md)
-* ![Testing Strategy](docs/test.md)
-* ![Processing Engine Logic](/docs/processing_engine.md)
+* [System Architecture](blob/main/docs/architecture.md)
+* [Setup & Installation Guide](blob/main/docs/setup.md)
+* [API Reference](blob/main/docs/api_reference.md)
+* [Testing Strategy](blob/main/docs/test.md)
+* [Processing Engine Logic](blob/main/docs/processing_engine.md)
 
 ---
 
