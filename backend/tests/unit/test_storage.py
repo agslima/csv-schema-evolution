@@ -1,7 +1,13 @@
-import pytest
+"""
+Unit tests for the storage service.
+"""
+
 from unittest.mock import AsyncMock, MagicMock, patch
+import pytest
 from bson import ObjectId
 from app.services import storage
+
+# pylint: disable=redefined-outer-name
 
 # Mock content slightly larger than our test limit
 TEST_LIMIT = 100
@@ -138,6 +144,7 @@ async def test_delete_file_success(mock_mongo):
     # 2. Setup GridFS to find the actual binary chunks
     # Create a mock grid_file object that has an _id
     mock_grid_file = MagicMock()
+    # pylint: disable=protected-access
     mock_grid_file._id = ObjectId()
     mock_fs.find.return_value = [mock_grid_file]
 
@@ -151,6 +158,7 @@ async def test_delete_file_success(mock_mongo):
 
     # Verify GridFS Delete (Iterating over cursor)
     mock_fs.find.assert_called_with({"filename": "delete_me.csv"})
+    # pylint: disable=protected-access
     mock_fs.delete.assert_called_with(mock_grid_file._id)
 
 
