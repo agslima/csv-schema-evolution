@@ -96,10 +96,10 @@ jobs:
           flake8 backend --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 backend --count --max-complexity=10 --max-line-length=127 --statistics
 
-      #- name: Run Pytest (Unit & Integration)
-      #  run: |
-      #    export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
-      #    pytest backend/tests/ -v --asyncio-mode=auto
+      - name: Run Pytest (Unit & Integration)
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
+          pytest backend/tests/ -v --asyncio-mode=auto
 
   # Job 2: CD, Container Build & Supply Chain Security
   cd-build-push:
