@@ -3,7 +3,7 @@
 ### Backend-Focused Full Stack Application (FastAPI + MongoDB GridFS)
 
 <p align="left">
-  <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/agslima/csv_schema_evolution/ci-cd.yml">
+  <img alt="CI/CD" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/ci-cd.yml/badge.svg">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
