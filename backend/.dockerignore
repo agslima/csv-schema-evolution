@@ -1,0 +1,26 @@
+# Security: Never copy secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Git history (contains author metadata and old code)
+.git
+.gitignore
+
+# Python cache & local envs
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-log.txt
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+Dockerfile
+.dockerignore
