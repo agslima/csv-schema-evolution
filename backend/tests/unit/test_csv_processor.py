@@ -10,11 +10,14 @@ from app.services import csv_processor
 
 @pytest.mark.asyncio
 async def test_process_csv_sync_gridfs():
-    """Test the PyMongo (Sync) path where fs_bucket returns a list."""
+    """Test the PyMongo (Sync) path."""
     file_id = str(ObjectId())
-    csv_content = b"col_a,col_b\nval_a,val_b\n"
 
-    # Patch locally to configure specific return values
+    # FIX 1: Change data to "Key,Value" format to match the parser
+    # Old: b"col_a,col_b\nval_a,val_b\n" (Horizontal)
+    # New: b"col_a,val_a\ncol_b,val_b\n" (Vertical Key-Value)
+    csv_content = b"col_a,val_a\ncol_b,val_b\n"
+
     with patch("app.services.csv_processor.db") as mock_db, patch(
         "app.services.csv_processor.fs_bucket"
     ) as mock_fs:
@@ -24,14 +27,11 @@ async def test_process_csv_sync_gridfs():
             "filename": "test.csv",
         }
 
-        # Mock Sync GridFS Output
         mock_out = MagicMock()
-        # CRITICAL FIX: side_effect returns content once, then empty bytes (EOF)
-        # This prevents the CSV parser from reading the header infinitely
+        # FIX 2: Use side_effect to simulate [Content, EOF]
         mock_out.read.side_effect = [csv_content, b""]
         mock_fs.find.return_value = [mock_out]
 
-        # Run
         records = await csv_processor.process_csv(file_id)
 
         assert len(records) == 1
@@ -41,9 +41,10 @@ async def test_process_csv_sync_gridfs():
 
 @pytest.mark.asyncio
 async def test_process_csv_async_gridfs():
-    """Test the Motor (Async) path where fs_bucket returns an async cursor."""
+    """Test the Motor (Async) path."""
     file_id = str(ObjectId())
-    csv_content = b"col_a,col_b\nval_a,val_b\n"
+    # FIX: Key,Value format
+    csv_content = b"col_a,val_a\n"
 
     with patch("app.services.csv_processor.db") as mock_db, patch(
         "app.services.csv_processor.fs_bucket"
@@ -54,12 +55,10 @@ async def test_process_csv_async_gridfs():
             "filename": "test.csv",
         }
 
-        # Mock Async GridOut
         mock_out = MagicMock()
-        # Async read needs side_effect for EOF
+        # FIX: Async read side_effect
         mock_out.read = AsyncMock(side_effect=[csv_content, b""])
 
-        # Mock Async Cursor
         mock_cursor = MagicMock()
         mock_cursor.to_list = AsyncMock(return_value=[mock_out])
         mock_fs.find.return_value = mock_cursor
@@ -74,7 +73,8 @@ async def test_process_csv_async_gridfs():
 async def test_process_csv_with_injection():
     """Test that CSV injection is sanitized."""
     file_id = str(ObjectId())
-    csv_content = b"formula,safe\n=CMD|' /C calc'!A0,normal_value\n"
+    # FIX: Key,Value format. Key="formula", Value="=CMD..."
+    csv_content = b"formula,=CMD|' /C calc'!A0\n"
 
     with patch("app.services.csv_processor.db") as mock_db, patch(
         "app.services.csv_processor.fs_bucket"
@@ -92,5 +92,5 @@ async def test_process_csv_with_injection():
         records = await csv_processor.process_csv(file_id)
 
         assert len(records) == 1
-        # Check injection is sanitized
+        # The value associated with 'formula' should be sanitized
         assert records[0]["formula"].startswith("'")
