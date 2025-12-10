@@ -11,8 +11,9 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 # pylint: enable=no-member
 
+
 # pylint: disable=wrong-import-position
-from app.services.sanitize import sanitize_value # noqa: E402
+from app.services.sanitize import sanitize_value  # noqa: E402
 
 
 def test_sanitize_value():
