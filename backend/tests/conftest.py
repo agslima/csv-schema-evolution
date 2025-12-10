@@ -77,10 +77,8 @@ def setup_patches():
     # 1. Patch the client and db instances
     patcher_client = patch("app.db.mongo.client", mock_client)
     patcher_db = patch("app.db.mongo.db", mock_db)
-    
     # 2. Patch the fs_bucket variable (the proxy)
     patcher_fs = patch("app.db.mongo.fs_bucket", mock_fs_bucket)
-    
     # 3. CRITICAL FIX: Patch the GridFSBucket CLASS.
     # This prevents the real GridFSBucket(db) from running and throwing TypeError
     patcher_gridfs_cls = patch("app.db.mongo.GridFSBucket")
@@ -110,3 +108,4 @@ from app.main import app                   # noqa: E402
 def client():
     """Create test client with mocked MongoDB."""
     return TestClient(app)
+    
