@@ -7,33 +7,27 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from bson import ObjectId
 from app.services import csv_processor
 
-# We need a manual fixture here if we want to customize returns per test
-# But the autouse fixture in conftest handles the global patching.
-# We will rely on patch context managers for specific test overrides.
-
 
 @pytest.mark.asyncio
 async def test_process_csv_sync_gridfs():
     """Test the PyMongo (Sync) path where fs_bucket returns a list."""
     file_id = str(ObjectId())
-
-    # Define content
     csv_content = b"col_a,col_b\nval_a,val_b\n"
 
-    # We must patch again to get access to the specific mocks for configuration
+    # Patch locally to configure specific return values
     with patch("app.services.csv_processor.db") as mock_db, patch(
         "app.services.csv_processor.fs_bucket"
     ) as mock_fs:
 
-        # Mock DB Return
         mock_db.files.find_one.return_value = {
             "_id": ObjectId(file_id),
             "filename": "test.csv",
         }
 
-        # Mock Sync GridFS
+        # Mock Sync GridFS Output
         mock_out = MagicMock()
-        # CRITICAL FIX: side_effect prevents infinite loops if code calls read() repeatedly
+        # CRITICAL FIX: side_effect returns content once, then empty bytes (EOF)
+        # This prevents the CSV parser from reading the header infinitely
         mock_out.read.side_effect = [csv_content, b""]
         mock_fs.find.return_value = [mock_out]
 
@@ -62,7 +56,7 @@ async def test_process_csv_async_gridfs():
 
         # Mock Async GridOut
         mock_out = MagicMock()
-        # Async read needs to return a coroutine
+        # Async read needs side_effect for EOF
         mock_out.read = AsyncMock(side_effect=[csv_content, b""])
 
         # Mock Async Cursor
@@ -98,4 +92,5 @@ async def test_process_csv_with_injection():
         records = await csv_processor.process_csv(file_id)
 
         assert len(records) == 1
+        # Check injection is sanitized
         assert records[0]["formula"].startswith("'")

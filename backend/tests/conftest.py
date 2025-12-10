@@ -33,12 +33,10 @@ def setup_patches():
     mock_fs_bucket = MagicMock()
 
     # --- DB MOCK SETUP ---
-    # Setup insert_one
     mock_db.files.insert_one = AsyncMock(
         return_value=MagicMock(inserted_id=ObjectId("507f1f77bcf86cd799439011"))
     )
 
-    # Setup find_one to return a valid document (awaited)
     mock_db.files.find_one = AsyncMock(
         return_value={
             "_id": ObjectId("507f1f77bcf86cd799439011"),
@@ -51,10 +49,9 @@ def setup_patches():
     mock_db.files.update_one = AsyncMock()
     mock_db.files.delete_one = AsyncMock()
 
-    # Setup find to return a cursor
     mock_cursor = MagicMock()
     mock_cursor.sort.return_value = mock_cursor
-    mock_cursor.__aiter__.return_value = iter([])  # Default empty
+    mock_cursor.__aiter__.return_value = iter([])
     mock_db.files.find.return_value = mock_cursor
 
     # --- GRIDFS MOCK SETUP ---
@@ -62,34 +59,29 @@ def setup_patches():
     mock_fs_bucket.open_download_stream_by_name = MagicMock()
     mock_fs_bucket.delete = MagicMock()
 
-    # Generic generic GridOut read side_effect (to stop infinite loops)
-    # Returns b"" by default
     mock_grid_out = MagicMock()
     mock_grid_out.read.return_value = b""
     mock_fs_bucket.find.return_value = [mock_grid_out]
 
     # --- APPLY PATCHES ---
-    # CRITICAL: We patch the references in 'app.services' and 'app.api'
-    # because they have already imported the real 'db' object.
-
     patches = [
         patch("app.services.storage.db", mock_db),
         patch("app.services.storage.fs_bucket", mock_fs_bucket),
         patch("app.services.csv_processor.db", mock_db),
         patch("app.services.csv_processor.fs_bucket", mock_fs_bucket),
-        # Also patch the original source just in case
         patch("app.db.mongo.db", mock_db),
         patch("app.db.mongo.fs_bucket", mock_fs_bucket),
         patch("app.db.mongo.GridFSBucket", MagicMock(return_value=mock_fs_bucket)),
     ]
 
-    for p in patches:
-        p.start()
+    # Fix: Renamed 'p' to 'patcher' to satisfy C0103
+    for patcher in patches:
+        patcher.start()
 
     yield
 
-    for p in patches:
-        p.stop()
+    for patcher in patches:
+        patcher.stop()
 
 
 @pytest.fixture
