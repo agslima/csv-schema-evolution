@@ -1,8 +1,22 @@
+# Build dependencies
 fastapi==0.104.1
-uvicorn[standard]==0.24.0
 pymongo==4.6.3
-motor==3.3.2
 pydantic==2.5.0
 python-multipart==0.0.18
+pytest-asyncio==0.21.1
+
+# Code quality
+pylint==2.14.0
+flake8==4.0.1
+black==24.3.0
+
+# Utilities
+uvicorn[standard]==0.24.0
+httpx<0.24
+motor==3.3.2
+
+# Security Add
 dnspython>=2.6.1 # not directly required, pinned by Snyk to avoid a vulnerability
 zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+h11>=0.16.0 # not directly required, pinned by Snyk to avoid a vulnerability
+anyio>=4.4.0 # not directly required, pinned by Snyk to avoid a vulnerability
