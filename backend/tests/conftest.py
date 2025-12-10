@@ -2,7 +2,6 @@
 Pytest configuration and fixtures for the backend.
 Sets up MongoDB mocks and environment variables.
 """
-
 import sys
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -75,29 +74,36 @@ def setup_patches():
     Apply mocks to app.db.mongo before the app is imported.
     Yields control to tests, then stops patches after session ends.
     """
+    # 1. Patch the client and db instances
     patcher_client = patch("app.db.mongo.client", mock_client)
     patcher_db = patch("app.db.mongo.db", mock_db)
+    
+    # 2. Patch the fs_bucket variable (the proxy)
     patcher_fs = patch("app.db.mongo.fs_bucket", mock_fs_bucket)
+    
+    # 3. CRITICAL FIX: Patch the GridFSBucket CLASS.
+    # This prevents the real GridFSBucket(db) from running and throwing TypeError
+    patcher_gridfs_cls = patch("app.db.mongo.GridFSBucket")
 
     patcher_client.start()
     patcher_db.start()
     patcher_fs.start()
+    
+    # Configure the class mock to return our mock bucket instance
+    mock_cls = patcher_gridfs_cls.start()
+    mock_cls.return_value = mock_fs_bucket
 
     yield
 
     patcher_client.stop()
     patcher_db.stop()
     patcher_fs.stop()
+    patcher_gridfs_cls.stop()
 
-
-# Import app AFTER patches are likely active (or will be when tests run)
-# We disable wrong-import-position because we need to patch things before importing app
-# however, with the fixture above, imports are safer.
-# For now, we keep the import here to match your structure.
 
 # pylint: disable=wrong-import-position
 from fastapi.testclient import TestClient  # noqa: E402
-from app.main import app  # noqa: E402
+from app.main import app                   # noqa: E402
 
 
 @pytest.fixture
