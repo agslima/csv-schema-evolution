@@ -105,8 +105,7 @@ docker-compose up -d --build
 
 #### 2. Access the Interfaces
 
-* **Web UI:** http://localhost:3000 (if frontend is included)
-* **API Documentation (Swagger):** http://localhost:8000/docs
+* **Web UI:** http://localhost:3000
 
 ---
 
@@ -171,9 +170,9 @@ For detailed implementation guides, please refer to:
 
 * [System Architecture](https://github.com/agslima/csv-schema-evolution/blob/main/docs/architecture.md)
 * [Setup & Installation Guide](https://github.com/agslima/csv-schema-evolution/blob/main/docs/setup.md)
-* [API Reference](https://github.com/agslima/csv-schema-evolution/blob/main/docs/api_reference.md)
+* [API Reference](https://github.com/agslima/csv-schema-evolution/blob/main/docs/api-reference.md)
 * [Testing Strategy](https://github.com/agslima/csv-schema-evolution/blob/main/docs/tests.md)
-* [Processing Engine Logic](https://github.com/agslima/csv-schema-evolution/blob/main/docs/sprocessing_engine.md)
+* [Processing Engine Logic](https://github.com/agslima/csv-schema-evolution/blob/main/docs/processing-engine.md)
 
 ---
 
