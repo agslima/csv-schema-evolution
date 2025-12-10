@@ -1,4 +1,4 @@
-name: DevSecOps Python Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
