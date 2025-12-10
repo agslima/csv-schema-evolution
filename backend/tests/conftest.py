@@ -1,7 +1,6 @@
 """
 Pytest configuration and fixtures for the backend.
 """
-
 import sys
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -15,27 +14,29 @@ os.environ["DB_NAME"] = "csv_uploader_test"
 
 
 @pytest.fixture(scope="function", autouse=True)
-def setup_patches():
+def mock_mongo_infrastructure():
     """
-    Global mocks for DB connections.
-    Scope='function' ensures mocks are fresh for every test loop.
+    Patches the Motor Client and GridFSBucket classes globally.
+    This prevents the real database connection from ever being established.
     """
-    # Create the Master Mock for the DB
-    mock_db = MagicMock()
-    mock_fs_bucket = MagicMock()
-
     # --- Define Data Structure ---
-    # This document MUST contain all fields accessed by the API
+    # This mock document satisfies all API requirements (preventing KeyError)
     mock_file_doc = {
         "_id": ObjectId("507f1f77bcf86cd799439011"),
         "filename": "test.csv",
         "status": "processed",
         "records_count": 0,
         "fields": ["col1", "col2"],
-        "uploadDate": "2023-01-01T00:00:00",
+        "uploadDate": "2023-01-01T00:00:00"
     }
 
-    # --- DB Returns ---
+    # --- Create Mocks ---
+    mock_db = MagicMock()
+    mock_client_instance = MagicMock()
+    # Ensure client['db_name'] returns our mock_db
+    mock_client_instance.__getitem__.return_value = mock_db
+    
+    # Configure DB methods
     mock_db.files.insert_one = AsyncMock(
         return_value=MagicMock(inserted_id=ObjectId("507f1f77bcf86cd799439011"))
     )
@@ -43,8 +44,9 @@ def setup_patches():
     mock_db.files.update_one = AsyncMock()
     mock_db.files.delete_one = AsyncMock()
 
-    # --- Cursor Logic (for list_files) ---
+    # Configure Cursor (for list_files)
     async def async_cursor_gen():
+        """Yield mock documents asynchronously."""
         yield mock_file_doc
 
     mock_cursor = MagicMock()
@@ -52,42 +54,30 @@ def setup_patches():
     mock_cursor.__aiter__.side_effect = async_cursor_gen
     mock_db.files.find.return_value = mock_cursor
 
-    # --- GridFS Returns ---
+    # Configure GridFS
+    mock_fs_bucket = MagicMock()
     mock_fs_bucket.open_upload_stream = MagicMock()
     mock_fs_bucket.delete = MagicMock()
-
     mock_grid_out = MagicMock()
-    mock_grid_out.read.return_value = b""
+    mock_grid_out.read.return_value = b"" 
     mock_fs_bucket.find.return_value = [mock_grid_out]
 
-    # --- Start Patches ---
-    # We patch the SOURCE definitions in `app.db.mongo`.
-    # Because we delayed the app import (see below), these patches will be active
-    # when the app modules are first loaded, ensuring they pick up the Mocks.
-    patches = [
-        patch("app.db.mongo.client", MagicMock()),
-        patch("app.db.mongo.db", mock_db),
-        patch("app.db.mongo.fs_bucket", mock_fs_bucket),
-        patch("app.db.mongo.GridFSBucket", MagicMock(return_value=mock_fs_bucket)),
-    ]
-
-    for p in patches:
-        p.start()
-
-    yield
-
-    for p in patches:
-        p.stop()
+    # --- Apply Patches ---
+    # 1. Patch the AsyncIOMotorClient CLASS. 
+    #    When app.db.mongo does 'client = AsyncIOMotorClient(...)', it gets our mock.
+    with patch("motor.motor_asyncio.AsyncIOMotorClient", return_value=mock_client_instance), \
+         patch("gridfs.GridFSBucket", return_value=mock_fs_bucket):
+        
+        yield
 
 
 @pytest.fixture
 def client():
     """
-    Create a TestClient.
-    Importing app inside the fixture ensures patches are active during import.
+    Create a TestClient. 
+    Importing app inside the fixture ensures it uses the patched classes.
     """
     # pylint: disable=import-outside-toplevel
     from fastapi.testclient import TestClient
     from app.main import app
-
     return TestClient(app)
