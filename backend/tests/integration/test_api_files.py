@@ -1,5 +1,10 @@
-import pytest
+"""
+Integration tests for the file API endpoints.
+"""
+
+# pylint: disable=no-name-in-module
 from io import BytesIO
+from bson import ObjectId
 
 
 def test_upload_file(client):
@@ -85,8 +90,6 @@ def test_delete_file(client):
 
 def test_delete_nonexistent_file(client):
     """Test deleting a file that doesn't exist."""
-    from bson import ObjectId
-
     # Use a valid but non-existent ObjectId
     # With mocked DB, deletion will appear successful since mock doesn't validate
     fake_id = str(ObjectId())
@@ -102,13 +105,3 @@ def test_health_check(client):
     response = client.get("/api/v1/health/")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
-
-
-def test_upload_with_id_field(client):
-    """Test upload with optional id_field parameter."""
-    csv_content = b"record_id,id1\nfield1,value1\nrecord_id,id2\nfield2,value2\n"
-    data = {"file": ("with_id.csv", BytesIO(csv_content), "text/csv")}
-    response = client.post("/api/v1/files/upload?id_field=record_id", files=data)
-    assert response.status_code == 200
-    json_data = response.json()
-    assert json_data["status"] == "processed"

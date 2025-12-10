@@ -1,24 +1,29 @@
+"""
+MongoDB connection and GridFS bucket initialization.
+"""
+
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from gridfs import GridFSBucket
-from bson import ObjectId
 
+# pylint: disable=no-member
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017")
 DB_NAME = os.getenv("DB_NAME", "csv_uploader")
+# pylint: enable=no-member
 
 client = AsyncIOMotorClient(MONGO_URI)
 db = client[DB_NAME]
 
 # Lazy initialization of fs_bucket to avoid issues with mocking in tests
-_fs_bucket = None
+_GRID_FS_BUCKET = None
 
 
 def _get_fs_bucket():
     """Get or initialize GridFS bucket (lazy initialization)."""
-    global _fs_bucket
-    if _fs_bucket is None:
-        _fs_bucket = GridFSBucket(db)
-    return _fs_bucket
+    global _GRID_FS_BUCKET  # pylint: disable=global-statement
+    if _GRID_FS_BUCKET is None:
+        _GRID_FS_BUCKET = GridFSBucket(db)
+    return _GRID_FS_BUCKET
 
 
 # Create a proxy object that delegates to the real fs_bucket

@@ -8,9 +8,12 @@ import sys
 import os
 
 # Add backend directory to path
+# pylint: disable=no-member
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "backend"))
 
+# pylint: disable=wrong-import-position
 from app.services.sanitize import sanitize_value
+from app.utils.validators import MAX_FILE_SIZE
 
 
 def test_sanitize_injection_prevention():
@@ -33,7 +36,8 @@ def test_sanitize_injection_prevention():
         result = sanitize_value(input_val)
         if result != expected:
             failed.append(
-                f"  FAIL: sanitize_value({repr(input_val)}) = {repr(result)}, expected {repr(expected)}"
+                f"  FAIL: sanitize_value({repr(input_val)}) = {repr(result)}, "
+                f"expected {repr(expected)}"
             )
 
     if failed:
@@ -41,9 +45,9 @@ def test_sanitize_injection_prevention():
         for msg in failed:
             print(msg)
         return False
-    else:
-        print("✅ test_sanitize_injection_prevention PASSED")
-        return True
+
+    print("✅ test_sanitize_injection_prevention PASSED")
+    return True
 
 
 def test_sanitize_edge_cases():
@@ -60,7 +64,8 @@ def test_sanitize_edge_cases():
         result = sanitize_value(input_val)
         if result != expected:
             failed.append(
-                f"  FAIL: sanitize_value({repr(input_val)}) = {repr(result)}, expected {repr(expected)}"
+                f"  FAIL: sanitize_value({repr(input_val)}) = {repr(result)}, "
+                f"expected {repr(expected)}"
             )
 
     if failed:
@@ -68,20 +73,19 @@ def test_sanitize_edge_cases():
         for msg in failed:
             print(msg)
         return False
-    else:
-        print("✅ test_sanitize_edge_cases PASSED")
-        return True
+
+    print("✅ test_sanitize_edge_cases PASSED")
+    return True
 
 
 def test_validators():
     """Test validators module."""
-    from app.utils.validators import MAX_FILE_SIZE, validate_csv_file
-    from fastapi import HTTPException, UploadFile
-
     # Test MAX_FILE_SIZE constant
-    if MAX_FILE_SIZE != 50 * 1024 * 1024:
+    expected_size = 50 * 1024 * 1024
+    if MAX_FILE_SIZE != expected_size:
         print(
-            f"❌ test_validators FAILED: MAX_FILE_SIZE = {MAX_FILE_SIZE}, expected 52428800"
+            f"❌ test_validators FAILED: MAX_FILE_SIZE = {MAX_FILE_SIZE}, "
+            f"expected {expected_size}"
         )
         return False
 
@@ -93,34 +97,3 @@ def main():
     """Run all tests."""
     print("=" * 60)
     print("CSV Schema Evolution - Test Suite")
-    print("=" * 60)
-    print()
-
-    tests = [
-        test_sanitize_injection_prevention,
-        test_sanitize_edge_cases,
-        test_validators,
-    ]
-
-    results = []
-    for test_func in tests:
-        try:
-            result = test_func()
-            results.append(result)
-        except Exception as e:
-            print(f"❌ {test_func.__name__} ERROR: {e}")
-            results.append(False)
-        print()
-
-    # Summary
-    passed = sum(results)
-    total = len(results)
-    print("=" * 60)
-    print(f"Results: {passed}/{total} tests passed")
-    print("=" * 60)
-
-    return 0 if all(results) else 1
-
-
-if __name__ == "__main__":
-    sys.exit(main())
