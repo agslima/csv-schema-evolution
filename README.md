@@ -3,11 +3,16 @@
 ### Backend-Focused Full Stack Application (FastAPI + MongoDB GridFS)
 
 <p align="left">
-  <img alt="CI/CD" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/ci-cd.yml/badge.svg">
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/ci-cd.yml"/>
+    <img alt="CI/CD Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/ci-cd.yml/badge.svg">
+  </a>
+  <a href="https://codecov.io/github/agslima/csv-schema-evolution" >
+    <img src="https://codecov.io/github/agslima/csv-schema-evolution/graph/badge.svg?token=776AEW3J4C"/>
+  </a>
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
-  <img alt="LGPD Safe" src="https://img.shields.io/badge/Data%20Protection-LGPD%20Safe-orange">
+  <!--<img alt="LGPD Safe" src="https://img.shields.io/badge/Data%20Protection-LGPD%20Safe-orange">-->
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
