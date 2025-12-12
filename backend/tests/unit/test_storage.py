@@ -5,7 +5,7 @@ Unit tests for the storage service.
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from bson import ObjectId
-from app.services import storage
+from app.utils import storage
 
 # pylint: disable=redefined-outer-name
 

@@ -62,18 +62,21 @@ jobs:
 
       # (SCA) - Check libraries
       - name: Install Snyk CLI
+        if: vars.ENABLE_SECURITY_SCANS == 'true'  # <--- Condition here
         run: npm install -g snyk
 
-      #- name: Run Snyk Open Source (Dependencies)
-      #  env:
-      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #  run: snyk test --file=backend/requirements.txt --package-manager=pip --severity-threshold=high
+      - name: Run Snyk Open Source (Dependencies)
+        if: vars.ENABLE_SECURITY_SCANS == 'true'  # <--- Condition here
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test --file=backend/requirements.txt --package-manager=pip --severity-threshold=high
 
-      # (SAST) - Check logic (Snyk Code serves as a second opinion to Bandit)
-      #- name: Run Snyk Code (Logic)
-      #  env:
-      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #  run: snyk code test backend/ --severity-threshold=high
+      #(SAST) - Check logic (Snyk Code serves as a second opinion to Bandit)
+      - name: Run Snyk Code (Logic)
+        if: vars.ENABLE_SECURITY_SCANS == 'true'  # <--- Condition here
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk code test backend/ --severity-threshold=high
 
       - name: Wait for MongoDB
         run: |
@@ -88,13 +91,15 @@ jobs:
           echo "MongoDB did not become ready in time" >&2
           exit 1
 
-      #- name: Lint with flake8
-      #  run: |
-      #    export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
-      #    flake8 backend --count --select=E9,F63,F7,F82 --show-source --statistics
-      #    flake8 backend --count --max-complexity=10 --max-line-length=127 --statistics
+      - name: Lint with flake8
+        if: vars.ENABLE_FLAKE8 == 'true'
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
+          flake8 backend --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 backend --count --max-complexity=10 --max-line-length=127 --statistics
       
       - name: Lint with Pylint
+        if: vars.ENABLE_PYLINT == 'true'
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
           pylint backend --output-format=colorized
@@ -122,29 +127,33 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      #- name: Login to Docker Hub
-      #  uses: docker/login-action@v2
-      #  with:
-      #    username: ${{ secrets.DOCKER_HUB_USERNAME }}
-      #    password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Login to Docker Hub
+        if: vars.ENABLE_DOCKER_HUB == 'true'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Lint Dockerfile
+        if: vars.ENABLE_DOCKER_HUB == 'true'
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: backend/Dockerfile
 
-      #- name: Build and Push Docker Image
-      #  uses: docker/build-push-action@v4
-      #  with:
-      #    context: ./backend
-      #    push: true
-      #    tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}, ${{ env.IMAGE_NAME }}:latest
+      - name: Build and Push Docker Image
+        if: vars.ENABLE_DOCKER_HUB == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}, ${{ env.IMAGE_NAME }}:latest
           
           # BEST PRACTICE: GitHub Actions Cache implementation
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
 
       - name: Run Trivy vulnerability scanner
+        if: vars.ENABLE_DOCKER_HUB == 'true'
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ env.IMAGE_NAME }}:${{ github.sha }}'
@@ -154,21 +163,24 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-      #- name: Install Cosign
-      #  uses: sigstore/cosign-installer@v3.7.0
-      #  with:
-      #    cosign-release: 'v2.4.1'
+      - name: Install Cosign
+        if: vars.ENABLE_DOCKER_HUB == 'true'
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: 'v2.4.1'
 
-      #- name: Sign the published Docker image
-      #  env:
-      #    COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-      #    COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-      #  run: |
-      #    echo "$COSIGN_PRIVATE_KEY" > cosign.key
-      #    cosign sign --key cosign.key -y ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Sign the published Docker image
+        if: vars.ENABLE_DOCKER_HUB == 'true'
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        run: |
+          echo "$COSIGN_PRIVATE_KEY" > cosign.key
+          cosign sign --key cosign.key -y ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      #- name: Generate SBOM (Syft)
-      #  uses: anchore/sbom-action@v0
-      #  with:
-      #    image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-      #    artifact-name: sbom.spdx.json
+      - name: Generate SBOM (Syft)
+        if: vars.ENABLE_DOCKER_HUB == 'true'
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          artifact-name: sbom.spdx.json

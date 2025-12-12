@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV Uploader</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-6">
+
+<div class="max-w-3xl mx-auto bg-white p-6 rounded shadow">
+  <h1 class="text-2xl font-bold mb-4">CSV Uploader</h1>
+
+  <!-- Upload Form -->
+  <div id="upload-section" class="mb-6">
+    <input type="file" id="fileInput" class="border p-2 rounded w-full">
+    <button id="uploadBtn" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Upload</button>
+    <div class="mt-2 h-2 bg-gray-200 rounded">
+      <div id="progressBar" class="h-2 bg-green-500 rounded w-0"></div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toasts" class="fixed top-4 right-4 space-y-2"></div>
+
+  <!-- Files Table -->
+  <div>
+    <input type="text" id="searchInput" placeholder="Search files..." class="border p-2 rounded w-full mb-2">
+    <table class="min-w-full bg-white border">
+      <thead>
+        <tr>
+          <th class="border px-2 py-1">Filename</th>
+          <th class="border px-2 py-1">Status</th>
+          <th class="border px-2 py-1">Records</th>
+          <th class="border px-2 py-1">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="filesTable"></tbody>
+    </table>
+    <div class="mt-2 flex justify-between">
+      <button id="prevPage" class="px-3 py-1 bg-gray-300 rounded">Previous</button>
+      <span id="pageInfo" class="px-2"></span>
+      <button id="nextPage" class="px-3 py-1 bg-gray-300 rounded">Next</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/ui_utils.js"></script>
+<script src="assets/js/upload.js"></script>
+<script src="assets/js/files_list.js"></script>
+</body>
+</html>

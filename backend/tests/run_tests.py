@@ -12,7 +12,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "backend"))
 
 # pylint: disable=wrong-import-position
-from app.services.sanitize import sanitize_value  # noqa: E402
+from app.utils.sanitize import sanitize_value  # noqa: E402
 from app.utils.validators import MAX_FILE_SIZE  # noqa: E402
 
 

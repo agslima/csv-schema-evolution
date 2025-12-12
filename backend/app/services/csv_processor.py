@@ -9,7 +9,7 @@ import logging
 from io import StringIO  # Fixed: Direct import avoids Pylint E1101
 
 from bson import ObjectId
-from app.services.sanitize import sanitize_value
+from app.utils.sanitize import sanitize_value
 from app.db.mongo import db, fs_bucket
 
 # Configure logger

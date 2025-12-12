@@ -1,40 +1,37 @@
-"""
-MongoDB connection and GridFS bucket initialization.
-"""
-
-import os
+import logging
 from motor.motor_asyncio import AsyncIOMotorClient
 from gridfs import GridFSBucket
+from app.core.config import settings
 
-# pylint: disable=no-member
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017")
-DB_NAME = os.getenv("DB_NAME", "csv_uploader")
-# pylint: enable=no-member
-
-client = AsyncIOMotorClient(MONGO_URI)
-db = client[DB_NAME]
-
-# Lazy initialization of fs_bucket to avoid issues with mocking in tests
-_GRID_FS_BUCKET = None
+logger = logging.getLogger(__name__)
 
 
-def _get_fs_bucket():
-    """Get or initialize GridFS bucket (lazy initialization)."""
-    global _GRID_FS_BUCKET  # pylint: disable=global-statement
-    if _GRID_FS_BUCKET is None:
-        _GRID_FS_BUCKET = GridFSBucket(db)
-    return _GRID_FS_BUCKET
+class DatabaseManager:
+    """
+    Singleton manager for MongoDB connection and GridFS bucket.
+    """
+
+    client: AsyncIOMotorClient = None
+    db = None
+    fs_bucket: GridFSBucket = None
+
+    def connect(self):
+        """Establishes the connection to MongoDB."""
+        try:
+            self.client = AsyncIOMotorClient(settings.MONGO_URI)
+            self.db = self.client[settings.DB_NAME]
+            # GridFSBucket requires the database object, not the client
+            self.fs_bucket = GridFSBucket(self.db)
+            logger.info("Successfully connected to MongoDB at %s", settings.MONGO_URI)
+        except Exception as e:
+            logger.error("Failed to connect to MongoDB: %s", e)
+            raise
+
+    def close(self):
+        """Closes the MongoDB connection."""
+        if self.client:
+            self.client.close()
+            logger.info("MongoDB connection closed.")
 
 
-# Create a proxy object that delegates to the real fs_bucket
-class _FSBucketProxy:
-    """Proxy for GridFSBucket to enable lazy initialization."""
-
-    def __getattr__(self, name):
-        return getattr(_get_fs_bucket(), name)
-
-    def __call__(self, *args, **kwargs):
-        return _get_fs_bucket()(*args, **kwargs)
-
-
-fs_bucket = _FSBucketProxy()
+db_manager = DatabaseManager()

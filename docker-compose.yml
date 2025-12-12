@@ -1,6 +1,49 @@
 version: '3.9'
 
 services:
+  # --- BACKEND SERVICE ---
+  backend:
+    build: ./backend
+    container_name: csv_engine_backend
+    restart: always
+    # We remove 'ports' here if we want to force access ONLY via Nginx (Security Best Practice)
+    # But for debugging, we can keep it or comment it out.
+    # ports:
+    #   - "8000:8000" 
+    expose:
+      - "8000" # Only accessible to other containers
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - DB_NAME=csv_engine_db
+    depends_on:
+      - mongo
+
+  # --- FRONTEND SERVICE (NGINX) ---
+  frontend:
+    build: ./frontend
+    container_name: csv_engine_frontend
+    restart: always
+    ports:
+      - "80:80" # The entry point for the user
+    depends_on:
+      - backend
+
+  # --- DATABASE ---
+  mongo:
+    image: mongo:6.0
+    container_name: csv_engine_mongo
+    restart: always
+    expose:
+      - "27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+
+###
+
+services:
   mongo:
     image: mongo:6
     container_name: csv-mongo
