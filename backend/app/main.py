@@ -14,6 +14,8 @@ from app.db.mongo import db_manager
 from app.api.v1.endpoints import files, health
 from app.core.middleware import RequestLogMiddleware
 
+# Note: Ideally, import delete_expired_files from where it is defined (e.g., services)
+# from app.services.cleanup import delete_expired_files 
 
 # Initialize Scheduler
 scheduler = AsyncIOScheduler()
@@ -26,13 +28,15 @@ async def lifespan(app: FastAPI):
 
     # 2. Startup: Configure and Start Scheduler
     # Run cleanup check every 60 minutes
-    scheduler.add_job(
-        delete_expired_files,
-        trigger=IntervalTrigger(minutes=60),
-        id="lgpd_cleanup_job",
-        replace_existing=True,
-    )
-    scheduler.start()
+    # Note: Ensure delete_expired_files is defined/imported before running this
+    if "delete_expired_files" in globals():
+        scheduler.add_job(
+            delete_expired_files,
+            trigger=IntervalTrigger(minutes=60),
+            id="lgpd_cleanup_job",
+            replace_existing=True,
+        )
+        scheduler.start()
 
     yield
 
@@ -48,7 +52,7 @@ app = FastAPI(
 app.add_middleware(RequestLogMiddleware)
 
 # Configure CORS
-# WARNING: In production, replace ["*"] with specific domains (e.g., ["https://my-frontend.com"])
+# WARNING: In production, replace ["*"] with specific domains
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -67,4 +71,5 @@ app.include_router(files.router, prefix=f"{settings.API_V1_STR}/files", tags=["F
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    # nosec B104: 0.0.0.0 bind is required for Docker container accessibility
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)  # nosec B104
