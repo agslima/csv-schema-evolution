@@ -1,3 +1,7 @@
+"""
+MongoDB database connection manager.
+Handles the AsyncIOMotorClient lifecycle and GridFS initialization.
+"""
 import logging
 from motor.motor_asyncio import AsyncIOMotorClient
 from gridfs import GridFSBucket
@@ -23,6 +27,7 @@ class DatabaseManager:
             # GridFSBucket requires the database object, not the client
             self.fs_bucket = GridFSBucket(self.db)
             logger.info("Successfully connected to MongoDB at %s", settings.MONGO_URI)
+        # pylint: disable=broad-exception-caught
         except Exception as e:
             logger.error("Failed to connect to MongoDB: %s", e)
             raise
