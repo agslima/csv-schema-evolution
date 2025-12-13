@@ -1,3 +1,7 @@
+"""
+Integration tests for uploading 'messy' CSV files.
+Verifies dialect detection and parsing of non-standard delimiters and quotes.
+"""
 import pytest
 from httpx import AsyncClient, ASGITransport
 from app.main import app
