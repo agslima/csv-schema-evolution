@@ -6,13 +6,11 @@ Handles asynchronous and synchronous database operations.
 import csv
 import inspect
 import logging
-from io import StringIO  # Fixed: Direct import avoids Pylint E1101
-
+from io import StringIO
 from bson import ObjectId
 
 # FIX E0611: Use correct function name from utils
 from app.utils.sanitize import sanitize_cell_value
-
 # FIX E0611: Use the db_manager singleton
 from app.db.mongo import db_manager
 
@@ -52,6 +50,9 @@ async def _read_content_from_gridfs(doc) -> str:
     # Strategy 1: fs_bucket.find()
     if hasattr(bucket, "find"):
         cursor = bucket.find({"filename": filename})
+        
+        # Pylint doesn't know this might be an AsyncIOMotorCursor
+        # pylint: disable=no-member
         if hasattr(cursor, "to_list") and inspect.iscoroutinefunction(cursor.to_list):
             outs = await cursor.to_list(length=1)
             grid_out = outs[0] if outs else None
@@ -60,6 +61,7 @@ async def _read_content_from_gridfs(doc) -> str:
                 grid_out = next(iter(cursor))
             except StopIteration:
                 grid_out = None
+        # pylint: enable=no-member
 
     # Strategy 2: open_download_stream_by_name (if Strategy 1 failed or yielded nothing)
     if grid_out is None and hasattr(bucket, "open_download_stream_by_name"):
@@ -93,7 +95,6 @@ def _parse_csv_content(content: str, id_field: str | None):
             continue
 
         field = row[0].strip()
-        # FIX: Use the corrected function name
         value = sanitize_cell_value(row[1].strip() if len(row) > 1 else "")
         fields_set.add(field)
 
