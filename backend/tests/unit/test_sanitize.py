@@ -1,45 +1,62 @@
 """
 Unit tests for the sanitize service.
+Ensures CSV Injection protection works correctly.
 """
 
 import sys
 import os
 
 # pylint: disable=no-member
-# Add project root to path so 'app' module can be imported
-# Path: tests/unit/ -> tests/ -> root
+# Add project root to path to ensure 'app' module resolution
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 # pylint: enable=no-member
 
-
 # pylint: disable=wrong-import-position
-# FIX E0611: Use correct function name
-from app.utils.sanitize import sanitize_cell_value  # noqa: E402
+from app.utils.sanitize import sanitize_cell_value
 
-
-def test_sanitize_value():
-    """Test CSV injection prevention for dangerous prefixes."""
+def test_sanitize_standard_prefixes():
+    """
+    Test CSV injection prevention for standard dangerous prefixes.
+    Any field starting with =, +, -, @ must be escaped.
+    """
     assert sanitize_cell_value("=CMD") == "'=CMD"
     assert sanitize_cell_value("+SUM") == "'+SUM"
     assert sanitize_cell_value("-SYSTEM") == "'-SYSTEM"
     assert sanitize_cell_value("@IMPORT") == "'@IMPORT"
+
+def test_sanitize_safe_values():
+    """Test that safe values remain unchanged."""
     assert sanitize_cell_value("normal") == "normal"
-    assert sanitize_cell_value("") == ""
     assert sanitize_cell_value("123") == "123"
+    assert sanitize_cell_value("") == ""
+    assert sanitize_cell_value("alice@example.com") == "alice@example.com"
 
-
-def test_sanitize_value_edge_cases():
-    """Test sanitize with edge cases."""
+def test_sanitize_edge_cases():
+    """Test sanitization with specific edge cases."""
     # Single character dangerous prefix
     assert sanitize_cell_value("=") == "'="
-    # Dangerous prefix in middle (should not be sanitized)
+    assert sanitize_cell_value("+") == "'+"
+    
+    # Dangerous character in the middle (safe, should not be sanitized)
     assert sanitize_cell_value("text=value") == "text=value"
-    # Multiple characters of same dangerous prefix
+    assert sanitize_cell_value("1+1") == "1+1"
+    
+    # Multiple characters of the same dangerous prefix
     assert sanitize_cell_value("===DANGER") == "'===DANGER"
 
-
-def test_sanitize_does_not_affect_whitespace():
-    """Test that sanitize doesn't affect leading whitespace."""
-    # Note: spaces don't trigger sanitization
-    assert sanitize_cell_value(" =FORMULA") == " =FORMULA"
-    assert sanitize_cell_value("a=FORMULA") == "a=FORMULA"
+def test_sanitize_handles_whitespace():
+    """
+    Test that leading whitespace DOES trigger sanitization.
+    
+    Explanation: Many spreadsheet tools ignore leading whitespace 
+    and still execute the formula. Therefore, "  =CMD" is dangerous
+    and must be sanitized to "'  =CMD".
+    """
+    # The previous test expected this to be ignored, 
+    # but our robust implementation uses .strip() check.
+    assert sanitize_cell_value(" =CMD") == "' =CMD"
+    assert sanitize_cell_value("\t+SUM") == "'\t+SUM"
+    
+    # Trailing whitespace does not matter for the trigger, 
+    # but the value should be preserved.
+    assert sanitize_cell_value("=CMD   ") == "'=CMD   "
