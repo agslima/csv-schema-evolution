@@ -9,8 +9,12 @@ import logging
 from io import StringIO  # Fixed: Direct import avoids Pylint E1101
 
 from bson import ObjectId
-from app.utils.sanitize import sanitize_value
-from app.db.mongo import db, fs_bucket
+
+# FIX E0611: Use correct function name from utils
+from app.utils.sanitize import sanitize_cell_value
+
+# FIX E0611: Use the db_manager singleton
+from app.db.mongo import db_manager
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -18,7 +22,9 @@ logger = logging.getLogger(__name__)
 
 async def _get_file_doc(file_id: str):
     """Retrieve file document from the database (supports sync/async)."""
-    files_coll = getattr(db, "files", db)
+    # Access db via db_manager
+    database = db_manager.db
+    files_coll = getattr(database, "files", database)
     find_one_fn = getattr(files_coll, "find_one")
 
     query = {"_id": ObjectId(file_id)}
@@ -41,10 +47,11 @@ async def _read_content_from_gridfs(doc) -> str:
     filename = doc["filename"]
     read_fn = None
     grid_out = None
+    bucket = db_manager.fs_bucket  # Access bucket via db_manager
 
     # Strategy 1: fs_bucket.find()
-    if hasattr(fs_bucket, "find"):
-        cursor = fs_bucket.find({"filename": filename})
+    if hasattr(bucket, "find"):
+        cursor = bucket.find({"filename": filename})
         if hasattr(cursor, "to_list") and inspect.iscoroutinefunction(cursor.to_list):
             outs = await cursor.to_list(length=1)
             grid_out = outs[0] if outs else None
@@ -55,8 +62,8 @@ async def _read_content_from_gridfs(doc) -> str:
                 grid_out = None
 
     # Strategy 2: open_download_stream_by_name (if Strategy 1 failed or yielded nothing)
-    if grid_out is None and hasattr(fs_bucket, "open_download_stream_by_name"):
-        stream = fs_bucket.open_download_stream_by_name(filename)
+    if grid_out is None and hasattr(bucket, "open_download_stream_by_name"):
+        stream = bucket.open_download_stream_by_name(filename)
         read_fn = getattr(stream, "read", None)
     elif grid_out:
         read_fn = getattr(grid_out, "read", None)
@@ -75,7 +82,6 @@ async def _read_content_from_gridfs(doc) -> str:
 
 def _parse_csv_content(content: str, id_field: str | None):
     """Parse CSV content string into a list of records."""
-    # Fixed: Using StringIO directly from the specific import
     text_io = StringIO(content)
     records = []
     fields_set = set()
@@ -87,7 +93,8 @@ def _parse_csv_content(content: str, id_field: str | None):
             continue
 
         field = row[0].strip()
-        value = sanitize_value(row[1].strip() if len(row) > 1 else "")
+        # FIX: Use the corrected function name
+        value = sanitize_cell_value(row[1].strip() if len(row) > 1 else "")
         fields_set.add(field)
 
         # Determine if we should flush the current record
@@ -108,7 +115,8 @@ def _parse_csv_content(content: str, id_field: str | None):
 
 async def _update_file_status(file_id: str, fields_set: set, record_count: int):
     """Update the file status in the database (supports sync/async)."""
-    files_coll = getattr(db, "files", db)
+    database = db_manager.db
+    files_coll = getattr(database, "files", database)
     update_one_fn = getattr(files_coll, "update_one")
 
     update_payload = {

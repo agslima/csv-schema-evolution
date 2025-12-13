@@ -1,4 +1,6 @@
-# app/services/dialect_detector.py
+"""
+Dialect Detector Service.
+"""
 
 import csv
 import re
@@ -13,26 +15,24 @@ class DialectDetector:
     Source: 'Wrangling Messy CSV Files by Detecting Row and Type Patterns' (2018)
     """
 
-    # Constants from the paper
-    ALPHA = 1e-3  # Constant to handle single-column files [cite: 172]
-    BETA = 1e-10  # Minimum Type Score to avoid zeroing out valid patterns [cite: 182]
+    # pylint: disable=too-few-public-methods
 
-    # Type Inference Regex Patterns (Simplified from Appendix A [cite: 375-394])
+    # Constants from the paper
+    ALPHA = 1e-3  # Constant to handle single-column files
+    BETA = 1e-10  # Minimum Type Score to avoid zeroing out valid patterns
+
+    # Type Inference Regex Patterns (Simplified from Appendix A)
     # Note: Order matters (check specific formats before general ones)
     TYPE_PATTERNS: List[Pattern] = [
-        re.compile(r"^\s*$"),  # Empty [cite: 377]
+        re.compile(r"^\s*$"),  # Empty
         re.compile(r"^-?\d+$"),  # Integer
-        re.compile(r"^-?\d+[.,]\d+(e[+-]?\d+)?$"),  # Float/Scientific [cite: 382]
-        re.compile(r"^(http|https)://[^\s/$.?#].[^\s]*$"),  # URL [cite: 377]
-        re.compile(
-            r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-        ),  # Email [cite: 377]
-        re.compile(
-            r"^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?)?$"
-        ),  # ISO Date/Time [cite: 394]
-        re.compile(r"^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$"),  # Common Date [cite: 391]
-        re.compile(r"^[Nn]/?[Aa]$"),  # N/A [cite: 390]
-        re.compile(r"^[A-Za-z0-9\s\-_]+$"),  # Alphanumeric [cite: 387]
+        re.compile(r"^-?\d+[.,]\d+(e[+-]?\d+)?$"),  # Float/Scientific
+        re.compile(r"^(http|https)://[^\s/$.?#].[^\s]*$"),  # URL
+        re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"),  # Email
+        re.compile(r"^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?)?$"),  # ISO Date/Time
+        re.compile(r"^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$"),  # Common Date
+        re.compile(r"^[Nn]/?[Aa]$"),  # N/A
+        re.compile(r"^[A-Za-z0-9\s\-_]+$"),  # Alphanumeric
     ]
 
     def __init__(self, sample_size: int = 8192):
@@ -50,6 +50,7 @@ class DialectDetector:
         best_score = -1.0
 
         for delimiter, quotechar in candidates:
+            # pylint: disable=broad-exception-caught
             try:
                 rows = self._parse_sample(sample, delimiter, quotechar)
                 if not rows:
@@ -66,6 +67,7 @@ class DialectDetector:
                     best_score = consistency_score
                     best_dialect = (delimiter, quotechar)
             except Exception:
+                # If parsing fails for a specific candidate, we simply skip it.
                 continue
 
         # Fallback to standard Excel dialect if nothing works
@@ -113,7 +115,7 @@ class DialectDetector:
     def _calculate_pattern_score(self, rows: List[List[str]]) -> float:
         """
         Calculates P(x, theta).
-        P = (1/K) * Sum( N_k * (L_k - 1) / L_k ) [cite: 156]
+        P = (1/K) * Sum( N_k * (L_k - 1) / L_k )
         """
         if not rows:
             return 0.0
@@ -121,7 +123,8 @@ class DialectDetector:
         lengths = [len(r) for r in rows]
         pattern_counts = Counter(lengths)
 
-        K = len(pattern_counts)  # Number of distinct row patterns [cite: 155]
+        # K: Number of distinct row patterns
+        num_patterns = len(pattern_counts)
         total_score = 0.0
 
         for length, count in pattern_counts.items():
@@ -133,12 +136,12 @@ class DialectDetector:
             score_k = numerator / length
             total_score += count * score_k
 
-        return (1 / K) * total_score
+        return (1 / num_patterns) * total_score
 
     def _calculate_type_score(self, rows: List[List[str]]) -> float:
         """
         Calculates T(x, theta).
-        T = (1/M) * Sum( I[type(cell) in KnownTypes] ) [cite: 178]
+        T = (1/M) * Sum( I[type(cell) in KnownTypes] )
         """
         total_cells = sum(len(r) for r in rows)
         if total_cells == 0:
@@ -148,10 +151,10 @@ class DialectDetector:
         for row in rows:
             for cell in row:
                 cell_val = cell.strip()
-                # Check against known types [cite: 175]
+                # Check against known types
                 if any(regex.match(cell_val) for regex in self.TYPE_PATTERNS):
                     matched_cells += 1
 
         score = matched_cells / total_cells
-        # Use Beta to avoid zeroing out valid pattern scores [cite: 182]
+        # Use Beta to avoid zeroing out valid pattern scores
         return max(self.BETA, score)

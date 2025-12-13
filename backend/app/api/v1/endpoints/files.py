@@ -3,14 +3,15 @@ API endpoints for file management.
 Handles file upload, listing, downloading, and deletion operations.
 """
 
+from typing import Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
-from fastapi.responses import JSONResponse
-from typing import List, Optional
 
-from app.services import storage, csv_handler
-from app.utils.validators import validate_csv_extension  # Assuming you have this helper
+# FIX: Import storage from utils, not services
+from app.utils import storage
+from app.services import csv_handler
 
-# If not, a simple inline check works, but let's assume strict separation.
+# FIX: Import the correct validator function name
+from app.utils.validators import validate_csv_file
 
 router = APIRouter()
 
@@ -25,24 +26,22 @@ async def upload_file(
     """
     Uploads a CSV, saves to GridFS, processes content, and returns metadata.
     """
-    if not file.filename.lower().endswith(".csv"):
-        raise HTTPException(
-            status_code=400, detail="Invalid file extension. Only .csv allowed."
-        )
+    # 1. Validation (Delegate to utility)
+    validate_csv_file(file)
 
     try:
-        # 1. Save binary to GridFS
+        # 2. Save binary to GridFS (Encrypts automatically)
         file_id = await storage.save_file_to_gridfs(file)
 
-        # 2. Create metadata entry
+        # 3. Create metadata entry
         await storage.create_file_metadata(file_id, file.filename)
 
-        # 3. Process Content (Read -> Parse -> Sanitize)
-        # Note: For very large files, this should be offloaded to a background task (Celery/RabbitMQ)
+        # 4. Process Content (Read -> Parse -> Sanitize)
+        # Note: For very large files, offload to background task (Celery/RabbitMQ)
         content_str = await storage.get_file_content_as_string(str(file_id))
         records, fields = await csv_handler.process_csv_content(content_str, id_field)
 
-        # 4. Update Metadata
+        # 5. Update Metadata
         await storage.update_file_status(str(file_id), fields, len(records))
 
         return {
@@ -51,14 +50,15 @@ async def upload_file(
             "status": "processed",
             "records_count": len(records),
             "fields": fields,
-            # "data": records  <-- Uncomment if you want to return data immediately
         }
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        # Log the actual error internally
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        # Log the actual error internally before raising HTTP error
+        raise HTTPException(
+            status_code=500, detail=f"Internal Server Error: {str(e)}"
+        ) from e
 
 
 @router.delete("/{file_id}", status_code=status.HTTP_200_OK)

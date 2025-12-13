@@ -7,12 +7,13 @@ Runs basic tests without pytest to avoid async/DB connectivity issues.
 import sys
 import os
 
-# Add backend directory to path
+# Add parent directory (backend/) to path so 'app' module can be imported
 # pylint: disable=no-member
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "backend"))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # pylint: disable=wrong-import-position
-from app.utils.sanitize import sanitize_value  # noqa: E402
+# FIX E0611: Use the correct function name 'sanitize_cell_value'
+from app.utils.sanitize import sanitize_cell_value  # noqa: E402
 from app.utils.validators import MAX_FILE_SIZE  # noqa: E402
 
 
@@ -33,10 +34,11 @@ def test_sanitize_injection_prevention():
 
     failed = []
     for input_val, expected in tests:
-        result = sanitize_value(input_val)
+        # Update function call
+        result = sanitize_cell_value(input_val)
         if result != expected:
             failed.append(
-                f"  FAIL: sanitize_value({repr(input_val)}) = {repr(result)}, "
+                f"  FAIL: sanitize_cell_value({repr(input_val)}) = {repr(result)}, "
                 f"expected {repr(expected)}"
             )
 
@@ -61,10 +63,11 @@ def test_sanitize_edge_cases():
 
     failed = []
     for input_val, expected in tests:
-        result = sanitize_value(input_val)
+        # Update function call
+        result = sanitize_cell_value(input_val)
         if result != expected:
             failed.append(
-                f"  FAIL: sanitize_value({repr(input_val)}) = {repr(result)}, "
+                f"  FAIL: sanitize_cell_value({repr(input_val)}) = {repr(result)}, "
                 f"expected {repr(expected)}"
             )
 
@@ -97,3 +100,35 @@ def main():
     """Run all tests."""
     print("=" * 60)
     print("CSV Schema Evolution - Test Suite")
+    print("=" * 60)
+    print()
+
+    tests = [
+        test_sanitize_injection_prevention,
+        test_sanitize_edge_cases,
+        test_validators,
+    ]
+
+    results = []
+    for test_func in tests:
+        try:
+            result = test_func()
+            results.append(result)
+        # pylint: disable=broad-except
+        except Exception as error:
+            print(f"❌ {test_func.__name__} ERROR: {error}")
+            results.append(False)
+        print()
+
+    # Summary
+    passed = sum(results)
+    total = len(results)
+    print("=" * 60)
+    print(f"Results: {passed}/{total} tests passed")
+    print("=" * 60)
+
+    return 0 if all(results) else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

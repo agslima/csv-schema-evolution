@@ -1,9 +1,15 @@
+"""
+Unit tests for the Dialect Detector service.
+"""
+
 import unittest
 import csv
 from app.services.dialect_detector import DialectDetector
 
 
 class TestDialectDetector(unittest.TestCase):
+    """Test suite for CSV dialect detection logic."""
+
     def setUp(self):
         self.detector = DialectDetector()
 
@@ -27,26 +33,23 @@ class TestDialectDetector(unittest.TestCase):
         Scenario: European format using semicolons as delimiters and commas for decimals.
         Paper: Validates that Type Score correctly identifies floats like '1,5'.
         """
-        content = (
-            "Measure;Value;Date\n" "Temp;37,5;2023-10-01\n" "Press;1013,2;2023-10-01"
-        )
+        content = """Measure;Value;Date
+Temp;37,5;2023-10-01
+Press;1013,2;2023-10-01"""
         dialect = self.detector.detect(content)
         self.assertEqual(dialect.delimiter, ";")
 
     def test_single_column_integers(self):
         """
         Scenario: A single column of IDs.
-        Paper Check: This tests the 'Alpha' constant [cite: 170-172].
-        Without Alpha, Pattern Score would be 0 ( (1-1)/1 ) and fail.
+        Paper Check: This tests the 'Alpha' constant.
+        Without Alpha, Pattern Score would be 0 and fail.
         """
-        content = "1001\n" "1002\n" "1003\n" "1004"
+        content = "1001\n1002\n1003\n1004"
         dialect = self.detector.detect(content)
-        # Should detect a standard newline separation (which CSV reads as one column)
-        # Note: In standard CSV, the delimiter doesn't matter much for 1 column,
-        # but the detector should not crash or return garbage.
-        # We generally expect it to default to comma or detect the lack of internal separators.
-        # However, purely single column files are often valid with ANY delimiter if no delimiter exists.
-        # The key is that it parses into 1 column rows.
+
+        # Verify internal parsing
+        # pylint: disable=protected-access
         rows = self.detector._parse_sample(
             content, dialect.delimiter, dialect.quotechar
         )
@@ -57,11 +60,12 @@ class TestDialectDetector(unittest.TestCase):
     def test_mixed_types_single_column(self):
         """
         Scenario: Single column with mixed integers, strings, and dates.
-        Paper Check: Tests the Type Score robustness. Even if column homogeneity is low,
-        global Type Score should be high because all tokens are valid types.
+        Paper Check: Tests the Type Score robustness.
         """
-        content = "12345\n" "Product_A\n" "2023-12-25\n" "admin@example.com"
+        content = "12345\nProduct_A\n2023-12-25\nadmin@example.com"
         dialect = self.detector.detect(content)
+
+        # pylint: disable=protected-access
         rows = self.detector._parse_sample(
             content, dialect.delimiter, dialect.quotechar
         )
@@ -71,7 +75,7 @@ class TestDialectDetector(unittest.TestCase):
     def test_messy_quotes(self):
         """
         Scenario: Fields containing the delimiter inside quotes.
-        Paper: Tests that the parser respects quotes to maintain Pattern Score (rectangularity).
+        Paper: Tests that parser respects quotes to maintain Pattern Score.
         """
         content = (
             "id,description,total\n"
@@ -84,10 +88,11 @@ class TestDialectDetector(unittest.TestCase):
         self.assertEqual(dialect.quotechar, '"')
 
         # Verify it actually parsed the quoted field correctly
+        # pylint: disable=protected-access
         rows = self.detector._parse_sample(
             content, dialect.delimiter, dialect.quotechar
         )
-        self.assertEqual(len(rows[1]), 3)  # Should be 3 columns, not 4
+        self.assertEqual(len(rows[1]), 3)
         self.assertEqual(rows[1][1], "Item A, with comma")
 
     def test_pipe_delimiter(self):
@@ -112,9 +117,7 @@ class TestDialectDetector(unittest.TestCase):
         """
         content = "!!!@@@###$$$%%%^^^&&&***((("
         dialect = self.detector.detect(content)
-        # We don't strictly care WHICH dialect it picks, as long as it returns a valid dialect object
         self.assertIsInstance(dialect, csv.Dialect)
-        # Typically defaults to excel (comma)
         self.assertEqual(dialect.delimiter, ",")
 
 

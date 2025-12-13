@@ -12,12 +12,17 @@ class Settings(BaseSettings):
     Reads from environment variables or uses default values.
     """
 
+    # Configuration classes primarily hold data, not methods
+    # pylint: disable=too-few-public-methods
+
     PROJECT_NAME: str = "CSV Engine API"
     API_V1_STR: str = "/api/v1"
 
     # Database Settings
+    # pylint: disable=no-member
     MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
     DB_NAME: str = os.getenv("DB_NAME", "csv_engine_db")
+    # pylint: enable=no-member
 
     # File Constraints
     MAX_FILE_SIZE_MB: int = 50

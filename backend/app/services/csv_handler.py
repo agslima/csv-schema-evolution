@@ -1,4 +1,7 @@
-# backend/app/services/csv_handler.py
+"""
+CSV Handling Service.
+Parses, sanitizes, and extracts schema from CSV content using dialect detection.
+"""
 
 import csv
 import logging
@@ -8,23 +11,16 @@ from collections import OrderedDict
 
 from fastapi.concurrency import run_in_threadpool
 from app.utils.sanitize import sanitize_cell_value
-from app.services.dialect_detector import DialectDetector  # <--- NEW IMPORT
+from app.services.dialect_detector import DialectDetector
 
 logger = logging.getLogger(__name__)
 
 
-def _parse_csv_sync(
-    content: str, id_field: Optional[str] = None
-) -> Tuple[List[Dict], List[str]]:
+def _detect_dialect(content: str) -> csv.Dialect:
     """
-    Synchronous logic to parse, sanitize, and extract schema from CSV content.
-    Uses DialectDetector to handle messy CSVs (Pattern & Type scoring).
+    Helper to detect CSV dialect.
+    Returns the detected dialect or falls back to 'excel'.
     """
-    if not content:
-        return [], []
-
-    # --- NEW LOGIC START ---
-    # Instantiate the detector and find the best fit dialect
     detector = DialectDetector()
     try:
         # Detect returns a csv.Dialect object with delimiter, quotechar, etc.
@@ -34,16 +30,28 @@ def _parse_csv_sync(
             dialect.delimiter,
             dialect.quotechar,
         )
-    except Exception as e:
+        return dialect
+    # pylint: disable=broad-exception-caught
+    except Exception as error:
         logger.warning(
-            "Dialect detection failed: %s. Falling back to default 'excel'.", e
+            "Dialect detection failed: %s. Falling back to default 'excel'.", error
         )
-        dialect = csv.get_dialect("excel")
-    # --- NEW LOGIC END ---
+        return csv.get_dialect("excel")
 
+
+def _parse_csv_sync(content: str) -> Tuple[List[Dict], List[str]]:
+    """
+    Synchronous logic to parse, sanitize, and extract schema from CSV content.
+    Uses DialectDetector to handle messy CSVs (Pattern & Type scoring).
+    """
+    if not content:
+        return [], []
+
+    dialect = _detect_dialect(content)
     text_io = StringIO(content)
     records: List[Dict] = []
     fields_set: Set[str] = set()
+    ordered_fields: List[str] = []
 
     try:
         # Pass the detected dialect object directly to DictReader
@@ -52,8 +60,6 @@ def _parse_csv_sync(
         if reader.fieldnames:
             fields_set.update(reader.fieldnames)
             ordered_fields = reader.fieldnames
-        else:
-            ordered_fields = []
 
         for row in reader:
             sanitized_row = OrderedDict()
@@ -69,11 +75,9 @@ def _parse_csv_sync(
             if sanitized_row:
                 records.append(sanitized_row)
 
-    except csv.Error as e:
-        logger.error("CSV Parsing Error: %s", e)
-        # Depending on requirements, we might want to re-raise or return partial data
-        # For now, we return what we managed to parse
-        pass
+    except csv.Error as error:
+        logger.error("CSV Parsing Error: %s", error)
+        # We return what we managed to parse so far
 
     return records, ordered_fields
 
@@ -83,5 +87,11 @@ async def process_csv_content(
 ) -> Tuple[List[Dict], List[str]]:
     """
     Asynchronous wrapper for the CPU-bound CSV parsing logic.
+
+    Args:
+        content: Raw CSV string content.
+        id_field: Optional ID field name (reserved for future grouping logic).
     """
-    return await run_in_threadpool(_parse_csv_sync, content, id_field)
+    # id_field is currently unused in the parsing logic but kept for interface compatibility
+    _ = id_field
+    return await run_in_threadpool(_parse_csv_sync, content)

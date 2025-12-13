@@ -1,22 +1,36 @@
+"""
+Middleware for logging HTTP requests and adding Request IDs.
+"""
+
 import time
 import uuid
 import logging
-import json
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from pythonjsonlogger import jsonlogger
 
 # Configure JSON Logger
-logger = logging.getLogger("api_logger")
-logHandler = logging.StreamHandler()
-formatter = jsonlogger.JsonFormatter("%(timestamp)s %(level)s %(name)s %(message)s")
-logHandler.setFormatter(formatter)
-logger.addHandler(logHandler)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger("api_logger")
+LOG_HANDLER = logging.StreamHandler()
+FORMATTER = jsonlogger.JsonFormatter("%(timestamp)s %(level)s %(name)s %(message)s")
+LOG_HANDLER.setFormatter(FORMATTER)
+LOGGER.addHandler(LOG_HANDLER)
+LOGGER.setLevel(logging.INFO)
 
 
 class RequestLogMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware to log request details (method, path, status, duration)
+    and inject a unique X-Request-ID header.
+    """
+
+    # Middleware classes often only have the dispatch method
+    # pylint: disable=too-few-public-methods
+
     async def dispatch(self, request: Request, call_next):
+        """
+        Intercepts the request, logs metadata, and adds a request ID.
+        """
         request_id = str(uuid.uuid4())
         start_time = time.time()
 
@@ -29,7 +43,7 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
             process_time = (time.time() - start_time) * 1000
 
             # Log Success
-            logger.info(
+            LOGGER.info(
                 "Request completed",
                 extra={
                     "request_id": request_id,
@@ -44,15 +58,15 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
             response.headers["X-Request-ID"] = request_id
             return response
 
-        except Exception as e:
+        except Exception as error:
             # Log Exception
-            logger.error(
+            LOGGER.error(
                 "Request failed",
                 extra={
                     "request_id": request_id,
                     "method": request.method,
                     "path": request.url.path,
-                    "error": str(e),
+                    "error": str(error),
                 },
             )
-            raise e
+            raise error

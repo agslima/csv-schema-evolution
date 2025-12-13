@@ -1,8 +1,13 @@
+"""
+Background cleanup service for expired files.
+"""
+
 import logging
 from datetime import datetime, timedelta, timezone
 from app.db.mongo import db_manager
-from app.services import storage
-from app.core.config import settings
+
+# FIX E0611: Import storage from the correct location (utils)
+from app.utils import storage
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +42,7 @@ async def delete_expired_files():
                 await storage.delete_file(file_id)
                 deleted_count += 1
                 logger.info("Auto-deleted expired file: %s", file_id)
+            # pylint: disable=broad-exception-caught
             except Exception as e:
                 logger.error("Failed to auto-delete file %s: %s", file_id, e)
 
@@ -45,5 +51,6 @@ async def delete_expired_files():
         else:
             logger.info("Cleanup complete. No expired files found.")
 
+    # pylint: disable=broad-exception-caught
     except Exception as e:
         logger.error("Error during scheduled cleanup: %s", e)

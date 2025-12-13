@@ -14,13 +14,22 @@ from app.db.mongo import db_manager
 from app.api.v1.endpoints import files, health
 from app.core.middleware import RequestLogMiddleware
 
+# FIX E0602: Import the missing function.
+# Please ensure this file exists or update the path to where you defined it.
+from app.services.cleanup import delete_expired_files
 
 # Initialize Scheduler
 scheduler = AsyncIOScheduler()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
+    """
+    Handle application startup and shutdown events.
+
+    Args:
+        _app (FastAPI): The application instance (unused).
+    """
     # 1. Startup: Connect DB
     db_manager.connect()
 
@@ -41,21 +50,19 @@ async def lifespan(app: FastAPI):
     db_manager.close()
 
 
-app = FastAPI(
-    title=settings.PROJECT_NAME, lifespan=lifespan, version="1.1.0"  # Version bump
-)
+app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan, version="1.1.0")
 
 app.add_middleware(RequestLogMiddleware)
 
 # Configure CORS
-# WARNING: In production, replace ["*"] with specific domains (e.g., ["https://my-frontend.com"])
+# WARNING: In production, replace ["*"] with specific domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Content-Disposition"] # Crucial for download filenames
+    expose_headers=["Content-Disposition"],
 )
 
 # Router Registration
@@ -67,4 +74,5 @@ app.include_router(files.router, prefix=f"{settings.API_V1_STR}/files", tags=["F
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    # nosec B104: 0.0.0.0 bind is required for Docker container accessibility
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)  # nosec B104

@@ -1,5 +1,9 @@
+"""
+Security module for handling encryption and decryption.
+Uses the 'cryptography' library (Fernet/AES).
+"""
+
 from cryptography.fernet import Fernet
-from app.core.config import settings
 
 # In production, this key must come from ENV VARS and match strict length requirements
 # Generate one via: verify_key = Fernet.generate_key()
@@ -8,10 +12,15 @@ _CIPHER_SUITE = None
 
 
 def get_cipher_suite():
-    global _CIPHER_SUITE
+    """
+    Get or create the Fernet cipher suite (Lazy Initialization).
+    WARNING: Currently generates an ephemeral key. Data encrypted with this
+    will be lost upon application restart unless a persistent key is configured.
+    """
+    global _CIPHER_SUITE  # pylint: disable=global-statement
     if _CIPHER_SUITE is None:
         # Ideally: key = settings.ENCRYPTION_KEY
-        # For this example, ensuring we have a key (Warning: ephemeral key means data loss on restart if not fixed)
+        # For this example, ensuring we have a key
         key = Fernet.generate_key()
         _CIPHER_SUITE = Fernet(key)
     return _CIPHER_SUITE
