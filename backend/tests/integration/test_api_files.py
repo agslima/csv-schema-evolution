@@ -125,4 +125,3 @@ async def test_delete_nonexistent_file(api_client):
 
     assert response.status_code == 404
     assert "not found" in response.json()["detail"].lower()
-    
