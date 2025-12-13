@@ -50,7 +50,6 @@ async def _read_content_from_gridfs(doc) -> str:
     # Strategy 1: fs_bucket.find()
     if hasattr(bucket, "find"):
         cursor = bucket.find({"filename": filename})
-        
         # Pylint doesn't know this might be an AsyncIOMotorCursor
         # pylint: disable=no-member
         if hasattr(cursor, "to_list") and inspect.iscoroutinefunction(cursor.to_list):
