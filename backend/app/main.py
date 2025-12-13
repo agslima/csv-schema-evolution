@@ -13,7 +13,8 @@ from app.core.config import settings
 from app.db.mongo import db_manager
 from app.api.v1.endpoints import files, health
 from app.core.middleware import RequestLogMiddleware
-
+# FIX: Import the cleanup function so it is defined
+from app.services.cleanup import delete_expired_files
 
 # Initialize Scheduler
 scheduler = AsyncIOScheduler()
@@ -32,15 +33,13 @@ async def lifespan(_app: FastAPI):
 
     # 2. Startup: Configure and Start Scheduler
     # Run cleanup check every 60 minutes
-    # Note: Ensure delete_expired_files is defined/imported before running this
-    if "delete_expired_files" in globals():
-        scheduler.add_job(
-            delete_expired_files,
-            trigger=IntervalTrigger(minutes=60),
-            id="lgpd_cleanup_job",
-            replace_existing=True,
-        )
-        scheduler.start()
+    scheduler.add_job(
+        delete_expired_files,
+        trigger=IntervalTrigger(minutes=60),
+        id="lgpd_cleanup_job",
+        replace_existing=True,
+    )
+    scheduler.start()
 
     yield
 
