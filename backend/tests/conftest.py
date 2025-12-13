@@ -3,9 +3,9 @@ Pytest configuration and global fixtures.
 """
 
 import asyncio
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, AsyncMock
 import pytest
-
+from app.db.mongo import db_manager  # Import the REAL singleton
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -14,26 +14,34 @@ def event_loop():
     yield loop
     loop.close()
 
-
 @pytest.fixture
 def mock_db_manager():
     """
-    Mocks the Singleton DatabaseManager.
-    Crucial for Unit Tests to avoid needing a real Mongo connection.
+    Mocks the Singleton DatabaseManager IN-PLACE.
+    This ensures all modules (storage, cleanup) see the mocks 
+    regardless of how they imported db_manager.
     """
-    # Fix: Use unittest.mock.patch
-    # Fix: Patch the source in app.db.mongo so all importers get the mock
-    with patch("app.db.mongo.db_manager") as mock_db:
-        # Mock GridFS Bucket
-        mock_bucket = MagicMock()
-        mock_bucket.open_upload_stream.return_value = AsyncMock()
-        mock_bucket.open_download_stream.return_value = AsyncMock()
-        mock_bucket.delete = AsyncMock()
+    # 1. Create Mocks
+    mock_fs = MagicMock()
+    mock_fs.open_upload_stream.return_value = AsyncMock()
+    mock_fs.open_download_stream.return_value = AsyncMock()
+    mock_fs.delete = AsyncMock()
 
-        mock_db.fs_bucket = mock_bucket
+    mock_files_coll = AsyncMock()
+    
+    mock_db_obj = MagicMock()
+    mock_db_obj.files = mock_files_coll
 
-        # Mock Standard DB Collections
-        mock_collection = AsyncMock()
-        mock_db.db.files = mock_collection
+    # 2. Save Original State
+    original_fs = db_manager.fs_bucket
+    original_db = db_manager.db
 
-        yield mock_db
+    # 3. Apply Mocks to the Singleton Instance
+    db_manager.fs_bucket = mock_fs
+    db_manager.db = mock_db_obj
+
+    yield db_manager
+
+    # 4. Teardown (Restore Original)
+    db_manager.fs_bucket = original_fs
+    db_manager.db = original_db
