@@ -1,0 +1,19 @@
+source venv/bin/activate # ou source ~/venv/bin/activate
+2. Garantir que as ferramentas de teste estão instaladas
+
+pip install coverage nose
+
+Gerar o Relatório HTML (Recomendado - Visual Profissional) ​Esta opção cria uma página web estática com gráficos coloridos. É a "prova visual" definitiva. ​Passo 1: Rodar a cobertura Execute o comando abaixo. Ele diz ao coverage para "vigiar" a pasta service enquanto roda os testes da pasta tests.
+
+coverage run --source=service -m nose tests/
+
+Passo 2: Gerar o HTML coverage html
+
+Opção 2: Gerar o Relatório no Terminal (Alternativa Rápida) ​Se você estiver rodando isso em um servidor remoto ou não conseguir abrir o navegador, o print do terminal também serve e é muito aceito tecnicamente. ​Passo 1: Rodar a cobertura
+
+coverage run --source=service -m nose tests/
+
+coverage report -m
+Pytest
+Using pytest from the backend directory
+pytest tests/unit/test_dialect_detector.py -vp
