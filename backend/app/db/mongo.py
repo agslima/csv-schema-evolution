@@ -2,6 +2,7 @@
 MongoDB database connection manager.
 Handles the AsyncIOMotorClient lifecycle and GridFS initialization.
 """
+
 import logging
 from motor.motor_asyncio import AsyncIOMotorClient
 from gridfs import GridFSBucket
