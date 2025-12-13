@@ -82,4 +82,14 @@ async def test_upload_messy_csv_end_to_end():
         assert data["status"] == "processed"
 
         # CRITICAL: Verify correct parsing
-        expected_fields = ["id", "location", "
+        expected_fields = ["id", "location", "event_date", "amount"]
+        assert (
+            data["fields"] == expected_fields
+        ), f"Dialect detection failed. Expected {expected_fields}, got {data['fields']}"
+
+        # We expect 3 records
+        assert data["records_count"] == 3
+
+        print("\n[SUCCESS] Messy CSV integration test passed!")
+        print(f"Detected Fields: {data['fields']}")
+        print(f"Records Count: {data['records_count']}")
