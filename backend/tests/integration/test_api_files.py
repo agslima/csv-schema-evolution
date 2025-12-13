@@ -12,8 +12,11 @@ from app.main import app
 BASE_URL = "http://test/api/v1/files"
 
 
-@pytest.fixture
-async def api_client():
+# FIX: We use 'name="api_client"' so the fixture is registered as 'api_client'
+# but the python function name 'fixture_api_client' is different.
+# This prevents Pylint W0621 (shadowing) errors.
+@pytest.fixture(name="api_client")
+async def fixture_api_client():
     """
     Fixture creates an AsyncClient specifically for FastAPI testing.
     Uses ASGITransport to bypass the need for a running server.
@@ -122,3 +125,4 @@ async def test_delete_nonexistent_file(api_client):
 
     assert response.status_code == 404
     assert "not found" in response.json()["detail"].lower()
+    
