@@ -14,7 +14,7 @@ black==24.3.0
 
 # Pin pytest to prevent breaking changes in CI
 pytest>=8.0.0
-pytest-asyncio==0.21.1
+pytest-asyncio==0.23.5
 pytest-cov==4.1.0
 responses==0.23.1
 coverage==7.2.7
