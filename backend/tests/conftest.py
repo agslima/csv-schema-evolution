@@ -28,7 +28,6 @@ def mock_db_manager():
     mock_fs.delete = AsyncMock()
 
     mock_files_coll = AsyncMock()
-    
     mock_db_obj = MagicMock()
     mock_db_obj.files = mock_files_coll
 
