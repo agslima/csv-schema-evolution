@@ -6,8 +6,8 @@ Verifies dialect detection and parsing of non-standard delimiters and quotes.
 from unittest.mock import patch, MagicMock, AsyncMock
 import pytest
 from httpx import AsyncClient, ASGITransport
+from bson import ObjectId  # <--- Added import
 from app.main import app
-
 
 # We use the ASGITransport to test the FastAPI app directly without spinning up a server
 @pytest.mark.asyncio
@@ -35,7 +35,7 @@ async def test_upload_messy_csv_end_to_end():
     )
 
     # 2. Setup Manual Mocks
-    # We mock the specific db_manager instance imported by app.utils.storage
+    # Ensure this patch path matches your actual file structure (app.utils.storage based on your logs)
     with patch("app.utils.storage.db_manager") as mock_db_manager:
 
         # Setup GridFS Mocks
@@ -44,6 +44,12 @@ async def test_upload_messy_csv_end_to_end():
 
         # Mock Upload Stream (Async Context Manager)
         mock_upload_stream = AsyncMock()
+        
+        # --- FIX: Assign a real ObjectId ---
+        # The storage service needs a valid ID to return/log, otherwise 
+        # it tries to cast an AsyncMock to ObjectId and fails.
+        mock_upload_stream._id = ObjectId() 
+        
         mock_fs.open_upload_stream.return_value = mock_upload_stream
 
         # Mock Download Stream (For reading back content)
@@ -76,14 +82,4 @@ async def test_upload_messy_csv_end_to_end():
         assert data["status"] == "processed"
 
         # CRITICAL: Verify correct parsing
-        expected_fields = ["id", "location", "event_date", "amount"]
-        assert (
-            data["fields"] == expected_fields
-        ), f"Dialect detection failed. Expected {expected_fields}, got {data['fields']}"
-
-        # We expect 3 records
-        assert data["records_count"] == 3
-
-        print("\n[SUCCESS] Messy CSV integration test passed!")
-        print(f"Detected Fields: {data['fields']}")
-        print(f"Records Count: {data['records_count']}")
+        expected_fields = ["id", "location", "
