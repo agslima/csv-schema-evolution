@@ -77,6 +77,19 @@ graph LR
     C -->|Malicious Input| X[Reject Request]
 ```
 
+```mermaid
+graph LR
+    A[User Upload] -->|Stream| B(FastAPI Endpoint)
+    B -->|Validation| C{Sanitizer}
+    C -->|Safe Content| D[Processor Engine]
+    D -->|Schema Inference| E[Normalizer]
+    E -->|Structured Data| F[(MongoDB / GridFS)]
+    C -->|Malicious Input| X[Reject Request]
+    
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style F fill:#bbf,stroke:#333,stroke-width:2px
+```
+
 ### Design Tradeoffs
 
 * **FastAPI + async I/O** for high concurrency during file uploads
