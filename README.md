@@ -222,20 +222,14 @@ GIF Demo
 For detailed implementation guides, please refer to:
 
 * 📡 API Reference — [`docs/api-reference.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/api-reference.md)
-* 🏗 Architecture — `docs/architecture.md`
-* ⚙ Processing Engine — `docs/processing-engine.md`
-* 🔒 Security & Compliance — `docs/security.md`
-* 🧪 Testing Strategy — `docs/testing.md`
-* 📝 Logging & Observability — `docs/logging.md`
-* 🔁 CI/CD & Supply Chain Security — `docs/ci-cd.md`
+* 🏗 Architecture — [`docs/architecture.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/architecture.md)
+* ⚙ Processing Engine — [`docs/processing-engine.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/processing-engine.md)
+* 🔁 CI/CD & Supply Chain Security — [`docs/ci-cd.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/ci-cd.md)
+* 🔒 Security & Compliance — [`docs/security.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/security.md)
+* 🧪 Testing Strategy — `docs/testing.md`[Setup & Installation Guide](https://github.com/agslima/csv-schema-evolution/blob/main/docs/testing.md)
+* 📝 Logging & Observability — [`docs/logging.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/logging.md)
+* 🚀 Setup & Installation Guide — [`docs/setup.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/setup.md)
   
-
-* [System Architecture](https://github.com/agslima/csv-schema-evolution/blob/main/docs/architecture.md)
-* [Setup & Installation Guide](https://github.com/agslima/csv-schema-evolution/blob/main/docs/setup.md)
-* 
-* [Testing Strategy](https://github.com/agslima/csv-schema-evolution/blob/main/docs/tests.md)
-* [Processing Engine Logic](https://github.com/agslima/csv-schema-evolution/blob/main/docs/processing-engine.md)
-
 ---
 
 ## Roadmap
