@@ -36,8 +36,8 @@ Uploads a CSV file, detects its dialect, sanitizes content, and encrypts it for 
 
 ​Retrieves a list of all uploaded files and their processing status.
 
-* **​URL:** /files/
-* **​Method:** GET
+* **​URL:** `/files/`
+* **​Method:** `GET`
   
 ​Success Response (200 OK)
 
@@ -58,8 +58,8 @@ Uploads a CSV file, detects its dialect, sanitizes content, and encrypts it for 
 
 ​Retrieves the original CSV file. The file is decrypted on-the-fly before being streamed to the client.
 
-* **​URL:** /files/{file_id}/download
-* *"​Method:** GET
+* **​URL:** `/files/{file_id}/download`
+* *"​Method:** `GET`
 
 ​Response
 * **​Headers:** Content-Disposition: attachment; filename="sales_data.csv"
@@ -68,8 +68,8 @@ Uploads a CSV file, detects its dialect, sanitizes content, and encrypts it for 
 ### ​4. Delete File
 
 ​Permanently removes the file content (GridFS) and metadata (MongoDB Collection).
-* **​URL:** /files/{file_id}
-​* **Method:** DELETE
+* **​URL:** `/files/{file_id}`
+​* **Method:** `DELETE`
 
 ​Success Response (200 OK)
 
@@ -80,4 +80,5 @@ Uploads a CSV file, detects its dialect, sanitizes content, and encrypts it for 
 ```
 
 Error Response
+
 ​* **404 Not Found:** If the file ID does not exist.
