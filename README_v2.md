@@ -12,7 +12,10 @@
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
-  <!--<img alt="LGPD Safe" src="https://img.shields.io/badge/Data%20Protection-LGPD%20Safe-orange">-->
+  <a href="https://www.bestpractices.dev/projects/11596">
+    <img src="https://www.bestpractices.dev/projects/11596/badge">
+  </a>
+  <img src="https://img.shields.io/badge/SLSA-Level%202-brightgreen.svg">
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
@@ -62,16 +65,6 @@ The engine ingests unstructured or semi‑structured CSV files and converts them
 ## High‑Level Architecture
 
 The system follows **Clean Architecture** principles with a clear separation between API, business logic, and infrastructure.
-
-```mermaid
-graph LR
-    A[Client Upload] -->|Stream| B(FastAPI API)
-    B --> C{Validation & Sanitization}
-    C -->|Safe| D[Processing Engine]
-    D --> E[Schema Normalizer]
-    E --> F[(MongoDB + GridFS)]
-    C -->|Rejected| X[Error Response]
-```
 
 ```mermaid
 graph LR
@@ -180,7 +173,7 @@ Logging configuration and operational guidance are documented in `docs/logging.m
 
 ---
 
-## How to run this?
+## How to run this? 🚀
 
 ### Prerequisites
 
@@ -223,7 +216,7 @@ GIF Demo
 -->
 
 
-## Documentation Index
+## Documentation Index 📁
 
 For detailed implementation guides, please refer to:
 
@@ -253,6 +246,15 @@ Planned enhancements aligned with real ingestion pipelines:
 * Export formats (Parquet, JSON, XLSX)
 * Background workers (Celery + Redis)
 * Role‑based access control (RBAC)
+
+---
+## Contributing
+
+* 1. ​Fork the project
+* 2. ​Create your Feature Branch (git checkout -b feature/AmazingFeature)
+* 3. ​Commit your changes (git commit -m 'Add some AmazingFeature')
+* 4. ​Push to the Branch (git push origin feature/AmazingFeature)
+* 5. ​Open a Pull Request
 
 ---
 
