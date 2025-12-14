@@ -7,15 +7,9 @@ import uuid
 import logging
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from pythonjsonlogger import jsonlogger
 
-# Configure JSON Logger
-LOGGER = logging.getLogger("api_logger")
-LOG_HANDLER = logging.StreamHandler()
-FORMATTER = jsonlogger.JsonFormatter("%(timestamp)s %(level)s %(name)s %(message)s")
-LOG_HANDLER.setFormatter(FORMATTER)
-LOGGER.addHandler(LOG_HANDLER)
-LOGGER.setLevel(logging.INFO)
+# We just ask for a logger. We TRUST logging.py has configured it correctly.
+LOGGER = logging.getLogger(__name__)
 
 
 class RequestLogMiddleware(BaseHTTPMiddleware):
@@ -24,7 +18,6 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
     and inject a unique X-Request-ID header.
     """
 
-    # Middleware classes often only have the dispatch method
     # pylint: disable=too-few-public-methods
 
     async def dispatch(self, request: Request, call_next):
@@ -34,15 +27,17 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
         request_id = str(uuid.uuid4())
         start_time = time.time()
 
-        # Inject ID into request state for other services to use
+        # Inject ID into request state so other parts of the app can see it
         request.state.request_id = request_id
 
-        # Process request
+        # Context filter for logs (optional, strictly speaking) but helpful
+        # Note: In a real async environment, we might use contextvars for this.
+
         try:
             response = await call_next(request)
             process_time = (time.time() - start_time) * 1000
 
-            # Log Success
+            # Log Success - Notice we don't need to format it manually anymore
             LOGGER.info(
                 "Request completed",
                 extra={
@@ -54,12 +49,10 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-            # Return custom header
             response.headers["X-Request-ID"] = request_id
             return response
 
         except Exception as error:
-            # Log Exception
             LOGGER.error(
                 "Request failed",
                 extra={
