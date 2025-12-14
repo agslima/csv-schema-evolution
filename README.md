@@ -196,10 +196,8 @@ Every commit and pull request triggers an automated workflow that performs:
 This pipeline reduces supply‑chain risk and provides traceability required for security reviews and compliance audits.
 
 <details><summary>Tooling used</summary>
-| Category | Tool  |
-| --- | --- |
-| Secret scanning | Gitleaks | 
   
+- Secret scanning: Gitleaks
 - SAST / SCA: Snyk, Bandit, Pylint  
 - Test coverage: Pytest + Codecov  
 - Docker linting: Hadolint  
