@@ -192,12 +192,12 @@ docker-compose up -d --build
 
 ---
 ## Screenshots
-| Upload CSV | Automated Processing |
+
 |---|---|
 | ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshot) | ![image](https://github.com/) |
-| Upload Flow| Processed Table Preview |
-|---|---|
+| Upload CSV | Automated Processing |
 | ![image](https://github.com/agslima) | ![image](https://github.com/agslima) |
+| Upload Flow| Processed Table Preview |
 
 <!--
 ### Demonstration:
