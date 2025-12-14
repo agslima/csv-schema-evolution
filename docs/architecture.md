@@ -51,7 +51,7 @@ Indexes:
 
 This file explains "How it works" under the hood.
 
-```markdown
+
 # 🏗️ System Architecture
 
 The CSV Schema Evolution Engine is built on a **Clean Architecture** principle, ensuring separation of concerns between the API, business logic, and infrastructure.
