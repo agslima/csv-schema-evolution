@@ -1,4 +1,4 @@
-# 📡 API Reference
+# API Reference 📡
 
 Base URL: `http://localhost:8000/api/v1`
 
@@ -28,15 +28,20 @@ Uploads a CSV file, detects its dialect, sanitizes content, and encrypts it for 
 }
 ```
 
-Error Responses
-​400 Bad Request: Invalid file extension or "Formula Injection" detected.
-​413 Payload Too Large: File exceeds the configured size limit.
-​2. List Files
+**Error Responses**
+​* **400 Bad Request:** Invalid file extension or "Formula Injection" detected.
+* ​**413 Payload Too Large:** File exceeds the configured size limit.
+
+### ​2. List Files
+
 ​Retrieves a list of all uploaded files and their processing status.
-​URL: /files/
-​Method: GET
+
+* **​URL:** /files/
+* **​Method:** GET
+  
 ​Success Response (200 OK)
 
+```json
 [
   {
     "id": "651a2b3c4d5e6f7g8h9i0j1k",
@@ -47,24 +52,32 @@ Error Responses
     "created_at": "2023-10-05T14:30:00Z"
   }
 ]
+```
 
+### 3. Download File
 
-3. Download File
 ​Retrieves the original CSV file. The file is decrypted on-the-fly before being streamed to the client.
-​URL: /files/{file_id}/download
-​Method: GET
+
+* **​URL:** /files/{file_id}/download
+* *"​Method:** GET
+
 ​Response
-​Headers: Content-Disposition: attachment; filename="sales_data.csv"
-​Body: Binary stream of the CSV file.
-​4. Delete File
+* **​Headers:** Content-Disposition: attachment; filename="sales_data.csv"
+* **​Body:** Binary stream of the CSV file.
+
+### ​4. Delete File
+
 ​Permanently removes the file content (GridFS) and metadata (MongoDB Collection).
-​URL: /files/{file_id}
-​Method: DELETE
+* **​URL:** /files/{file_id}
+​* **Method:** DELETE
+
 ​Success Response (200 OK)
 
+```json
 {
   "message": "File 651a2b3c... deleted successfully"
 }
+```
 
 Error Response
-​404 Not Found: If the file ID does not exist.
+​* **404 Not Found:** If the file ID does not exist.
