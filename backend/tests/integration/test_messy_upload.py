@@ -54,11 +54,8 @@ async def test_upload_messy_csv_end_to_end():
         mock_download_stream = MagicMock()
         mock_download_stream.read = AsyncMock(return_value=csv_content.encode("utf-8"))
 
-        # --- FIX START ---
         # Make open_download_stream an AsyncMock so it can be awaited.
-        # When awaited, it returns the mock_download_stream object.
         mock_fs.open_download_stream = AsyncMock(return_value=mock_download_stream)
-        # --- FIX END ---
 
         # Setup Standard DB Mocks (for metadata insertion)
         mock_db_manager.db.files.insert_one = AsyncMock()
@@ -69,7 +66,6 @@ async def test_upload_messy_csv_end_to_end():
 
         # 3. Perform the Request
         # We also patch encryption to be a pass-through identity function
-        # to simplify this parsing test.
         with patch("app.utils.storage.encrypt_data", side_effect=lambda x: x), patch(
             "app.utils.storage.decrypt_data", side_effect=lambda x: x
         ):
@@ -98,5 +94,7 @@ async def test_upload_messy_csv_end_to_end():
         # We expect 3 records
         assert data["records_count"] == 3
 
+        # FIX: Ensure these are valid function calls
         print("\n[SUCCESS] Messy CSV integration test passed!")
-        print
+        print(f"Detected Fields: {data['fields']}")
+        print(f"Records Count: {data['records_count']}")

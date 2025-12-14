@@ -8,11 +8,14 @@ import os
 # 1. Add the project root (backend) to sys.path immediately.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# pylint: disable=wrong-import-position
 import asyncio
 from unittest.mock import MagicMock, AsyncMock, patch
 import pytest
 from bson import ObjectId
 from app.db.mongo import db_manager  # Import the REAL singleton
+
+# pylint: enable=wrong-import-position
 
 
 @pytest.fixture(scope="session")
@@ -33,6 +36,7 @@ def mock_db_manager():
 
     # Configure Upload Stream
     mock_upload_stream = AsyncMock()
+    # pylint: disable=protected-access
     mock_upload_stream._id = ObjectId()
     mock_fs.open_upload_stream.return_value = mock_upload_stream
 

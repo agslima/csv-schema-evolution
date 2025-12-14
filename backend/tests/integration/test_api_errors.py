@@ -3,7 +3,7 @@ Integration tests for API error handling.
 Validates 400/404/500 scenarios for Upload, Download, and Delete.
 """
 
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import patch, AsyncMock
 import pytest
 from httpx import AsyncClient, ASGITransport
 from bson import ObjectId
@@ -13,7 +13,24 @@ BASE_URL = "http://test/api/v1/files"
 
 
 @pytest.fixture(name="api_client")
-async def fixture_api_client(mock_db_manager):
+def fixture_api_client(mock_db_manager):  # pylint: disable=unused-argument
+    """
+    Fixture for AsyncClient.
+    CRITICAL: We request 'mock_db_manager' here to ensure the DB is mocked
+    before the app starts or any patches run.
+    """
+    return AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test", follow_redirects=True
+    )
+
+
+# Note: Since the client is an async context manager, tests usually use it
+# via 'async with'. However, if you want the fixture to yield an OPEN client,
+# it should look like this (updated to match previous patterns):
+
+
+@pytest.fixture(name="api_client")
+async def fixture_api_client_async(mock_db_manager):  # pylint: disable=unused-argument
     """
     Fixture for AsyncClient.
     CRITICAL: We request 'mock_db_manager' here to ensure the DB is mocked

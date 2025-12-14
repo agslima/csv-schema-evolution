@@ -3,7 +3,6 @@ Integration tests for the file API endpoints (Async/FastAPI).
 Validates the full lifecycle: Upload -> Process -> List -> Delete -> Download.
 """
 
-# FIX: Added 'patch' to the imports
 from unittest.mock import MagicMock, AsyncMock, patch
 import pytest
 from httpx import AsyncClient, ASGITransport
@@ -15,7 +14,7 @@ BASE_URL = "http://test/api/v1/files"
 
 
 @pytest.fixture(name="api_client")
-async def fixture_api_client(mock_db_manager):
+async def fixture_api_client(mock_db_manager):  # pylint: disable=unused-argument
     """Fixture creates an AsyncClient specifically for FastAPI testing."""
     # FIX: Enable follow_redirects to handle strict slash redirects (307 -> 200)
     async with AsyncClient(

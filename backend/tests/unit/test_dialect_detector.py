@@ -4,7 +4,7 @@ Unit tests for the Dialect Detector service.
 
 import unittest
 
-import csv
+# import csv
 from app.services.dialect_detector import DialectDetector
 
 
