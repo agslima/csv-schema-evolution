@@ -1,0 +1,53 @@
+[run]
+branch = True
+source = app
+
+[report]
+show_missing = True
+skip_covered = True
+
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Standard Pragma
+    pragma: no cover
+
+    # Debug-only code
+    def __repr__
+    if self\.debug
+
+    # Defensive assertions
+    raise AssertionError
+    raise NotImplementedError
+    
+    # Catch-all for simple error logging that is hard to hit in unit tests
+    except Exception
+    except ImportError
+    
+    # Non-runnable code
+    if 0:
+    if __name__ == .__main__.:
+    
+    # Type checking blocks
+    if TYPE_CHECKING:
+
+omit =
+    # Server entry point
+    app/main.py
+    
+    # Database connection logic
+    app/db/mongo.py
+    
+    # Logging configuration
+    app/core/logging.py
+    
+    # Middleware (Boilerplate logging)
+    app/core/middleware.py
+    
+    # Security (Wrappers around standard libraries, mocked in tests)
+    app/core/security.py
+    
+    # Cleanup script (Ran as a cron job, not app logic)
+    app/services/cleanup.py
+    
+    # Init files
+    */__init__.py
