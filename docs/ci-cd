@@ -1,78 +1,62 @@
-# 🚀 CI/CD Pipeline Documentation
+# CI/CD Pipeline Documentation
 
 This document explains the Continuous Integration and Continuous Delivery (CI/CD) pipeline used in this project, the security guarantees it provides, and how it maps to the SLSA (Supply-chain Levels for Software Artifacts) framework.
 
 
 ---
 
-🎯 Pipeline Goals
+##  Pipeline Goals 🎯
 
 The CI/CD pipeline is intentionally designed with clear trust boundaries, fast developer feedback, and strong supply‑chain security guarantees.
 
-Primary goals:
+**Primary goals:**
 
-Fast, blocking feedback on Pull Requests
-
-Strong security gates before artifacts are built
-
-Cryptographically verifiable release artifacts
-
-Clear separation between build and release responsibilities
-
-
+* Fast, blocking feedback on Pull Requests
+* Strong security gates before artifacts are built
+* Cryptographically verifiable release artifacts
+* Clear separation between build and release responsibilities
 
 ---
 
-🧩 Pipeline Stages Overview
+## Pipeline Stages Overview 🧩
 
 The pipeline is divided into three independent stages, each with increasing trust and responsibility.
 
-Stage	Trigger	Purpose
-
-PR Pipeline	Pull Request	Fast validation & security gates
-Main Branch Pipeline	Push to main	Build & verify container artifacts
-Release Pipeline	Git tag (vX.Y.Z)	Artifact signing & provenance
-
-
+| Stage	Trigger	Purpose
+| --- | --- | --- |
+| PR Pipeline |	Pull Request |	Fast validation & security gates |
+| Main Branch Pipeline | Push to main |	Build & verify container artifacts |
+| Release Pipeline |	Git tag (vX.Y.Z) | Artifact signing & provenance |
 
 ---
 
-1️⃣ PR Pipeline (Fast, Blocking)
+### 1️⃣ PR Pipeline (Fast, Blocking)
 
-Trigger: pull_request → main
+Trigger: `pull_request → main`
 
 This stage protects the codebase by preventing insecure or low‑quality code from merging.
 
-Executed Steps
+**Executed Steps**
 
-Secret Scanning: Gitleaks
-
-Static Analysis: Bandit (high severity, high confidence)
-
-Linting: Pylint (minimum score enforced)
-
-Testing: Unit + Integration tests (pytest)
-
-Coverage Gate: Enforced via coverage.py + Codecov
+* **Secret Scanning:** Gitleaks
+* **Static Analysis:** Bandit (high severity, high confidence)
+* **Linting:** Pylint (minimum score enforced)
+* **Testing:** Unit + Integration tests (pytest)
+* **Coverage Gate:** Enforced via coverage.py + Codecov
 
 
-Guarantees
+*Guarantees*
 
-No secrets committed
-
-No known high‑risk Python vulnerabilities
-
-Code quality threshold enforced
-
-Functional correctness validated
-
-
+* No secrets committed
+* No known high‑risk Python vulnerabilities
+* Code quality threshold enforced
+* Functional correctness validated
 
 ---
 
-2️⃣ Main Branch Pipeline (Build & Verify)
+### 2️⃣ Main Branch Pipeline (Build & Verify)
 
-Trigger: push → main
+Trigger: `push → main`
 
 This stage builds deployable artifacts but does not yet establish trust.
 
