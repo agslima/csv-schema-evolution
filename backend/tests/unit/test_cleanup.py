@@ -2,8 +2,13 @@
 Unit tests for the cleanup service.
 """
 
-from unittest.mock import patch, AsyncMock
+# Standard library imports first
+from unittest.mock import patch, AsyncMock, MagicMock
+
+# Third-party imports second
 import pytest
+
+# Local application imports last
 from app.services.cleanup import delete_expired_files
 
 
@@ -13,16 +18,17 @@ async def test_cleanup_deletes_old_files(mock_db_manager):
     Tests if the cleanup job finds old files and calls delete.
     """
     # 1. Setup - Mock Mongo cursor
-    # Create a fake "document" representing an expired file
     expired_file_id = "507f1f77bcf86cd799439011"
     mock_doc = {"_id": expired_file_id}
 
-    # Configure async cursor mock
-    mock_cursor = AsyncMock()
-    mock_cursor.__aiter__.return_value = [mock_doc]
+    # Define an async generator to simulate the MongoDB cursor
+    async def mock_cursor_generator():
+        yield mock_doc
 
-    # Inject cursor into find
-    mock_db_manager.db.files.find.return_value = mock_cursor
+    # --- KEY FIX ---
+    # Convert 'find' to MagicMock so it returns the generator IMMEDIATELY
+    # instead of returning a coroutine (which AsyncMock does by default).
+    mock_db_manager.db.files.find = MagicMock(return_value=mock_cursor_generator())
 
     # 2. Execute intercepting storage.delete_file
     with patch(
@@ -31,7 +37,6 @@ async def test_cleanup_deletes_old_files(mock_db_manager):
         await delete_expired_files()
 
         # 3. Asserts
-        # Verify if database was queried with date criteria
         mock_db_manager.db.files.find.assert_called_once()
         args, _ = mock_db_manager.db.files.find.call_args
         query = args[0]

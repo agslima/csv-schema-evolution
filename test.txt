@@ -17,3 +17,4 @@ coverage report -m
 Pytest
 Using pytest from the backend directory
 pytest tests/unit/test_dialect_detector.py -vp
+pytest tests/integration/test_api_files.py -v

@@ -6,8 +6,9 @@ Verifies dialect detection and parsing of non-standard delimiters and quotes.
 from unittest.mock import patch, MagicMock, AsyncMock
 import pytest
 from httpx import AsyncClient, ASGITransport
-from bson import ObjectId  # <--- Added import
+from bson import ObjectId
 from app.main import app
+
 
 # We use the ASGITransport to test the FastAPI app directly without spinning up a server
 @pytest.mark.asyncio
@@ -35,7 +36,7 @@ async def test_upload_messy_csv_end_to_end():
     )
 
     # 2. Setup Manual Mocks
-    # Ensure this patch path matches your actual file structure (app.utils.storage based on your logs)
+    # Ensure this patch path matches your actual file structure
     with patch("app.utils.storage.db_manager") as mock_db_manager:
 
         # Setup GridFS Mocks
@@ -44,19 +45,20 @@ async def test_upload_messy_csv_end_to_end():
 
         # Mock Upload Stream (Async Context Manager)
         mock_upload_stream = AsyncMock()
-        
-        # --- FIX: Assign a real ObjectId ---
-        # The storage service needs a valid ID to return/log, otherwise 
-        # it tries to cast an AsyncMock to ObjectId and fails.
-        mock_upload_stream._id = ObjectId() 
-        
+        # The storage service needs a valid ID to return/log.
+        # pylint: disable=protected-access
+        mock_upload_stream._id = ObjectId()
         mock_fs.open_upload_stream.return_value = mock_upload_stream
 
         # Mock Download Stream (For reading back content)
         mock_download_stream = MagicMock()
-        # The app reads the content we just uploaded
         mock_download_stream.read = AsyncMock(return_value=csv_content.encode("utf-8"))
-        mock_fs.open_download_stream.return_value = mock_download_stream
+
+        # --- FIX START ---
+        # Make open_download_stream an AsyncMock so it can be awaited.
+        # When awaited, it returns the mock_download_stream object.
+        mock_fs.open_download_stream = AsyncMock(return_value=mock_download_stream)
+        # --- FIX END ---
 
         # Setup Standard DB Mocks (for metadata insertion)
         mock_db_manager.db.files.insert_one = AsyncMock()
@@ -66,10 +68,16 @@ async def test_upload_messy_csv_end_to_end():
         files = {"file": ("messy_data.csv", csv_content, "text/csv")}
 
         # 3. Perform the Request
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as ac:
-            response = await ac.post("/api/v1/files/upload", files=files)
+        # We also patch encryption to be a pass-through identity function
+        # to simplify this parsing test.
+        with patch("app.utils.storage.encrypt_data", side_effect=lambda x: x), patch(
+            "app.utils.storage.decrypt_data", side_effect=lambda x: x
+        ):
+
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test"
+            ) as ac:
+                response = await ac.post("/api/v1/files/upload", files=files)
 
         # 4. Assertions
         # Check if the request was successful
@@ -91,5 +99,4 @@ async def test_upload_messy_csv_end_to_end():
         assert data["records_count"] == 3
 
         print("\n[SUCCESS] Messy CSV integration test passed!")
-        print(f"Detected Fields: {data['fields']}")
-        print(f"Records Count: {data['records_count']}")
+        print

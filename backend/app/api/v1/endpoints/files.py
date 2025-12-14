@@ -5,13 +5,13 @@ Handles file upload, listing, downloading, and deletion operations.
 
 from typing import Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
+from bson import ObjectId
 
-# FIX: Import storage from utils, not services
+# --- FIX: Import storage from 'utils' and csv_handler from 'services' ---
 from app.utils import storage
 from app.services import csv_handler
-
-# FIX: Import the correct validator function name
-from app.utils.validators import validate_csv_file
+from app.db.mongo import db_manager
 
 router = APIRouter()
 
@@ -26,22 +26,23 @@ async def upload_file(
     """
     Uploads a CSV, saves to GridFS, processes content, and returns metadata.
     """
-    # 1. Validation (Delegate to utility)
-    validate_csv_file(file)
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(
+            status_code=400, detail="Invalid file extension. Only .csv allowed."
+        )
 
     try:
-        # 2. Save binary to GridFS (Encrypts automatically)
+        # 1. Save binary to GridFS
         file_id = await storage.save_file_to_gridfs(file)
 
-        # 3. Create metadata entry
+        # 2. Create metadata entry
         await storage.create_file_metadata(file_id, file.filename)
 
-        # 4. Process Content (Read -> Parse -> Sanitize)
-        # Note: For very large files, offload to background task (Celery/RabbitMQ)
+        # 3. Process Content (Read -> Parse -> Sanitize)
         content_str = await storage.get_file_content_as_string(str(file_id))
         records, fields = await csv_handler.process_csv_content(content_str, id_field)
 
-        # 5. Update Metadata
+        # 4. Update Metadata
         await storage.update_file_status(str(file_id), fields, len(records))
 
         return {
@@ -55,13 +56,60 @@ async def upload_file(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        # Log the actual error internally before raising HTTP error
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error: {str(e)}"
         ) from e
 
 
-@router.delete("/{file_id}", status_code=status.HTTP_200_OK)
+@router.get("/")
+async def list_files():
+    """
+    Lists all uploaded files sorted by creation date (newest first).
+    """
+    cursor = db_manager.db.files.find().sort("created_at", -1)
+
+    results = []
+    async for doc in cursor:
+        results.append(
+            {
+                "id": str(doc["_id"]),
+                "filename": doc.get("filename"),
+                "status": doc.get("status"),
+                "records_count": doc.get("records_count", 0),
+                "fields": doc.get("fields", []),
+                "created_at": doc.get("created_at"),
+            }
+        )
+    return results
+
+
+@router.get("/{file_id}/download")
+async def download_file(file_id: str):
+    """
+    Downloads the original CSV file.
+    """
+    try:
+        # Verify existence
+        doc = await db_manager.db.files.find_one({"_id": ObjectId(file_id)})
+        if not doc:
+            raise HTTPException(status_code=404, detail="File not found")
+
+        # Get content (Decrypted)
+        content_str = await storage.get_file_content_as_string(file_id)
+
+        # Stream it back
+        return StreamingResponse(
+            iter([content_str]),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={doc['filename']}"},
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=404, detail=f"File not found or error reading: {e}"
+        ) from e
+
+
+@router.delete("/{file_id}")
 async def delete_file(file_id: str):
     """Deletes a file and its metadata."""
     success = await storage.delete_file(file_id)

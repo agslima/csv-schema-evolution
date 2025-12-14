@@ -3,6 +3,7 @@ Unit tests for the Dialect Detector service.
 """
 
 import unittest
+
 import csv
 from app.services.dialect_detector import DialectDetector
 
@@ -110,17 +111,17 @@ Press;1013,2;2023-10-01"""
         dialect = self.detector.detect(content)
         self.assertEqual(dialect.delimiter, ",")
 
-        def test_garbage_fallback(self):
+    def test_garbage_fallback(self):
         """
         Scenario: Complete garbage input.
         Paper: Should fallback to defaults (Excel) rather than crash.
         """
         content = "!!!@@@###$$$%%%^^^&&&***((("
         dialect = self.detector.detect(content)
-        
+
         # FIX: Check behavior (delimiter) instead of strict type inheritance
         # self.assertIsInstance(dialect, csv.Dialect) <--- REMOVE THIS
-        self.assertEqual(dialect.delimiter, ',') # Default fallback
+        self.assertEqual(dialect.delimiter, ",")  # Default fallback
 
 
 if __name__ == "__main__":
