@@ -12,7 +12,6 @@
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
-  <img src="https://www.bestpractices.dev/projects/11596/badge">
   <!--
   <a href="https://www.bestpractices.dev/projects/11596">  
   </a>
@@ -53,7 +52,7 @@ The engine ingests unstructured or semi‑structured CSV files and converts them
 
 | Raw Input                       | Processing Stages                                                   | Structured Output                             |
 | ------------------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
-| `Name, John``Age, 23``City, NY` | Sanitization → Dialect Detection → Schema Inference → Normalization | `{ "name": "John", "age": 23, "city": "NY" }` |
+| `Name; John``Age, 23``City, NY` | Sanitization → Dialect Detection → Schema Inference → Normalization | `{ "name": "John", "age": 23, "city": "NY" }` |
 
 ### Key Outcomes
 
@@ -222,7 +221,7 @@ GIF Demo
 
 For detailed implementation guides, please refer to:
 
-* 📡 API Reference — `docs/api-reference.md`
+* 📡 API Reference — [`docs/api-reference.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/api-reference.md)
 * 🏗 Architecture — `docs/architecture.md`
 * ⚙ Processing Engine — `docs/processing-engine.md`
 * 🔒 Security & Compliance — `docs/security.md`
@@ -233,7 +232,7 @@ For detailed implementation guides, please refer to:
 
 * [System Architecture](https://github.com/agslima/csv-schema-evolution/blob/main/docs/architecture.md)
 * [Setup & Installation Guide](https://github.com/agslima/csv-schema-evolution/blob/main/docs/setup.md)
-* [API Reference](https://github.com/agslima/csv-schema-evolution/blob/main/docs/api-reference.md)
+* 
 * [Testing Strategy](https://github.com/agslima/csv-schema-evolution/blob/main/docs/tests.md)
 * [Processing Engine Logic](https://github.com/agslima/csv-schema-evolution/blob/main/docs/processing-engine.md)
 
