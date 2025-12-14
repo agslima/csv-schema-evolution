@@ -191,10 +191,15 @@ docker-compose up -d --build
 * **Web UI:** http://localhost:3000
 
 ---
+## Screenshots
+| Upload CSV | Automated Processing |
+|---|---|
+| ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshot) | ![image](https://github.com/) |
+| Upload Flow| Processed Table Preview |
+|---|---|
+| ![image](https://github.com/agslima) | ![image](https://github.com/agslima) |
+
 <!--
-
----
-
 ### Demonstration:
 1. Secure Upload
 
@@ -255,4 +260,4 @@ Planned enhancements aligned with real ingestion pipelines:
 
 ## License 
 
-Distributed under the MIT License.
+This project is licensed under the GPLv3 License. See the LICENSE file for details.
