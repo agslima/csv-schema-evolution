@@ -12,11 +12,13 @@
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
-  <!--<a href="https://www.bestpractices.dev/projects/11596">
-    <img src="https://www.bestpractices.dev/projects/11596/badge">
-  </a>-->
+  <img src="https://www.bestpractices.dev/projects/11596/badge">
+  <!--
+  <a href="https://www.bestpractices.dev/projects/11596">  
+  </a>
   <img src="https://img.shields.io/badge/SLSA-Level%202-brightgreen.svg">
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
+  -->
 </p>
 
 > **A backend‑centric engine for securely ingesting, sanitizing, and normalizing heterogeneous CSV files.**
@@ -45,7 +47,7 @@ This system was built to solve those problems in a **controlled, auditable backe
 
 ---
 
-## What the Engine Does 🎯
+## What the Engine Does 
 
 The engine ingests unstructured or semi‑structured CSV files and converts them into **normalized, user‑friendly tabular data**.
 
@@ -62,7 +64,7 @@ The engine ingests unstructured or semi‑structured CSV files and converts them
 
 ---
 
-## High‑Level Architecture 🏗️
+## High‑Level Architecture 
 
 The system follows **Clean Architecture** principles with a clear separation between API, business logic, and infrastructure.
 
@@ -216,7 +218,7 @@ GIF Demo
 -->
 
 
-## Documentation Index 📁
+## Documentation Index 
 
 For detailed implementation guides, please refer to:
 
@@ -248,7 +250,7 @@ Planned enhancements aligned with real ingestion pipelines:
 * Role‑based access control (RBAC)
 
 ---
-## Contributing 🤝
+## Contributing 
 
 * 1. ​Fork the project
 * 2. ​Create your Feature Branch (git checkout -b feature/AmazingFeature)
@@ -258,6 +260,6 @@ Planned enhancements aligned with real ingestion pipelines:
 
 ---
 
-## License 📘
+## License 
 
 Distributed under the MIT License.
