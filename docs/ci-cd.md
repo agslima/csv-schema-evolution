@@ -45,7 +45,7 @@ This stage protects the codebase by preventing insecure or low‑quality code fr
 * **Coverage Gate:** Enforced via coverage.py + Codecov
 
 
-*Guarantees*
+**Guarantees**
 
 * No secrets committed
 * No known high‑risk Python vulnerabilities
@@ -60,82 +60,66 @@ Trigger: `push → main`
 
 This stage builds deployable artifacts but does not yet establish trust.
 
-Executed Steps
+**Executed Steps**
 
-Dockerfile Linting: Hadolint
+* Dockerfile Linting: Hadolint
+* Container Build: Docker BuildKit
+* Container Registry Push: Docker Hub
+* Vulnerability Scan: Trivy (HIGH / CRITICAL block)
 
-Container Build: Docker BuildKit
+**Guarantees**
 
-Container Registry Push: Docker Hub
-
-Vulnerability Scan: Trivy (HIGH / CRITICAL block)
-
-
-Guarantees
-
-Reproducible container builds
-
-No critical vulnerabilities at build time
-
-Artifacts are verified but unsigned
-
-
+* Reproducible container builds
+* No critical vulnerabilities at build time
+* Artifacts are verified but unsigned
 
 ---
 
-3️⃣ Release Pipeline (Trust & Provenance)
+### 3️⃣ Release Pipeline (Trust & Provenance)
 
-Trigger: Git tag (vX.Y.Z)
+**Trigger:** Git tag (`vX.Y.Z`)
 
 This stage establishes artifact trust and supply‑chain integrity.
 
-Executed Steps
+**Executed Steps**
 
-Image Signing: Cosign (cryptographic signature)
+* Image Signing: `Cosign` (cryptographic signature)
+* SBOM Generation: `Syft` (SPDX‑JSON)
 
-SBOM Generation: Syft (SPDX‑JSON)
+**Guarantees**
 
-
-Guarantees
-
-Image authenticity is cryptographically verifiable
-
-Full dependency inventory available
-
-Immutable, auditable release artifacts
-
-
+* Image authenticity is cryptographically verifiable
+* Full dependency inventory available
+* Immutable, auditable release artifacts
 
 ---
 
-🔐 Supply‑Chain Security Controls
+** Supply‑Chain Security Controls 🔐
 
-Control	Tool
-
-Secret Scanning	Gitleaks
-SAST (Python)	Bandit
-Linting	Pylint, Hadolint
-Dependency Analysis	Trivy
-Image Signing	Cosign
-SBOM	Syft
-
-
+| Control |	Tool |
+| --- | --- |
+| Secret Scanning |	Gitleaks |
+| SAST (Python) |	Bandit |
+|Linting	| Pylint, Hadolint |
+| Dependency Analysis | Trivy |
+| Image Signing |	Cosign |
+| SBOM |	Syft |
 
 ---
 
-🧠 SLSA Mapping
+## SLSA Mapping 🧠
 
 This pipeline aligns with SLSA Level 2 and partially satisfies Level 3 controls.
 
-SLSA Level 1 – Build Process
+**SLSA Level 1 – Build Process**
 
 ✔ Fully automated build via GitHub Actions
 
-SLSA Level 2 – Build Service
+**SLSA Level 2 – Build Service**
 
 ✔ Version‑controlled pipeline ✔ Authenticated source (GitHub) ✔ Tamper‑resistant build steps
 
-SLSA Level 3 – Hardened Builds (Partial)
+**SLSA Level 3 – Hardened Builds (Partial)**
 
 ⚠️ Isolated runners (GitHub‑hosted) ⚠️ No hermetic builds yet ✔ Signed artifacts (Cosign) ✔ Provenance metadata (SBOM)
 
@@ -143,12 +127,9 @@ SLSA Level 3 – Hardened Builds (Partial)
 
 Path to Level 3: Self‑hosted runners, hermetic builds, provenance attestations
 
-
-
-
 ---
 
-## 🏗️ CI/CD Architecture Diagram
+## CI/CD Architecture Diagram 🏗️
 
 ```text
 Developer
@@ -189,26 +170,19 @@ Developer
 
 ---
 
-## 📌 Key Design Decisions
+## Key Design Decisions 📌
 
-Separation of trust levels prevents PRs from producing trusted artifacts
-
-Security scans fail fast to reduce feedback time
-
-Signing only on release avoids accidental trust escalation
-
-SBOM generation enables compliance (LGPD, SOC‑2, ISO‑27001)
-
+* Separation of trust levels prevents PRs from producing trusted artifacts
+* Security scans fail fast to reduce feedback time
+* Signing only on release avoids accidental trust escalation
+* SBOM generation enables compliance (LGPD, SOC‑2, ISO‑27001)
 
 ---
 
-# 📈 Future Improvements
+## Future Improvements 📈
 
-SLSA provenance attestations (cosign attest)
-
-Hermetic builds with pinned dependencies
-
-Admission policy enforcement (Kubernetes / OPA)
-
-Continuous dependency monitoring
+* SLSA provenance attestations (cosign attest)
+* Hermetic builds with pinned dependencies
+* Admission policy enforcement (Kubernetes / OPA)
+* Continuous dependency monitoring
 
