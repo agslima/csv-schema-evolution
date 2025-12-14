@@ -81,4 +81,4 @@ Uploads a CSV file, detects its dialect, sanitizes content, and encrypts it for 
 
 Error Response
 
-​* **404 Not Found:** If the file ID does not exist.
+**404 Not Found:** If the file ID does not exist.
