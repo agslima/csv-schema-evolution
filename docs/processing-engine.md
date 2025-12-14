@@ -1,43 +1,4 @@
-# CSV Processing Engine
-
-The engine performs:
-- delimiter detection
-- schema inference
-- key-value expansion
-- CSV injection prevention
-- data normalization
-- anomaly detection & logging
-
-## Schema Inference Algorithm
-
-Example input:
-Name, John
-Age, 23
-Name, Mary
-Age, 30
-City, NY
-
-Algorithm:
-1. Parse rows as key-value pairs.
-2. Build a set of all discovered keys.
-3. Group values into logical records.
-4. Fill missing keys with null.
-5. Output normalized table.
-
-## Sanitization Logic
-
-Cells starting with dangerous characters:
-=, +, -, @
-
-→ replaced with escaped versions or prefixed with `'`
-
-## Future Upgrades
-- RFC 4180 compliance parser
-- Chunked large file processing
-- Rule-based transformation engine
-- XLSX/JSON/Parquet export
-
-# ⚙️ Processing Engine & Logic
+# Processing Engine & Logical ⚙️
 
 The engine uses a heuristic approach to handle "messy" CSV files without demanding user configuration.
 
@@ -66,3 +27,13 @@ If triggered:
 1.  The value is escaped by prepending a single quote `'`.
 2.  `=SUM(1+1)` becomes `'=SUM(1+1)`.
 3.  Spreadsheets treat this as text, neutralizing the attack.
+
+### Limitations
+- Extremely sparse files may result in ambiguous dialect scores.
+- In such cases, the system falls back to Excel-compatible defaults.
+
+## Future Upgrades
+- RFC 4180 compliance parser
+- Chunked large file processing
+- Rule-based transformation engine
+- XLSX/JSON/Parquet export
