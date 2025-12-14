@@ -22,7 +22,7 @@ The CI/CD pipeline is intentionally designed with clear trust boundaries, fast d
 
 The pipeline is divided into three independent stages, each with increasing trust and responsibility.
 
-| Stage	Trigger	Purpose
+| Stage | Trigger |	Purpose |
 | --- | --- | --- |
 | PR Pipeline |	Pull Request |	Fast validation & security gates |
 | Main Branch Pipeline | Push to main |	Build & verify container artifacts |
