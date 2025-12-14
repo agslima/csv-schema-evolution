@@ -88,6 +88,38 @@ Detailed architecture documentation is available in `/docs`.
 
 ---
 
+## Screenshots
+
+| Upload CSV | Automated Processing |
+|---|---|
+| ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshot) | ![image](https://github.com/) |
+| **Upload Flow**| **Processed Table Preview** |
+| ![image](https://github.com/agslima) | ![image](https://github.com/agslima) |
+
+
+<!--
+### Demonstration:
+1. Secure Upload
+
+Users upload files via a clean interface with immediate validation.
+2. Automated Processing
+
+The system ingests, cleans, and presents the data.
+
+Upload Flow
+![Upload Interface](docs/demo/screenshots/upload_page.png)
+
+Processed Table Preview
+![Processed CSV Output](docs/demo/screenshots/table_output.png)
+
+GIF Demo
+![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
+
+---
+
+-->
+
+---
 
 ## How to run this? 🚀
 
@@ -190,38 +222,6 @@ Example:
 ```
 
 Logging configuration and operational guidance are documented in `docs/logging.md`.
-
----
-## Screenshots
-
-| Upload CSV | Automated Processing |
-|---|---|
-| ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshot) | ![image](https://github.com/) |
-| **Upload Flow**| **Processed Table Preview** |
-| ![image](https://github.com/agslima) | ![image](https://github.com/agslima) |
-
-
-<!--
-### Demonstration:
-1. Secure Upload
-
-Users upload files via a clean interface with immediate validation.
-2. Automated Processing
-
-The system ingests, cleans, and presents the data.
-
-Upload Flow
-![Upload Interface](docs/demo/screenshots/upload_page.png)
-
-Processed Table Preview
-![Processed CSV Output](docs/demo/screenshots/table_output.png)
-
-GIF Demo
-![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
-
----
-
--->
 
 ---
 
