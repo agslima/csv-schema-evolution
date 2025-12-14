@@ -88,6 +88,25 @@ Detailed architecture documentation is available in `/docs`.
 
 ---
 
+
+## How to run this? 🚀
+
+### Prerequisites
+
+* Docker & Docker Compose
+  
+#### 1. Run the Stack
+
+```bash
+docker-compose up -d --build
+```
+
+#### 2. Access the Interfaces
+
+* **Web UI:** http://localhost:3000
+
+---
+
 ## API Overview  
 
 | Method | Endpoint                      | Description                              |
@@ -173,24 +192,6 @@ Example:
 Logging configuration and operational guidance are documented in `docs/logging.md`.
 
 ---
-
-## How to run this? 🚀
-
-### Prerequisites
-
-* Docker & Docker Compose
-  
-#### 1. Run the Stack
-
-```bash
-docker-compose up -d --build
-```
-
-#### 2. Access the Interfaces
-
-* **Web UI:** http://localhost:3000
-
----
 ## Screenshots
 
 | Upload CSV | Automated Processing |
@@ -222,6 +223,7 @@ GIF Demo
 
 -->
 
+---
 
 ## Documentation Index 
 
