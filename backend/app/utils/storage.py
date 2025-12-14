@@ -11,15 +11,20 @@ from app.core.config import settings
 from app.core.security import encrypt_data, decrypt_data
 
 
-async def save_file_to_gridfs(file: UploadFile) -> ObjectId:
+async def save_bytes_to_gridfs(content: bytes, filename: str) -> ObjectId:
     """
-    Reads the file stream, encrypts it, and saves it to MongoDB GridFS.
+    Saves raw bytes (already sanitized) to GridFS with encryption.
+
+    Args:
+        content: The raw file content in bytes.
+        filename: The name of the file to save.
+
+    Returns:
+        ObjectId: The ID of the saved file in GridFS.
 
     Raises:
         ValueError: If file size exceeds the configured limit.
     """
-    content = await file.read()
-
     if len(content) > settings.max_file_size_bytes:
         raise ValueError(f"File exceeds maximum size of {settings.MAX_FILE_SIZE_MB}MB")
 
@@ -27,12 +32,25 @@ async def save_file_to_gridfs(file: UploadFile) -> ObjectId:
     encrypted_content = encrypt_data(content)
 
     # Open upload stream
-    grid_in = db_manager.fs_bucket.open_upload_stream(file.filename)
+    grid_in = db_manager.fs_bucket.open_upload_stream(filename)
     await grid_in.write(encrypted_content)
     await grid_in.close()
 
     # pylint: disable=protected-access
     return grid_in._id
+
+
+async def save_file_to_gridfs(file: UploadFile) -> ObjectId:
+    """
+    Reads the file stream, encrypts it, and saves it to MongoDB GridFS.
+    (Kept for backward compatibility or raw uploads if needed later)
+
+    Raises:
+        ValueError: If file size exceeds the configured limit.
+    """
+    content = await file.read()
+    # Delegate to the bytes saver to avoid logic duplication
+    return await save_bytes_to_gridfs(content, file.filename)
 
 
 async def create_file_metadata(file_id: ObjectId, filename: str) -> dict:

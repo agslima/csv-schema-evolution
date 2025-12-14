@@ -3,12 +3,13 @@ API endpoints for file management.
 Handles file upload, listing, downloading, and deletion operations.
 """
 
+import csv
+from io import StringIO
 from typing import Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 from bson import ObjectId
 
-# --- FIX: Import storage from 'utils' and csv_handler from 'services' ---
 from app.utils import storage
 from app.services import csv_handler
 from app.db.mongo import db_manager
@@ -24,7 +25,8 @@ async def upload_file(
     ),
 ):
     """
-    Uploads a CSV, saves to GridFS, processes content, and returns metadata.
+    Uploads a CSV, Sanitizes content, saves the CLEAN version to GridFS,
+    and returns metadata.
     """
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(
@@ -32,17 +34,40 @@ async def upload_file(
         )
 
     try:
-        # 1. Save binary to GridFS
-        file_id = await storage.save_file_to_gridfs(file)
+        # 1. Read the raw content immediately (Into Memory)
+        content_bytes = await file.read()
+        try:
+            content_str = content_bytes.decode("utf-8-sig")
+        except UnicodeDecodeError as e:
+            raise HTTPException(
+                status_code=400, detail="Invalid CSV encoding. Use UTF-8."
+            ) from e
 
-        # 2. Create metadata entry
-        await storage.create_file_metadata(file_id, file.filename)
-
-        # 3. Process Content (Read -> Parse -> Sanitize)
-        content_str = await storage.get_file_content_as_string(str(file_id))
+        # 2. Process & Sanitize (In Memory)
+        # This strips formula injections and normalizes data
+        # Note: We rely on csv_handler logic to return sanitized dictionaries
         records, fields = await csv_handler.process_csv_content(content_str, id_field)
 
-        # 4. Update Metadata
+        # 3. Reconstruct the CSV (The "Evolution" Step)
+        # We create a new, clean CSV string from the sanitized records.
+        # This ensures the stored file is safe to download.
+        output_io = StringIO()
+        if fields:
+            # We use standard Excel-compatible CSV format
+            writer = csv.DictWriter(output_io, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(records)
+
+        # Convert the clean CSV string back to bytes for storage
+        sanitized_content = output_io.getvalue().encode("utf-8")
+
+        # 4. Save the SANITIZED content to GridFS
+        file_id = await storage.save_bytes_to_gridfs(sanitized_content, file.filename)
+
+        # 5. Create metadata entry
+        await storage.create_file_metadata(file_id, file.filename)
+
+        # 6. Update Metadata status
         await storage.update_file_status(str(file_id), fields, len(records))
 
         return {
@@ -86,7 +111,7 @@ async def list_files():
 @router.get("/{file_id}/download")
 async def download_file(file_id: str):
     """
-    Downloads the original CSV file.
+    Downloads the processed (safe) CSV file.
     """
     try:
         # Verify existence
