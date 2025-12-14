@@ -2,6 +2,20 @@
 
 ### Backend‑First Data Ingestion Service (FastAPI + MongoDB GridFS)
 
+<p align="left">
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/ci-cd.yml"/>
+    <img alt="CI/CD Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/ci-cd.yml/badge.svg">
+  </a>
+  <a href="https://codecov.io/github/agslima/csv-schema-evolution" >
+    <img src="https://codecov.io/github/agslima/csv-schema-evolution/graph/badge.svg?token=776AEW3J4C"/>
+  </a>
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
+  <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
+  <!--<img alt="LGPD Safe" src="https://img.shields.io/badge/Data%20Protection-LGPD%20Safe-orange">-->
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
+</p>
+
 > **A backend‑centric engine for securely ingesting, sanitizing, and normalizing heterogeneous CSV files.**
 
 This project focuses on **data safety, correctness, and operational transparency**. It was designed to process sensitive CSV files **without relying on third‑party online tools**, ensuring full control over data handling and compliance requirements.
@@ -57,6 +71,16 @@ graph LR
     D --> E[Schema Normalizer]
     E --> F[(MongoDB + GridFS)]
     C -->|Rejected| X[Error Response]
+```
+
+```mermaid
+graph LR
+    A[User Upload] -->|Stream| B(FastAPI Endpoint)
+    B -->|Validation| C{Sanitizer}
+    C -->|Safe Content| D[Processor Engine]
+    D -->|Schema Inference| E[Normalizer]
+    E -->|Structured Data| F[(MongoDB / GridFS)]
+    C -->|Malicious Input| X[Reject Request]
 ```
 
 ### Design Tradeoffs
@@ -156,29 +180,52 @@ Logging configuration and operational guidance are documented in `docs/logging.m
 
 ---
 
-## Local Development
+## How to run this?
 
 ### Prerequisites
 
-* Docker
-* Docker Compose
-
-### Run the Stack
+* Docker & Docker Compose
+  
+#### 1. Run the Stack
 
 ```bash
 docker-compose up -d --build
 ```
 
-### Access
+#### 2. Access the Interfaces
 
-* API Docs (Swagger): [http://localhost:8000/docs](http://localhost:8000/docs)
-* Web UI (if enabled): [http://localhost:3000](http://localhost:3000)
+* **Web UI:** http://localhost:3000
+
+---
+<!--
 
 ---
 
+### Demonstration:
+1. Secure Upload
+
+Users upload files via a clean interface with immediate validation.
+2. Automated Processing
+
+The system ingests, cleans, and presents the data.
+
+Upload Flow
+![Upload Interface](docs/demo/screenshots/upload_page.png)
+
+Processed Table Preview
+![Processed CSV Output](docs/demo/screenshots/table_output.png)
+
+GIF Demo
+![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
+
+---
+
+-->
+
+
 ## Documentation Index
 
-All implementation details are intentionally kept out of this README and documented separately:
+For detailed implementation guides, please refer to:
 
 * 📡 API Reference — `docs/api-reference.md`
 * 🏗 Architecture — `docs/architecture.md`
@@ -186,6 +233,14 @@ All implementation details are intentionally kept out of this README and documen
 * 🔒 Security & Compliance — `docs/security.md`
 * 🧪 Testing Strategy — `docs/testing.md`
 * 📝 Logging & Observability — `docs/logging.md`
+* 🔁 CI/CD & Supply Chain Security — `docs/ci-cd.md`
+  
+
+* [System Architecture](https://github.com/agslima/csv-schema-evolution/blob/main/docs/architecture.md)
+* [Setup & Installation Guide](https://github.com/agslima/csv-schema-evolution/blob/main/docs/setup.md)
+* [API Reference](https://github.com/agslima/csv-schema-evolution/blob/main/docs/api-reference.md)
+* [Testing Strategy](https://github.com/agslima/csv-schema-evolution/blob/main/docs/tests.md)
+* [Processing Engine Logic](https://github.com/agslima/csv-schema-evolution/blob/main/docs/processing-engine.md)
 
 ---
 
