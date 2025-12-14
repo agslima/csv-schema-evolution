@@ -114,7 +114,7 @@ jobs:
         run: |
           # Use the config file we created to ignore boilerplate
           # Generate 'coverage.xml' for Codecov
-          pytest --cov=app --cov-report=xml --cov-config=.coveragerc tests/
+          pytest --cov=app --cov-report=xml --cov-config=.coveragerc ./backend/tests/
 
       - name: Upload coverage reports to Codecov
         if: vars.ENABLE_CODECOV == 'true'
