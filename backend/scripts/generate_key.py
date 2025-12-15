@@ -1,4 +1,7 @@
-# scripts/generate_key.py
+"""
+scripts/generate_key.py
+"""
+
 from cryptography.fernet import Fernet
 
 

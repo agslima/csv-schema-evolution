@@ -29,3 +29,8 @@ docker-compose down
 
 # 2. Rebuild with new security settings
 docker-compose up -d --build
+
+ci-security-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
