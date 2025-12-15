@@ -24,9 +24,7 @@
 
 This project focuses on **data safety, correctness, and operational transparency**. It was designed to process sensitive CSV files **without relying on third‑party online tools**, ensuring full control over data handling and compliance requirements.
 
----
-
-## Problem Statement 🧠
+## Problem Statement
 
 In real production environments, CSV files are rarely clean or standardized. Users frequently upload files with:
 
@@ -92,8 +90,9 @@ Detailed architecture documentation is available in `/docs`.
 
 | Upload CSV | Automated Processing |
 |---|---|
-| ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshot) | ![image](https://github.com/) |
-| **Upload Flow**| **Processed Table Preview** |
+| ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/interface.png) | ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/job-done.png) |
+
+<!--| **Upload Flow**| **Processed Table Preview** |
 | ![image](https://github.com/agslima) | ![image](https://github.com/agslima) |
 
 
