@@ -1,3 +1,4 @@
+
 name: CI / CD Pipeline
 
 on:
@@ -12,10 +13,10 @@ env:
   IMAGE_NAME: ${{ secrets.DOCKER_HUB_USERNAME }}/csv-ingestion-engine
   PYTHON_VERSION: "3.11"
 
-# --------------------------------------------------
-# PR PIPELINE — FAST & BLOCKING
-# --------------------------------------------------
 jobs:
+  # --------------------------------------------------
+  # 1. PR PIPELINE — FAST & BLOCKING
+  # --------------------------------------------------
   pr-ci:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -73,12 +74,15 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-# --------------------------------------------------
-# MAIN BRANCH — BUILD & VERIFY
-# --------------------------------------------------
+  # --------------------------------------------------
+  # 2. BUILD & VERIFY (Runs on Merge OR Tag)
+  # --------------------------------------------------
   main-build:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: pr-ci
+    # LOGIC FIX: Run on push to main OR on release tags
+    # Removed 'needs: pr-ci' to prevent skipping
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
 
     permissions:
@@ -104,9 +108,11 @@ jobs:
         with:
           context: ./backend
           push: true
+          # Logic: If it's a tag, tag with version. If main, tag with sha/latest.
           tags: |
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.IMAGE_NAME }}:latest
+            ${{ startsWith(github.ref, 'refs/tags/v') && format('{0}:{1}', env.IMAGE_NAME, github.ref_name) || '' }}
 
       - name: Container vulnerability scan
         uses: aquasecurity/trivy-action@master
@@ -115,12 +121,12 @@ jobs:
           severity: "CRITICAL,HIGH"
           exit-code: "1"
 
-# --------------------------------------------------
-# RELEASE PIPELINE — TRUST & PROVENANCE
-# --------------------------------------------------
+  # --------------------------------------------------
+  # 3. RELEASE PIPELINE (Trust)
+  # --------------------------------------------------
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: main-build
+    needs: main-build # Safe now because main-build runs on tags
     runs-on: ubuntu-latest
 
     permissions:
@@ -136,9 +142,10 @@ jobs:
       - name: Sign image
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
           echo "$COSIGN_PRIVATE_KEY" > cosign.key
-          cosign sign --key cosign.key \
+          cosign sign --key cosign.key -y \
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Generate SBOM
