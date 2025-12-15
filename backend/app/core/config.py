@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     class Config:
+        """
+        Application configuration settings.
+        """
+
         case_sensitive = True
         env_file = ".env"
         # CRITICAL FIX: Ignore extra env vars (like internal docker vars)
