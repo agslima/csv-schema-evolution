@@ -25,7 +25,6 @@ As detailed in the Processing Engine, we actively neutralize **Formula Injection
 - **No SQL Injection:** We use MongoDB (NoSQL) with ODM usage (Motor), effectively eliminating SQL Injection risks.
 - **GridFS Isolation:** Binary file data is separated from metadata, allowing for optimized storage policies.
 
-
 ## 5. LGPD Alignment
 
 - Data Minimization: Raw files are encrypted and never exposed.

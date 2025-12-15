@@ -13,9 +13,10 @@ from app.core.config import settings
 from app.db.mongo import db_manager
 from app.api.v1.endpoints import files, health
 from app.core.middleware import RequestLogMiddleware
-
-# FIX: Import the cleanup function so it is defined
 from app.services.cleanup import delete_expired_files
+
+# FIX: Import the logging setup function we created
+from app.core.logging import setup_logging
 
 # Initialize Scheduler
 scheduler = AsyncIOScheduler()
@@ -29,10 +30,14 @@ async def lifespan(_app: FastAPI):
     Args:
         _app (FastAPI): The application instance (unused).
     """
-    # 1. Startup: Connect DB
+    # 1. Startup: Configure Logging (FIRST PRIORITY)
+    # Ensuring logging is set up before DB or Scheduler prevents lost startup errors.
+    setup_logging()
+
+    # 2. Startup: Connect DB
     db_manager.connect()
 
-    # 2. Startup: Configure and Start Scheduler
+    # 3. Startup: Configure and Start Scheduler
     # Run cleanup check every 60 minutes
     scheduler.add_job(
         delete_expired_files,
@@ -44,13 +49,14 @@ async def lifespan(_app: FastAPI):
 
     yield
 
-    # 3. Shutdown: Clean up
+    # 4. Shutdown: Clean up
     scheduler.shutdown()
     db_manager.close()
 
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan, version="1.1.0")
 
+# Register Logging Middleware
 app.add_middleware(RequestLogMiddleware)
 
 # Configure CORS

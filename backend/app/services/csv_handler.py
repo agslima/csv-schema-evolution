@@ -12,8 +12,60 @@ from collections import OrderedDict
 from fastapi.concurrency import run_in_threadpool
 from app.utils.sanitize import sanitize_cell_value
 from app.services.dialect_detector import DialectDetector
+from app.services.transposer import parse_vertical_csv
 
 logger = logging.getLogger(__name__)
+
+
+def _is_vertical_layout(content: str, dialect: csv.Dialect) -> bool:
+    """
+    Heuristic to check if the file is likely a Vertical Key-Value dump.
+
+    Signs of Vertical Layout:
+    1. Most rows have exactly 2 columns (Key, Value).
+    2. The first column values repeat frequently (high duplication rate).
+    """
+    sample_io = StringIO(content[:4096])  # Check first 4KB
+    reader = csv.reader(sample_io, dialect=dialect)
+
+    row_lengths = []
+    first_col_values = []
+
+    try:
+        for _ in range(20):  # Check first 20 lines
+            row = next(reader)
+            if row:
+                row_lengths.append(len(row))
+                first_col_values.append(row[0])
+    except StopIteration:
+        pass
+    except csv.Error:
+        return False
+
+    if not row_lengths:
+        return False
+
+    # Check 1: Are 90% of rows length 2? (Allowing for some noise)
+    # Note: Your example had separator lines "---", so we should look for "Small width"
+    avg_width = sum(row_lengths) / len(row_lengths)
+    if avg_width > 2.5:
+        return False  # Horizontal files usually have many columns
+
+    # Check 2: Repetition. If it's a standard CSV, column 0 (ID) usually is unique.
+    # If it's vertical, column 0 (Field Name) repeats every N rows.
+    # If we have 20 rows and 5 unique keys, duplication is high.
+    unique_keys = set(first_col_values)
+    duplication_ratio = 1 - (len(unique_keys) / len(first_col_values))
+
+    # If more than 30% of keys are duplicates, it's likely vertical
+    is_vertical = duplication_ratio > 0.3
+
+    if is_vertical:
+        logger.info(
+            "Vertical Key-Value layout detected (Duplication: %.2f)", duplication_ratio
+        )
+
+    return is_vertical
 
 
 def _detect_dialect(content: str) -> csv.Dialect:
@@ -48,6 +100,13 @@ def _parse_csv_sync(content: str) -> Tuple[List[Dict], List[str]]:
         return [], []
 
     dialect = _detect_dialect(content)
+
+    # --- ADAPTIVE STRATEGY START ---
+    if _is_vertical_layout(content, dialect):
+        logger.info("Delegating to Vertical Transposer...")
+        return parse_vertical_csv(content, dialect)
+    # --- ADAPTIVE STRATEGY END ---
+
     text_io = StringIO(content)
     records: List[Dict] = []
     fields_set: Set[str] = set()

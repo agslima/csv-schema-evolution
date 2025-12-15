@@ -23,7 +23,7 @@ source venv/bin/activate
 pip install -r backend/requirements.txt
 ```
 
-### Run backend:
+### Run backend
 
 ```bash
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -35,7 +35,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 docker-compose up --build
 ```
 
-## Services:
+## Services
 
-* FastAPI: http://localhost:8000
-* Mongo Express: http://localhost:8081
+- FastAPI: http://localhost:8000
+- Mongo Express: http://localhost:8081

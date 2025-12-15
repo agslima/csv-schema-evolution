@@ -44,7 +44,6 @@ This stage protects the codebase by preventing insecure or low‑quality code fr
 * **Testing:** Unit + Integration tests (pytest)
 * **Coverage Gate:** Enforced via coverage.py + Codecov
 
-
 **Guarantees**
 
 * No secrets committed
@@ -96,14 +95,14 @@ This stage establishes artifact trust and supply‑chain integrity.
 
 ** Supply‑Chain Security Controls 🔐
 
-| Control |	Tool |
+| Control | Tool |
 | --- | --- |
-| Secret Scanning |	Gitleaks |
-| SAST (Python) |	Bandit |
-|Linting	| Pylint, Hadolint |
+| Secret Scanning | Gitleaks |
+| SAST (Python) | Bandit |
+|Linting | Pylint, Hadolint |
 | Dependency Analysis | Trivy |
-| Image Signing |	Cosign |
-| SBOM |	Syft |
+| Image Signing | Cosign |
+| SBOM | Syft |
 
 ---
 

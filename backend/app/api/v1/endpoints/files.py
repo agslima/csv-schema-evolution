@@ -8,7 +8,6 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 from bson import ObjectId
 
-# --- FIX: Import storage from 'utils' and csv_handler from 'services' ---
 from app.utils import storage
 from app.services import csv_handler
 from app.db.mongo import db_manager
@@ -20,7 +19,7 @@ router = APIRouter()
 async def upload_file(
     file: UploadFile = File(...),
     id_field: Optional[str] = Query(
-        None, description="Optional field to group records"
+        None, description="Optional field to help detect record grouping"
     ),
 ):
     """
@@ -31,19 +30,25 @@ async def upload_file(
             status_code=400, detail="Invalid file extension. Only .csv allowed."
         )
 
+    file_id = None
     try:
-        # 1. Save binary to GridFS
+        # 1. Save binary to GridFS (Encrypted)
         file_id = await storage.save_file_to_gridfs(file)
 
-        # 2. Create metadata entry
+        # 2. Create metadata entry (Status: Pending)
         await storage.create_file_metadata(file_id, file.filename)
 
-        # 3. Process Content (Read -> Parse -> Sanitize)
+        # 3. Process Content
+        # We retrieve the content string to perform the heuristic checks (Vertical vs Horizontal)
         content_str = await storage.get_file_content_as_string(str(file_id))
+
+        # The parser now intelligently switches between Standard and Vertical/Transposer modes
         records, fields = await csv_handler.process_csv_content(content_str, id_field)
 
-        # 4. Update Metadata
-        await storage.update_file_status(str(file_id), fields, len(records))
+        # 4. Update Metadata (Status: Processed)
+        await storage.update_file_status(
+            str(file_id), status="processed", fields=fields, count=len(records)
+        )
 
         return {
             "id": str(file_id),
@@ -54,8 +59,20 @@ async def upload_file(
         }
 
     except ValueError as e:
+        # If storage or validation fails
+        if file_id:
+            await storage.update_file_status(
+                str(file_id), status="error", error_msg=str(e)
+            )
         raise HTTPException(status_code=400, detail=str(e)) from e
+
     except Exception as e:
+        # If parsing or database fails
+        if file_id:
+            await storage.update_file_status(
+                str(file_id), status="error", error_msg="Internal Processing Error"
+            )
+
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error: {str(e)}"
         ) from e
@@ -78,6 +95,7 @@ async def list_files():
                 "records_count": doc.get("records_count", 0),
                 "fields": doc.get("fields", []),
                 "created_at": doc.get("created_at"),
+                "error_message": doc.get("error_message"),
             }
         )
     return results

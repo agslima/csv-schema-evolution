@@ -1,113 +1,79 @@
 version: '3.9'
 
 services:
-  # --- BACKEND SERVICE ---
-  backend:
-    build: ./backend
-    container_name: csv_engine_backend
-    restart: always
-    # We remove 'ports' here if we want to force access ONLY via Nginx (Security Best Practice)
-    # But for debugging, we can keep it or comment it out.
-    # ports:
-    #   - "8000:8000" 
-    expose:
-      - "8000" # Only accessible to other containers
-    environment:
-      - MONGO_URI=mongodb://mongo:27017
-      - DB_NAME=csv_engine_db
-    depends_on:
-      - mongo
-
-  # --- FRONTEND SERVICE (NGINX) ---
-  frontend:
-    build: ./frontend
-    container_name: csv_engine_frontend
-    restart: always
-    ports:
-      - "80:80" # The entry point for the user
-    depends_on:
-      - backend
-
-  # --- DATABASE ---
+  # --- 1. DATABASE (Secure) ---
   mongo:
     image: mongo:6.0
     container_name: csv_engine_mongo
-    restart: always
+    restart: unless-stopped
+    # Security: Only expose port to internal network, NOT to the host
     expose:
       - "27017"
-    volumes:
-      - mongo_data:/data/db
-
-volumes:
-  mongo_data:
-
-###
-
-services:
-  mongo:
-    image: mongo:6
-    container_name: csv-mongo
-    restart: unless-stopped
-    # Security: Do NOT expose ports to the host/public unless testing locally
-    # If needed for local tools, bind to localhost only:
-    # ports:
-    #   - "127.0.0.1:27017:27017"
-    
     environment:
-      # Security: Enable Authentication
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_INITDB_DATABASE: csv_uploader
-    
+      MONGO_INITDB_DATABASE: csv_engine_db
     volumes:
       - mongo_data:/data/db
-    
-    # Security: Isolate DB in a backend network
     networks:
       - secure-net
-    
-    # Security: Resource limits to prevent DoS crashing the host
+    # Security: Resource limits
     deploy:
       resources:
         limits:
           cpus: '1.0'
           memory: 1G
 
+  # --- 2. BACKEND API (Hardened) ---
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: agslima/csv-ingestion-engine:latest
-    container_name: csv-backend
+    container_name: csv_engine_backend
     restart: unless-stopped
     
-    # Security: Drop capabilities (Rootless is handled in Dockerfile, but this is extra insurance)
+    # Security: Drop root capabilities
     cap_drop:
       - ALL
     
-    # Security: Run with Read-Only filesystem (optional, but recommended for high security)
-    # We mount /tmp as a tmpfs because Python needs to write temporary files
+    # Security: Read-only filesystem (Write only to /tmp)
     read_only: true
     tmpfs:
-      - /tmp
+      - /tmp:rw,noexec,nosuid
     
-    ports:
-      - "8000:8000"
+    # Networking: Only accessible by Frontend, not the public internet
+    expose:
+      - "8000"
     
+    # Load secrets
     env_file:
-      - .env
+      - ./backend/.env
     
-    # removed the 'command' override. 
-    # Why? We want to use the CMD defined in the secure Dockerfile ("app.main:app").
-    # Overriding it with "--reload" is strictly for development and dangerous in prod.
-    
+    # Construct Connection String using variables from .env
+    environment:
+      - MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/?authSource=admin
+      - DB_NAME=csv_engine_db
+      
     depends_on:
       - mongo
-    
     networks:
       - secure-net
 
-# Define a private network
+  # --- 3. FRONTEND (Nginx Proxy) ---
+  frontend:
+    build: 
+      context: ./frontend
+    container_name: csv_engine_frontend
+    restart: unless-stopped
+    # The ONLY public port
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - secure-net
+
+# --- NETWORKS & VOLUMES ---
 networks:
   secure-net:
     driver: bridge

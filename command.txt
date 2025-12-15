@@ -21,3 +21,11 @@ pytest tests/integration/test_api_files.py -v
 
 pytest --cov=app --cov-report=term-missing tests/
 pytest --cov=app --cov-report=term-missing --cov-config=.coveragerc tests/
+
+---
+
+# 1. Stop existing containers
+docker-compose down
+
+# 2. Rebuild with new security settings
+docker-compose up -d --build

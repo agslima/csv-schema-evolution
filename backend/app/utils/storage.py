@@ -11,15 +11,10 @@ from app.core.config import settings
 from app.core.security import encrypt_data, decrypt_data
 
 
-async def save_file_to_gridfs(file: UploadFile) -> ObjectId:
+async def save_bytes_to_gridfs(content: bytes, filename: str) -> ObjectId:
     """
-    Reads the file stream, encrypts it, and saves it to MongoDB GridFS.
-
-    Raises:
-        ValueError: If file size exceeds the configured limit.
+    Saves raw bytes to GridFS with encryption.
     """
-    content = await file.read()
-
     if len(content) > settings.max_file_size_bytes:
         raise ValueError(f"File exceeds maximum size of {settings.MAX_FILE_SIZE_MB}MB")
 
@@ -27,12 +22,20 @@ async def save_file_to_gridfs(file: UploadFile) -> ObjectId:
     encrypted_content = encrypt_data(content)
 
     # Open upload stream
-    grid_in = db_manager.fs_bucket.open_upload_stream(file.filename)
+    grid_in = db_manager.fs_bucket.open_upload_stream(filename)
     await grid_in.write(encrypted_content)
     await grid_in.close()
 
     # pylint: disable=protected-access
     return grid_in._id
+
+
+async def save_file_to_gridfs(file: UploadFile) -> ObjectId:
+    """
+    Reads the file stream and saves it to MongoDB GridFS.
+    """
+    content = await file.read()
+    return await save_bytes_to_gridfs(content, file.filename)
 
 
 async def create_file_metadata(file_id: ObjectId, filename: str) -> dict:
@@ -65,11 +68,26 @@ async def get_file_content_as_string(file_id: str) -> str:
         raise ValueError(f"Could not read/decrypt file from storage: {e}") from e
 
 
-async def update_file_status(file_id: str, fields: list, count: int) -> None:
-    """Updates the file processing status."""
+async def update_file_status(
+    file_id: str,
+    status: str,
+    fields: list = None,
+    count: int = 0,
+    error_msg: str = None,
+) -> None:
+    """Updates the file processing status (success or error)."""
+    update_data = {"status": status}
+
+    if fields is not None:
+        update_data["fields"] = fields
+    if count is not None:
+        update_data["records_count"] = count
+    if error_msg:
+        update_data["error_message"] = error_msg
+
     await db_manager.db.files.update_one(
         {"_id": ObjectId(file_id)},
-        {"$set": {"status": "processed", "fields": fields, "records_count": count}},
+        {"$set": update_data},
     )
 
 

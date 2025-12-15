@@ -57,28 +57,34 @@ const app = {
     },
 
     renderTable(files) {
-        if (files.length === 0) {
+        if (!files || files.length === 0) {
             this.tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No files found.</td></tr>`;
             return;
         }
 
         const html = files.map(file => {
-            // Badges for status
+            // 1. Status Badges
             let badgeClass = "bg-secondary";
             if (file.status === "processed") badgeClass = "bg-success";
             if (file.status === "error") badgeClass = "bg-danger";
             if (file.status === "pending") badgeClass = "bg-warning text-dark";
 
-            // Format fields list (truncate if too long)
-            const fieldsStr = file.fields.slice(0, 5).join(", ") + (file.fields.length > 5 ? "..." : "");
+            // 2. Format Fields (Truncate if too long)
+            const fieldsList = file.fields || [];
+            const fieldsStr = fieldsList.slice(0, 5).join(", ") + (fieldsList.length > 5 ? "..." : "");
+
+            // 3. FIX: Use the actual creation date from the backend
+            const dateStr = file.created_at 
+                ? new Date(file.created_at).toLocaleString() 
+                : "Just now";
 
             return `
                 <tr>
                     <td class="fw-bold">${file.filename}</td>
-                    <td class="small text-muted">${new Date().toLocaleDateString()}</td> 
-                    <td><span class="badge ${badgeClass}">${file.status.toUpperCase()}</span></td>
-                    <td>${file.records_count.toLocaleString()}</td>
-                    <td class="small text-muted" title="${file.fields.join(", ")}">${fieldsStr}</td>
+                    <td class="small text-muted">${dateStr}</td> 
+                    <td><span class="badge ${badgeClass}">${(file.status || 'unknown').toUpperCase()}</span></td>
+                    <td>${(file.records_count || 0).toLocaleString()}</td>
+                    <td class="small text-muted" title="${fieldsList.join(", ")}">${fieldsStr}</td>
                     <td>
                         <div class="btn-group btn-group-sm">
                             <a href="${API.getDownloadUrl(file.id)}" class="btn btn-outline-primary" target="_blank">Download</a>
