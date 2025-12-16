@@ -69,8 +69,8 @@ $P = \frac{1}{K} \sum_{k=1}^{K} N_{k} \frac{L_{k} - 1}{L_{k}}$
 
 Where:
 - `K` = number of distinct row length patterns
-- `Nk` = number of rows with length `Lk`
-- `Lk` = row length
+- `$N_{k}$` = number of rows with length `Lk`
+- `$L_{k}$` = row length
 
 ### Key Behaviors
 
@@ -113,8 +113,9 @@ This prevents perfectly aligned but meaningless data from winning dialect select
 ## 5. Vertical Layout Detection (Key-Value Streams)
 
 Some CSV-like inputs represent records vertically:
-
+```text
 name, John age, 23 city, NY name, Mary age, 30 city, LA
+```
 
 ### Detection Heuristics
 
@@ -156,21 +157,14 @@ This allows schema drift without invalidating prior records.
 
 ## 7. Sanitization — CSV / Formula Injection
 
-All cell values are treated as untrusted input.
+Attack Vector: CSV Injection (RFC 7111 limitation). Malicious cell values (e.g., =cmd|' /C calc'!A0) can execute code when opened in Excel.
 
-### Threat
-
-Spreadsheet software may execute formulas such as:
-
-=CMD|' /C calc'!A0
-
-### Defense
-
-If a cell starts with:
-
-= + - @
-
-The engine prepends a single quote (`'`), forcing literal rendering.
+​Sanitization Logic:
+Treat the CSV as untrusted user input.
+​Trigger Detection: Check if cell starts with =, +, -, @.
+​Neutralization: Prepend a single quote '.
+​Input: =SUM(1+1)
+​Output: '=SUM(1+1) (Rendered as literal text by spreadsheets).
 
 ---
 
@@ -204,9 +198,9 @@ These trade-offs are intentional.
 
 ---
 
-## 10. Theoretical Basis
+## 10. Reference & Theoretical Basis ​📚
 
-This engine is inspired by:
+This engine is based on:
 
 > *Wrangling Messy CSV Files by Detecting Row and Type Patterns*  
 > Gerrit J.J. van den Burg et al., The Alan Turing Institute (2018)  
