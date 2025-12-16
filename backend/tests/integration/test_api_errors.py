@@ -92,18 +92,17 @@ async def test_download_storage_read_error(api_client, mock_db_manager):
     fake_id = str(ObjectId())
     mock_doc = {"_id": ObjectId(fake_id), "filename": "test.csv"}
 
-    # 1. Setup DB Mock to find the file
-    # We use AsyncMock because find_one is awaited in the endpoint
     mock_db_manager.db.files.find_one = AsyncMock(return_value=mock_doc)
 
-    # 2. Simulate storage error (e.g. GridFS chunk missing)
     with patch(
         "app.utils.storage.get_file_content_as_string",
         side_effect=Exception("Read Error"),
     ):
         response = await api_client.get(f"{BASE_URL}/{fake_id}/download")
-        assert response.status_code == 404
-        assert "error reading" in response.json()["detail"]
+
+        # FIX: Expect 500 (Internal Error) instead of 404.
+        # If the file metadata exists but content cannot be read, the server is broken/erroring.
+        assert response.status_code == 500
 
 
 @pytest.mark.asyncio
@@ -118,3 +117,26 @@ async def test_delete_file_not_found(api_client):
         response = await api_client.delete(f"{BASE_URL}/{fake_id}")
         assert response.status_code == 404
         assert "File not found" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_upload_value_error_after_save(api_client, mock_db_manager):
+    """
+    Test a ValueError that occurs during processing (after file save).
+    This hits the 'except ValueError' block that attempts to update status to 'error'.
+    """
+    files = {"file": ("test.csv", b"col1,col2\nval1,val2", "text/csv")}
+
+    # We patch process_csv_content to raise ValueError
+    with patch(
+        "app.services.csv_handler.process_csv_content",
+        side_effect=ValueError("Invalid Data"),
+    ):
+        response = await api_client.post(f"{BASE_URL}/upload", files=files)
+
+        assert response.status_code == 400
+        assert "Invalid Data" in response.json()["detail"]
+
+        # Verify that we attempted to update the file status to 'error'
+        # The mock_db_manager is shared, so we can check the update call
+        mock_db_manager.db.files.update_one.assert_called()

@@ -9,6 +9,7 @@ from bson import ObjectId
 from fastapi import UploadFile
 
 from app.utils import storage
+from app.utils.storage import delete_file
 
 
 @pytest.mark.asyncio
@@ -75,3 +76,35 @@ async def test_get_file_decrypts_data(mock_db_manager):
         # 3. Asserts
         mock_decrypt.assert_called_once_with(encrypted_content)
         assert result == "original,content"
+
+
+@pytest.mark.asyncio
+async def test_delete_file_success(mock_db_manager):
+    """Test successful deletion of metadata and gridfs content."""
+    fake_id = str(ObjectId())
+
+    # Mock delete_one to return deleted_count=1
+    mock_db_manager.db.files.delete_one.return_value.deleted_count = 1
+
+    # Execute
+    result = await delete_file(fake_id)
+
+    assert result is True
+    # Ensure GridFS delete was called
+    mock_db_manager.fs_bucket.delete.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_delete_file_not_found_in_metadata(mock_db_manager):
+    """Test deletion when file does not exist in metadata."""
+    fake_id = str(ObjectId())
+
+    # Mock delete_one to return deleted_count=0
+    mock_db_manager.db.files.delete_one.return_value.deleted_count = 0
+
+    # Execute
+    result = await delete_file(fake_id)
+
+    assert result is False
+    # GridFS delete should NOT be called if metadata wasn't found
+    mock_db_manager.fs_bucket.delete.assert_not_called()

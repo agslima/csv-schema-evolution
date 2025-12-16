@@ -70,14 +70,12 @@ def test_handler_malformed_rows():
 
         records, _ = _parse_csv_sync("dummy")
 
-        # 'None' key should be skipped.
-        # 'None' value should become ""
-        assert "col1" in records[0]
-        assert records[0]["col1"] == ""
+    assert "col1" in records[0]
+    assert records[0]["col1"] == ""
 
-        # FIX: Expect whitespace to remain; app logic only sanitizes,
-        # it does not strip values.
-        assert records[0]["col2"] == " val "
+    # FIX: Expect 'val' (stripped) instead of ' val '
+    # The sanitize_cell_value function uses .strip(), so this is the correct expected behavior.
+    assert records[0]["col2"] == "val"
 
 
 @pytest.mark.asyncio

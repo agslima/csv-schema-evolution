@@ -5,15 +5,13 @@ Supports Adaptive Ingestion (Standard Horizontal + Vertical KV).
 
 import csv
 import logging
-from io import StringIO  # <--- Crucial Import
+from io import StringIO
 from typing import List, Tuple, Dict, Optional
 from collections import OrderedDict
 
 from fastapi.concurrency import run_in_threadpool
 from app.utils.sanitize import sanitize_cell_value
 from app.services.dialect_detector import DialectDetector
-
-# --- IMPORT THE TRANSPOSER ---
 from app.services.transposer import parse_vertical_csv
 
 logger = logging.getLogger(__name__)
@@ -25,6 +23,7 @@ def _detect_dialect(content: str) -> csv.Dialect:
     try:
         dialect = detector.detect(content)
         return dialect
+    # pylint: disable=broad-exception-caught
     except Exception as error:
         logger.warning("Dialect detection failed: %s. Defaulting to Excel.", error)
         return csv.get_dialect("excel")
@@ -85,9 +84,7 @@ def _parse_csv_sync(content: str) -> Tuple[List[Dict], List[str]]:
     try:
         reader = csv.DictReader(text_io, dialect=dialect)
 
-        # FIX 1: Sanitize the Header List immediately
         if reader.fieldnames:
-            # We strip every field name so it matches the logic used in the loop below
             ordered_fields = [f.strip() for f in reader.fieldnames if f]
 
         for row in reader:
@@ -95,13 +92,9 @@ def _parse_csv_sync(content: str) -> Tuple[List[Dict], List[str]]:
 
             for field, value in row.items():
                 if field:
-                    # Logic must match the list above: field.strip()
                     clean_field = field.strip()
-
                     raw_value = value if value is not None else ""
-                    # FIX 2: Ensure we are using the updated sanitizer (see Step 2)
                     clean_value = sanitize_cell_value(raw_value)
-
                     sanitized_row[clean_field] = clean_value
 
             if sanitized_row:
@@ -116,5 +109,9 @@ def _parse_csv_sync(content: str) -> Tuple[List[Dict], List[str]]:
 async def process_csv_content(
     content: str, id_field: Optional[str] = None
 ) -> Tuple[List[Dict], List[str]]:
-    """Asynchronous wrapper."""
+    """
+    Asynchronous wrapper for the CPU-bound CSV parsing logic.
+    """
+    # id_field is kept for interface compatibility but unused in parsing logic
+    _ = id_field
     return await run_in_threadpool(_parse_csv_sync, content)
