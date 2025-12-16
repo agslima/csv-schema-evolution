@@ -37,7 +37,10 @@ jobs:
       MONGODB_URI: mongodb://127.0.0.1:27017
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Secret scanning
         uses: gitleaks/gitleaks-action@v2
@@ -109,11 +112,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Dockerfile lint
+      - name: Backend Dockerfile lint
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: backend/Dockerfile
 
+     # Lint Frontend
+      - name: Frontend Dockerfile lint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: frontend/Dockerfile 
+          
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
