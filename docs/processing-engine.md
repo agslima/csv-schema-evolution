@@ -44,9 +44,15 @@ Each stage is independent and testable.
 Instead of relying on trial-and-error parsing, the engine evaluates candidate
 dialects using a **Consistency Score (Q)**.
 
-```Math
 Q(θ) = P(x, θ) × T(x, θ)
-```
+
+
+* **Arithmetic Mean**: $\frac{1}{N}\sum_{i=0}^{N}(A_{i})$,
+    * **Weighted Mean**: $\sum_{i=0}^{N}(P_{i}A_{i})$,
+    * **Geometric Mean**: $\sqrt[N]{A_{1}\times A_{2}\times...\times A_{N}}$,
+    * **Harmonic Mean**: $N/(\sum_{i=1}^{N}\frac{1}{A_{i}})$,
+    * **Quadratic Mean**: $\sqrt{(\sum_{i=1}^{N}A_{i}^{2})/N}$,
+
 
 Where:
 - `θ` is a candidate dialect
