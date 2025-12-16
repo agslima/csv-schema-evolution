@@ -68,9 +68,9 @@ The Pattern Score rewards:
 $P = \frac{1}{K} \sum_{k=1}^{K} N_{k} \frac{L_{k} - 1}{L_{k}}$
 
 Where:
-- `K` = number of distinct row length patterns
-- `$N_{k}$` = number of rows with length `Lk`
-- `$L_{k}$` = row length
+- K = number of distinct row length patterns
+- $N_{k}$ = number of rows with length `Lk`
+- $L_{k}$ = row length
 
 ### Key Behaviors
 
