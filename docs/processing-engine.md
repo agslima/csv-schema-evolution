@@ -44,15 +44,7 @@ Each stage is independent and testable.
 Instead of relying on trial-and-error parsing, the engine evaluates candidate
 dialects using a **Consistency Score (Q)**.
 
-Q(θ) = P(x, θ) × T(x, θ)
-
-
-* **Arithmetic Mean**: $\frac{1}{N}\sum_{i=0}^{N}(A_{i})$,
-    * **Weighted Mean**: $\sum_{i=0}^{N}(P_{i}A_{i})$,
-    * **Geometric Mean**: $\sqrt[N]{A_{1}\times A_{2}\times...\times A_{N}}$,
-    * **Harmonic Mean**: $N/(\sum_{i=1}^{N}\frac{1}{A_{i}})$,
-    * **Quadratic Mean**: $\sqrt{(\sum_{i=1}^{N}A_{i}^{2})/N}$,
-
+Q(\theta) = P(x, \theta) \times T(x, \theta)
 
 Where:
 - `θ` is a candidate dialect
@@ -76,9 +68,7 @@ The Pattern Score rewards:
 
 ### Formula
 
-```Math
-P = (1 / K) × Σ [ Nk × ((Lk − 1) / Lk) ]
-```
+P = \frac{1}{K} \sum_{k=1}^{K} N_{k} \frac{L_{k} - 1}{L_{k}}
 
 Where:
 - `K` = number of distinct row length patterns
@@ -106,9 +96,8 @@ Cells are evaluated using a **regex precedence chain**: Integer → Float → Da
 
 ### Formula
 
-```Math
-T = (1 / M) × Σ I(cell ∈ KnownTypes)
-```
+T = \frac{1}{M} \sum_{cells} \mathbb{I}(\text{cell} \in \text{KnownTypes})
+
 
 Where:
 - `M` = total number of evaluated cells
