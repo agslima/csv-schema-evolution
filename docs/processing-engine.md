@@ -1,12 +1,10 @@
-# ⚙️ Processing Engine — Design & Heuristics
+# Processing Engine — Design & Heuristics ⚙️
 
 This document describes the internal logic of the CSV Processing Engine.
 The engine is designed to reliably ingest **messy, human-generated CSV files**
 without requiring manual configuration or strict adherence to RFC standards.
 
 The primary goal is **correct structure inference**, not blind syntactic validity.
-
----
 
 ## Design Principles
 
@@ -37,16 +35,14 @@ The engine follows a deterministic, multi-stage pipeline:Detect → Decide → P
 
 Each stage is independent and testable.
 
----
 
 ## 2. Dialect Detection via Consistency Scoring
 
 Instead of relying on trial-and-error parsing, the engine evaluates candidate
 dialects using a **Consistency Score (Q)**.
 
-$\Q(\theta) = P(x,\theta)\times T(x,\theta)$
+$Q(\theta) = P(x,\theta)\times T(x,\theta)$
 
-    $\frac{1}{N}\sum_{i=0}^{N}(A_{i})$
 Where:
 - `θ` is a candidate dialect
 - `x` is a fixed-size sample (default: first 8KB)
@@ -69,7 +65,7 @@ The Pattern Score rewards:
 
 ### Formula
 
-P = \frac{1}{K} \sum_{k=1}^{K} N_{k} \frac{L_{k} - 1}{L_{k}}
+$P = \frac{1}{K} \sum_{k=1}^{K} N_{k} \frac{L_{k} - 1}{L_{k}}$
 
 Where:
 - `K` = number of distinct row length patterns
@@ -97,7 +93,7 @@ Cells are evaluated using a **regex precedence chain**: Integer → Float → Da
 
 ### Formula
 
-T = \frac{1}{M} \sum_{cells} \mathbb{I}(\text{cell} \in \text{KnownTypes})
+$T = \frac{1}{M} \sum_{cells} \mathbb{I}(\text{cell} \in \text{KnownTypes})$
 
 
 Where:
