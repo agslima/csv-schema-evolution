@@ -16,6 +16,15 @@ def sanitize_cell_value(value: str) -> str:
     Returns:
         str: The sanitized string.
     """
-    if value and value.strip().startswith(("=", "+", "-", "@")):
-        return f"'{value}"
-    return value
+    if not value:
+        return ""
+
+    # 1. Trim Whitespace (The "Cleaning" part)
+    clean_value = value.strip()
+
+    # 2. Security Check (The "Protection" part)
+    # If a field starts with strictly forbidden characters, prefix with single quote
+    if clean_value.startswith(("=", "+", "-", "@")):
+        return f"'{clean_value}"
+
+    return clean_value

@@ -34,3 +34,6 @@ ci-security-check:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
+----
+tree -I 'venv|__pycache__|.git'

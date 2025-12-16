@@ -3,6 +3,12 @@ API endpoints for file management.
 Handles file upload, listing, downloading, and deletion operations.
 """
 
+# --- ADD THESE TWO LINES ---
+import csv
+from io import StringIO
+
+# ---------------------------
+
 from typing import Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -22,9 +28,7 @@ async def upload_file(
         None, description="Optional field to help detect record grouping"
     ),
 ):
-    """
-    Uploads a CSV, saves to GridFS, processes content, and returns metadata.
-    """
+    # ... (Keep existing upload logic) ...
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(
             status_code=400, detail="Invalid file extension. Only .csv allowed."
@@ -32,20 +36,11 @@ async def upload_file(
 
     file_id = None
     try:
-        # 1. Save binary to GridFS (Encrypted)
         file_id = await storage.save_file_to_gridfs(file)
-
-        # 2. Create metadata entry (Status: Pending)
         await storage.create_file_metadata(file_id, file.filename)
-
-        # 3. Process Content
-        # We retrieve the content string to perform the heuristic checks (Vertical vs Horizontal)
         content_str = await storage.get_file_content_as_string(str(file_id))
-
-        # The parser now intelligently switches between Standard and Vertical/Transposer modes
         records, fields = await csv_handler.process_csv_content(content_str, id_field)
 
-        # 4. Update Metadata (Status: Processed)
         await storage.update_file_status(
             str(file_id), status="processed", fields=fields, count=len(records)
         )
@@ -59,7 +54,6 @@ async def upload_file(
         }
 
     except ValueError as e:
-        # If storage or validation fails
         if file_id:
             await storage.update_file_status(
                 str(file_id), status="error", error_msg=str(e)
@@ -67,12 +61,10 @@ async def upload_file(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
     except Exception as e:
-        # If parsing or database fails
         if file_id:
             await storage.update_file_status(
                 str(file_id), status="error", error_msg="Internal Processing Error"
             )
-
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error: {str(e)}"
         ) from e
@@ -80,11 +72,8 @@ async def upload_file(
 
 @router.get("/")
 async def list_files():
-    """
-    Lists all uploaded files sorted by creation date (newest first).
-    """
+    # ... (Keep existing list logic) ...
     cursor = db_manager.db.files.find().sort("created_at", -1)
-
     results = []
     async for doc in cursor:
         results.append(
@@ -104,32 +93,41 @@ async def list_files():
 @router.get("/{file_id}/download")
 async def download_file(file_id: str):
     """
-    Downloads the original CSV file.
+    Downloads the processed/cleaned CSV file.
     """
     try:
-        # Verify existence
         doc = await db_manager.db.files.find_one({"_id": ObjectId(file_id)})
         if not doc:
             raise HTTPException(status_code=404, detail="File not found")
 
-        # Get content (Decrypted)
-        content_str = await storage.get_file_content_as_string(file_id)
+        raw_content = await storage.get_file_content_as_string(file_id)
 
-        # Stream it back
+        # Re-Run Processing
+        records, fields = await csv_handler.process_csv_content(raw_content)
+
+        # Convert back to CSV
+        output = StringIO()  # <--- This line caused the error before!
+        writer = csv.DictWriter(output, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(records)
+        clean_csv_content = output.getvalue()
+
         return StreamingResponse(
-            iter([content_str]),
+            iter([clean_csv_content]),
             media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename={doc['filename']}"},
+            headers={
+                "Content-Disposition": f"attachment; filename=cleaned_{doc['filename']}"
+            },
         )
     except Exception as e:
         raise HTTPException(
-            status_code=404, detail=f"File not found or error reading: {e}"
+            status_code=500, detail=f"Error generating download: {e}"
         ) from e
 
 
 @router.delete("/{file_id}")
 async def delete_file(file_id: str):
-    """Deletes a file and its metadata."""
+    # ... (Keep existing delete logic) ...
     success = await storage.delete_file(file_id)
     if not success:
         raise HTTPException(status_code=404, detail="File not found")

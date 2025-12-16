@@ -12,7 +12,6 @@ from app.core.config import settings
 def setup_logging():
     """
     Configures the root logger to use JSON formatting.
-    This ensures ALL logs (app, middleware, libraries) share the same format.
     """
     logger = logging.getLogger()
 
@@ -27,12 +26,13 @@ def setup_logging():
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(settings.LOG_LEVEL)
 
-    # Use JSON Formatter (Moved from your middleware)
-    # This ensures fields like 'timestamp', 'level', and 'message' are standardized
+    # --- FIX: REMOVED rename_fields TO PREVENT KeyError ---
     formatter = jsonlogger.JsonFormatter(
-        "%(timestamp)s %(level)s %(name)s %(message)s %(request_id)s",
-        rename_fields={"levelname": "level", "asctime": "timestamp"},
+        "%(asctime)s %(levelname)s %(name)s %(message)s %(request_id)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
+    # -------------------------------------------------------
+
     handler.setFormatter(formatter)
 
     # Add handler to root logger
@@ -42,3 +42,6 @@ def setup_logging():
     logging.getLogger("multipart").setLevel(logging.WARNING)
     logging.getLogger("pymongo").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("apscheduler").setLevel(
+        logging.WARNING
+    )  # Optional: Silence scheduler noise
