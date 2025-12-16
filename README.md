@@ -84,6 +84,7 @@ graph LR
 
 Detailed architecture documentation is available in `/docs`.
 
+<!--
 ---
 
 ## Screenshots
