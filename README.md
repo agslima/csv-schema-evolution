@@ -90,9 +90,8 @@ Detailed architecture documentation is available in `/docs`.
 
 | Upload CSV | Processed Table Preview |
 |---|---|
-| ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/interface.png) | ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/job-done.png) |
-
-<!--| **GIF Demo** |
+| ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/job-done.png) | ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/table.png) |
+| **GIF Demo** |
 | ![image]([https://github.com/agslima](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/demo.gif)|
 
 ### Demonstration:
