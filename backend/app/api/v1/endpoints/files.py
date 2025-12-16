@@ -3,12 +3,8 @@ API endpoints for file management.
 Handles file upload, listing, downloading, and deletion operations.
 """
 
-# --- ADD THESE TWO LINES ---
 import csv
 from io import StringIO
-
-# ---------------------------
-
 from typing import Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -28,7 +24,9 @@ async def upload_file(
         None, description="Optional field to help detect record grouping"
     ),
 ):
-    # ... (Keep existing upload logic) ...
+    """
+    Uploads a CSV file, saves raw content, processes schema, and returns metadata.
+    """
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(
             status_code=400, detail="Invalid file extension. Only .csv allowed."
@@ -36,11 +34,15 @@ async def upload_file(
 
     file_id = None
     try:
+        # 1. Save Raw Encrypted
         file_id = await storage.save_file_to_gridfs(file)
         await storage.create_file_metadata(file_id, file.filename)
+
+        # 2. Read & Process
         content_str = await storage.get_file_content_as_string(str(file_id))
         records, fields = await csv_handler.process_csv_content(content_str, id_field)
 
+        # 3. Update Status
         await storage.update_file_status(
             str(file_id), status="processed", fields=fields, count=len(records)
         )
@@ -72,7 +74,9 @@ async def upload_file(
 
 @router.get("/")
 async def list_files():
-    # ... (Keep existing list logic) ...
+    """
+    Lists all uploaded files sorted by creation date (newest first).
+    """
     cursor = db_manager.db.files.find().sort("created_at", -1)
     results = []
     async for doc in cursor:
@@ -93,7 +97,8 @@ async def list_files():
 @router.get("/{file_id}/download")
 async def download_file(file_id: str):
     """
-    Downloads the processed/cleaned CSV file.
+    Downloads the processed (safe) CSV file.
+    Reconstructs the CSV from processed records to ensure sanitization.
     """
     try:
         doc = await db_manager.db.files.find_one({"_id": ObjectId(file_id)})
@@ -102,11 +107,11 @@ async def download_file(file_id: str):
 
         raw_content = await storage.get_file_content_as_string(file_id)
 
-        # Re-Run Processing
+        # Re-Run Processing to get clean records
         records, fields = await csv_handler.process_csv_content(raw_content)
 
         # Convert back to CSV
-        output = StringIO()  # <--- This line caused the error before!
+        output = StringIO()
         writer = csv.DictWriter(output, fieldnames=fields)
         writer.writeheader()
         writer.writerows(records)
@@ -119,6 +124,8 @@ async def download_file(file_id: str):
                 "Content-Disposition": f"attachment; filename=cleaned_{doc['filename']}"
             },
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error generating download: {e}"
@@ -127,7 +134,9 @@ async def download_file(file_id: str):
 
 @router.delete("/{file_id}")
 async def delete_file(file_id: str):
-    # ... (Keep existing delete logic) ...
+    """
+    Deletes a file and its metadata from the database.
+    """
     success = await storage.delete_file(file_id)
     if not success:
         raise HTTPException(status_code=404, detail="File not found")
