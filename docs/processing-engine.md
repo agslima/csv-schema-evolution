@@ -159,12 +159,13 @@ This allows schema drift without invalidating prior records.
 
 Attack Vector: CSV Injection (RFC 7111 limitation). Malicious cell values (e.g., =cmd|' /C calc'!A0) can execute code when opened in Excel.
 
-​Sanitization Logic:
+​### Sanitization Logic:
 Treat the CSV as untrusted user input.
-​Trigger Detection: Check if cell starts with =, +, -, @.
-​Neutralization: Prepend a single quote '.
-​Input: =SUM(1+1)
-​Output: '=SUM(1+1) (Rendered as literal text by spreadsheets).
+
+* ​Trigger Detection: Check if cell starts with `=, +, -, @`.
+* ​Neutralization: Prepend a single quote '.
+    * ​Input: `=SUM(1+1)`
+    * ​Output: `=SUM(1+1)` (Rendered as literal text by spreadsheets).
 
 ---
 
