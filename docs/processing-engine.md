@@ -44,8 +44,9 @@ Each stage is independent and testable.
 Instead of relying on trial-and-error parsing, the engine evaluates candidate
 dialects using a **Consistency Score (Q)**.
 
-Q(\theta) = P(x, \theta) \times T(x, \theta)
+$\Q(\theta) = P(x,\theta)\times T(x,\theta)$
 
+    $\frac{1}{N}\sum_{i=0}^{N}(A_{i})$
 Where:
 - `θ` is a candidate dialect
 - `x` is a fixed-size sample (default: first 8KB)
