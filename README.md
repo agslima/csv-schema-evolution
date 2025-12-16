@@ -88,33 +88,30 @@ Detailed architecture documentation is available in `/docs`.
 
 ## Screenshots
 
-| Upload CSV | Automated Processing |
+| Upload CSV | Processed Table Preview |
 |---|---|
 | ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/interface.png) | ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/job-done.png) |
 
-<!--| **Upload Flow**| **Processed Table Preview** |
-| ![image](https://github.com/agslima) | ![image](https://github.com/agslima) |
+<!--| **GIF Demo** |
+| ![image]([https://github.com/agslima](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/demo.gif)|
 
-
-<!--
 ### Demonstration:
+
 1. Secure Upload
 
 Users upload files via a clean interface with immediate validation.
+
 2. Automated Processing
 
 The system ingests, cleans, and presents the data.
-
 Upload Flow
 ![Upload Interface](docs/demo/screenshots/upload_page.png)
 
 Processed Table Preview
 ![Processed CSV Output](docs/demo/screenshots/table_output.png)
 
-GIF Demo
+3. GIF Demo
 ![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
-
----
 
 -->
 
