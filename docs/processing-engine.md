@@ -205,7 +205,7 @@ This engine is based on:
 
 > *Wrangling Messy CSV Files by Detecting Row and Type Patterns*  
 > Gerrit J.J. van den Burg et al., The Alan Turing Institute (2018)  
-> arXiv:1811.11242
+> [arXiv:1811.11242](https://arxiv.org/abs/1811.11242?hl=en-US)
 
 The implementation adapts the paper’s principles for production use,
 prioritizing **robustness over formal correctness**.
