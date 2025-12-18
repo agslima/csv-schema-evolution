@@ -34,7 +34,7 @@ The pipeline is divided into three independent stages, each with increasing trus
 
 Trigger: `pull_request → main`
 
-This stage protects the codebase by preventing insecure or low‑quality code from merging.
+This stage protects the codebase by preventing insecure or low-quality code from being merged.
 
 **Executed Steps**
 
@@ -93,7 +93,7 @@ This stage establishes artifact trust and supply‑chain integrity.
 
 ---
 
-** Supply‑Chain Security Controls 🔐
+##** Supply‑Chain Security Controls 🔐
 
 | Control | Tool |
 | --- | --- |
@@ -183,5 +183,3 @@ Developer
 * SLSA provenance attestations (cosign attest)
 * Hermetic builds with pinned dependencies
 * Admission policy enforcement (Kubernetes / OPA)
-* Continuous dependency monitoring
-
