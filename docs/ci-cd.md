@@ -93,7 +93,7 @@ This stage establishes artifact trust and supply‑chain integrity.
 
 ---
 
-##** Supply‑Chain Security Controls 🔐
+## Supply‑Chain Security Controls 🔐
 
 | Control | Tool |
 | --- | --- |
