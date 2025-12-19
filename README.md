@@ -24,6 +24,13 @@
 
 This project focuses on **data safety, correctness, and operational transparency**. It was designed to process sensitive CSV files **without relying on third‑party online tools**, ensuring full control over data handling and compliance requirements.
 
+## TL;DR
+
+- Secure backend service for ingesting untrusted CSVs
+- Focused on compliance, sanitization, and observability
+- Designed for real production pipelines, not ad-hoc scripts
+- Best entry points: `/docs/architecture.md` and `/docs/processing-engine.md`
+
 ## Problem Statement
 
 In real production environments, CSV files are rarely clean or standardized. Users frequently upload files with:
@@ -166,13 +173,13 @@ Security is enforced **by design**, not as an afterthought:
 * No third‑party data processing services
 * Clear separation between raw file storage and metadata
 
-LGPD alignment is achieved through **data minimization, purpose limitation, and strong access control**. Full details are available in `docs/security.md`.
+The system is designed with LGPD principles in mind, including **data minimization**, **purpose limitation**, and **access control**. Full details are available in `docs/security.md`.
 
 ---
 
 ## Testing & Quality 
 
-The project is developed using **Test-Driven Development (TDD)** and maintains **near-100% test coverage**, excluding explicitly documented boilerplate.
+The project is developed using **Test-Driven Development (TDD)** and maintains **high test coverage** across all critical paths, with exclusions explicitly documented boilerplate.
 
 Test levels include:
 
@@ -180,7 +187,7 @@ Test levels include:
 * Integration tests covering full HTTP request lifecycles
 * Storage and database interaction tests
 
-Coverage is continuously measured via Codecov and enforced in CI. See `docs/testing.md` for details.
+Coverage is continuously measured via **Codecov** and enforced in CI. See `docs/testing.md` for details.
 
 ---
 
