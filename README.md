@@ -50,6 +50,63 @@ This system was built to solve those problems in a **controlled, auditable backe
 
 ---
 
+## How to run this? 🚀
+
+### Prerequisites
+
+* Docker & Docker Compose
+
+##### 1. Clone the repository
+
+```bash
+git clone https://github.com/agslima/csv-schema-evolution.git
+cd csv-schema-evolution
+```
+
+#### 1. Run the Stack
+
+```bash
+docker-compose up -d --build
+```
+
+#### 2. Access the Interfaces
+
+* **Web UI:** http://localhost:3000
+* **API Docs (Swagger):** http://localhost:8000/docs
+
+---
+
+<!--
+
+## Screenshots
+
+| Upload CSV | Processed Table Preview |
+|---|---|
+| ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/job-done.png) | ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/table.png) |
+| **GIF Demo** |
+| ![image]([https://github.com/agslima](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/demo.gif)|
+
+### Demonstration:
+
+1. Secure Upload
+
+Users upload files via a clean interface with immediate validation.
+
+2. Automated Processing
+
+The system ingests, cleans, and presents the data.
+Upload Flow
+![Upload Interface](docs/demo/screenshots/upload_page.png)
+
+Processed Table Preview
+![Processed CSV Output](docs/demo/screenshots/table_output.png)
+
+3. GIF Demo
+![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
+
+---
+-->
+
 ## What the Engine Does 
 
 The engine ingests unstructured or semi‑structured CSV files and converts them into **normalized, user‑friendly tabular data**.
@@ -93,62 +150,6 @@ graph LR
 
 Detailed architecture documentation is available in `/docs`.
 
-<!--
----
-
-## Screenshots
-
-| Upload CSV | Processed Table Preview |
-|---|---|
-| ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/job-done.png) | ![image](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/table.png) |
-| **GIF Demo** |
-| ![image]([https://github.com/agslima](https://github.com/agslima/csv-schema-evolution/blob/main/docs/screenshots/demo.gif)|
-
-### Demonstration:
-
-1. Secure Upload
-
-Users upload files via a clean interface with immediate validation.
-
-2. Automated Processing
-
-The system ingests, cleans, and presents the data.
-Upload Flow
-![Upload Interface](docs/demo/screenshots/upload_page.png)
-
-Processed Table Preview
-![Processed CSV Output](docs/demo/screenshots/table_output.png)
-
-3. GIF Demo
-![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
-
--->
-
----
-
-## How to run this? 🚀
-
-### Prerequisites
-
-* Docker & Docker Compose
-
-##### 1. Clone the repository
-
-```bash
-git clone https://github.com/agslima/csv-schema-evolution.git
-cd csv-schema-evolution
-```
-
-#### 1. Run the Stack
-
-```bash
-docker-compose up -d --build
-```
-
-#### 2. Access the Interfaces
-
-* **Web UI:** http://localhost:3000
-* **API Docs (Swagger):** http://localhost:8000/docs
 ---
 
 ## API Overview  
