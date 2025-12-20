@@ -12,10 +12,11 @@
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
+  <!--
   <a href="https://www.bestpractices.dev/projects/11596">
     <img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/11596/badge">
   </a>
-  <img src="https://img.shields.io/badge/SLSA-Level%202-brightgreen.svg">
+  <img src="https://img.shields.io/badge/SLSA-Level%202-brightgreen.svg">-->
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
@@ -162,7 +163,7 @@ Detailed architecture documentation is available in `/docs`.
 | DELETE | `/api/v1/files/{id}`          | Permanently delete file and metadata     |
 | GET    | `/api/v1/health`              | Health check                             |
 
-Full request/response payloads and error models are documented in **docs/api-reference.md**.
+Full request/response payloads and error models are documented in `docs/api-reference.md`.
 
 ---
 
