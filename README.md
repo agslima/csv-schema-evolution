@@ -89,6 +89,7 @@ graph LR
 
 > [!NOTE]
 > GridFS was chosen to simplify transactional consistency between file storage and metadata during early ingestion stages, with future support for object storage planned.
+
 > When dialect detection confidence falls below a defined threshold, the engine fails fast with an explicit error rather than producing ambiguous output
 
 Detailed architecture documentation is available in `/docs`.
