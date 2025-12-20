@@ -12,12 +12,10 @@
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
-  <!--
   <a href="https://www.bestpractices.dev/projects/11596">  
   </a>
   <img src="https://img.shields.io/badge/SLSA-Level%202-brightgreen.svg">
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
-  -->
 </p>
 
 > **A backend‑centric engine for securely ingesting, sanitizing, and normalizing heterogeneous CSV files.**
@@ -88,6 +86,10 @@ graph LR
 * **MongoDB GridFS** to store large files without memory pressure
 * **Heuristic dialect detection** to avoid forcing users to configure CSV formats
 * **Encryption at rest** to minimize exposure of sensitive data
+
+> [!NOTE]
+> GridFS was chosen to simplify transactional consistency between file storage and metadata during early ingestion stages, with future support for object storage planned.
+> When dialect detection confidence falls below a defined threshold, the engine fails fast with an explicit error rather than producing ambiguous output
 
 Detailed architecture documentation is available in `/docs`.
 
@@ -273,4 +275,4 @@ Planned enhancements aligned with real ingestion pipelines:
 
 ## License 
 
-This project is licensed under the GPLv3 License. See the LICENSE file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.
