@@ -2,20 +2,42 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Use this section to inform people about which versions of your project are currently being supported with security updates.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| 1.0.x   | :white_check_mark: |
+| < 1.0   | :x:                |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+We take the security of our software seriously. If you suspect that you have found a vulnerability, please follow the steps below.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+### 1. Do not open a public GitHub issue
+
+Publicly announcing a security vulnerability can put the entire community at risk. Please keep the details private until we have addressed the issue.
+
+### 2. Contact us
+
+Please email us at **a.agnaldosilva at gmail.com** with a detailed report. Include:
+
+* Description of the vulnerability.
+* Steps to reproduce.
+* Potential impact.
+
+### 3. Response Timeline
+
+* We will acknowledge your email within **48 hours**.
+* We will send a confirmation once the issue is verified.
+* We aim to release a patch within **7 days** for critical issues.
+
+## Security Measures
+
+This project implements the following security practices:
+
+* **SCA & SAST:** Automated scanning via Snyk.
+* **Container Security:** Image scanning via Trivy.
+* **Secrets Management:** Automated detection of hardcoded credentials.
+* **SLSA Compliance:** SBOM generation and Image Signing.
+
+Thank you for helping keep our application secure!
