@@ -12,7 +12,8 @@
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
-  <a href="https://www.bestpractices.dev/projects/11596">  
+  <a href="https://www.bestpractices.dev/projects/11596">
+    <img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/11596/badge">
   </a>
   <img src="https://img.shields.io/badge/SLSA-Level%202-brightgreen.svg">
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
@@ -83,14 +84,12 @@ graph LR
 ### Design Tradeoffs
 
 * **FastAPI + async I/O** for high concurrency during file uploads
-* **MongoDB GridFS** to store large files without memory pressure
+* **MongoDB GridFS** was chosen to simplify transactional consistency between file storage and metadata during early ingestion stages, with future support for object storage planned.
 * **Heuristic dialect detection** to avoid forcing users to configure CSV formats
 * **Encryption at rest** to minimize exposure of sensitive data
 
 > [!NOTE]
-> GridFS was chosen to simplify transactional consistency between file storage and metadata during early ingestion stages, with future support for object storage planned.
-
-> When dialect detection confidence falls below a defined threshold, the engine fails fast with an explicit error rather than producing ambiguous output
+> When **dialect detection** confidence falls below a defined threshold, the engine **fails fast** with an explicit error rather than producing ambiguous output.
 
 Detailed architecture documentation is available in `/docs`.
 
