@@ -32,7 +32,7 @@ The pipeline is divided into three independent stages, each with increasing trus
 
 Logical View (Control Flow + Trust Boundaries)
 
-```Mermaid
+```mermaid
 flowchart TB
     subgraph Dev["Developer"]
         A[Git Push / PR]
