@@ -28,6 +28,59 @@ The pipeline is divided into three independent stages, each with increasing trus
 | Main Branch Pipeline | Push to main |	Build & verify container artifacts |
 | Release Pipeline |	Git tag (vX.Y.Z) | Artifact signing & provenance |
 
+## CI/CD Architecture Diagram
+
+Logical View (Control Flow + Trust Boundaries)
+
+```Mermaid
+flowchart TB
+    subgraph Dev["Developer"]
+        A[Git Push / PR]
+    end
+
+    subgraph GitHub["GitHub Repository"]
+        B[Pull Request]
+        C[Main Branch]
+        D[Version Tag vX.Y.Z]
+    end
+
+    subgraph CI["GitHub Actions – CI"]
+        subgraph PR["PR Pipeline (Fast & Blocking)"]
+            P1[Gitleaks<br/>Secret Scanning]
+            P2[Bandit<br/>Python SAST]
+            P3[Snyk<br/>Dependency Scan]
+            P4[Pylint<br/>Code Quality Gate]
+            P5[Pytest<br/>Unit & Integration Tests]
+            P6[Codecov<br/>Coverage Enforcement]
+        end
+
+        subgraph Build["Build & Verify"]
+            B1[Hadolint<br/>Dockerfile Lint]
+            B2[Docker Build]
+            B3[Push Image<br/>Docker Hub]
+            B4[Trivy<br/>Container Scan]
+        end
+
+        subgraph Release["Release & Trust"]
+            R1[Cosign<br/>Image Signing]
+            R2[SBOM Generation<br/>SPDX]
+        end
+    end
+
+    subgraph Registry["Artifact Registry"]
+        I1[(Docker Hub)]
+    end
+
+    %% Flow
+    A --> B
+    B --> PR
+    PR -->|Merge| C
+    C --> Build
+    D --> Build
+    Build --> I1
+    I1 --> Release
+```
+
 ---
 
 ### 1️⃣ PR Pipeline (Fast, Blocking)
