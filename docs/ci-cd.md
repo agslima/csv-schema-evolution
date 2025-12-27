@@ -39,12 +39,12 @@ Logical View (Control Flow + Trust Boundaries)
 flowchart TB
     Dev[Developer] --> PR[Pull Request]
 
-    subgraph PR_PIPELINE["PR Pipeline (Untrusted)"]
+    subgraph PR_PIPELINE["PR Pipeline<br/>(Untrusted)"]
         G[Gitleaks]
         B[Bandit]
         S[Snyk]
         L[Pylint]
-        T[Pytest + Coverage]
+        T[Pytest<br/>Coverage]
         D[Dockerfile Lint]
     end
 
@@ -62,9 +62,9 @@ flowchart TB
     BUILD --> REG
 
     subgraph RELEASE["Release & Trust"]
-        C[Cosign Sign (Digest)]
-        SB[SBOM (SPDX)]
-        P[Provenance Attestation]
+        C[Cosign Sign<br/>Digest]
+        SB[SBOM<br/>SPDX]
+        P[Provenance<br/>Attestation]
     end
 
     REG --> RELEASE
