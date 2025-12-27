@@ -3,11 +3,11 @@
 ### Backend‑First Data Ingestion Service (FastAPI + MongoDB GridFS)
 
 <p align="left">
-  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation"/>
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml">
     <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation/badge.svg">
   </a>
-  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml"/>
-    <img alt="CodeQLe" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/03-codeql.yml/badge.svg">
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml">
+    <img alt="CodeQLe" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml/badge.svg">
   </a>
   <a href="https://codecov.io/github/agslima/csv-schema-evolution" >
     <img src="https://codecov.io/github/agslima/csv-schema-evolution/graph/badge.svg?token=776AEW3J4C"/>
@@ -127,7 +127,7 @@ The engine ingests unstructured or semi‑structured CSV files and converts them
 
 ---
 
-## High‑Level Architecture 
+## High‑Level Architecture
 
 The system adheres to **Clean Architecture** principles, featuring a clear separation between API, business logic, and infrastructure.
 
@@ -183,7 +183,7 @@ The system is designed with LGPD principles in mind, including **data minimizati
 
 ---
 
-## Testing & Quality 
+## Testing & Quality
 
 The project is developed using **Test-Driven Development (TDD)** and maintains **high test coverage** across all critical paths, with exclusions explicitly documented in the boilerplate.
 

@@ -1,4 +1,4 @@
-name: "02 - Build & Delivery"
+name: "Build & Delivery"
 
 on:
   push:
@@ -100,3 +100,4 @@ jobs:
           image: ${{ matrix.image }}:${{ github.sha }}
           format: spdx-json
           artifact-name: sbom-${{ matrix.image }}.spdx.json
+          
