@@ -16,7 +16,7 @@ black==24.3.0
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
 pytest-cov==4.1.0
-responses==0.23.1
+responses==0.25.8
 coverage==7.2.7
 
 # --- Utilities ---
