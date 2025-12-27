@@ -1,4 +1,4 @@
-name: "Build & Delivery"
+name: "02 - Build & Delivery"
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     tags: [ "v*.*.*" ]
 
 env:
+  # Base Image Names
   IMG_BACKEND: ${{ secrets.DOCKER_HUB_USERNAME }}/csv-engine-backend
   IMG_FRONTEND: ${{ secrets.DOCKER_HUB_USERNAME }}/csv-engine-frontend
 
@@ -15,11 +16,10 @@ concurrency:
 
 jobs:
   # ------------------------------------------------------------------
-  # JOB 1: Build & Publish Containers
+  # JOB 1: Build & Publish Containers (Matrix)
   # ------------------------------------------------------------------
   build-push:
     name: Build & Push
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,6 +31,7 @@ jobs:
           - name: backend
             context: ./backend
             image: ${{ secrets.DOCKER_HUB_USERNAME }}/csv-engine-backend
+          # 5. Improvement: Added Frontend Build Logic
           - name: frontend
             context: ./frontend
             image: ${{ secrets.DOCKER_HUB_USERNAME }}/csv-engine-frontend
@@ -46,7 +47,6 @@ jobs:
 
       - name: Build and Push (${{ matrix.name }})
         uses: docker/build-push-action@v4
-        id: build-push # Added ID to retrieve digest later
         with:
           context: ${{ matrix.context }}
           push: true
@@ -60,21 +60,19 @@ jobs:
         with:
           image-ref: ${{ matrix.image }}:${{ github.sha }}
           severity: "CRITICAL,HIGH"
-          exit-code: "1"
+          exit-code: "1" # Fail pipeline if critical vulnerabilities found
 
   # ------------------------------------------------------------------
-  # JOB 2: Trust & Provenance (Keyless Signing)
+  # JOB 2: Trust & Provenance (Signing)
   # ------------------------------------------------------------------
   sign-artifacts:
-    name: Sign Artifacts (Keyless)
+    name: Sign Artifacts
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build-push
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
-      # 1. CRITICAL PERMISSION FOR OIDC
-      id-token: write 
+      id-token: write # Required for OIDC (Future proofing)
 
     strategy:
       matrix:
@@ -86,18 +84,15 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.7.0
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      # 2. Keyless Signing Step
+      # 6. Improvement: Matrix Signing
+      # Signs both frontend and backend images using the same key
       - name: Sign Image (${{ matrix.image }})
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
-          # No keys, no passwords. Just the image.
-          # The --yes flag skips the confirmation prompt.
-          cosign sign --yes ${{ matrix.image }}:${{ github.sha }}
+          echo "$COSIGN_PRIVATE_KEY" > cosign.key
+          cosign sign --key cosign.key -y ${{ matrix.image }}:${{ github.sha }}
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
@@ -105,9 +100,3 @@ jobs:
           image: ${{ matrix.image }}:${{ github.sha }}
           format: spdx-json
           artifact-name: sbom-${{ matrix.image }}.spdx.json
-
-      # 3. Attest SBOM (Optional but Recommended)
-      # Attaches the SBOM directly to the image in the registry
-      - name: Attest SBOM
-        run: |
-          cosign attest --yes --predicate sbom-${{ matrix.image }}.spdx.json --type spdx ${{ matrix.image }}:${{ github.sha }}
