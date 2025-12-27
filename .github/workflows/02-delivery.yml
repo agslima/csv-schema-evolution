@@ -133,11 +133,11 @@ jobs:
       # --------------------------------------------------------------
       - name: Sign Image (Digest)
         run: |
-          cosign sign --yes ${{ env.IMAGE }} 
+          cosign sign --yes "$IMAGE"
 
       - name: Verify Signature
         run: |
-          cosign verify ${{ env.IMAGE }} \
+          cosign verify "$IMAGE" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.*"
 
@@ -147,8 +147,11 @@ jobs:
       - name: Generate SBOM
         uses: anchore/sbom-action@f325610c9f50a54015d37c8d16cb3b0e2c8f4de0 # v0.17.9
         with:
-          image: ${{ env.IMAGE }}
+          image: "$IMAGE"
           format: spdx-json
+          # FIX: Explicitly save the file to the current directory
+          output-file: sbom-${{ matrix.image_repo }}.spdx.json
+          # This controls the name of the artifact uploaded to GitHub UI
           artifact-name: sbom-${{ matrix.image_repo }}.spdx.json
 
       - name: Attest SBOM
@@ -156,7 +159,7 @@ jobs:
           cosign attest --yes \
             --type spdx \
             --predicate sbom-${{ matrix.image_repo }}.spdx.json \
-            ${{ env.IMAGE }}
+            "$IMAGE"
 
       # --------------------------------------------------------------
       # SLSA Provenance (Digest-Correct)
