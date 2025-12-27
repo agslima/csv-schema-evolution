@@ -37,9 +37,8 @@ jobs:
 
     steps:
       # SHA Pinning for Supply Chain Security
-      # Pinned: actions/checkout@v4.2.2
       - name: Checkout Code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
           fetch-depth: 0
 
@@ -104,11 +103,12 @@ jobs:
 
       # Hadolint (Shift Left)
       - name: Lint Backend Dockerfile
-        uses: hadolint/hadolint-action@5429efd3704d5ed3cd4d18cd62097269a8317726 # v3.1.0
+        uses: hadolint/hadolint-action@v3.1.0 # v3.1.0
         with:
           dockerfile: backend/Dockerfile
 
       - name: Lint Frontend Dockerfile
-        uses: hadolint/hadolint-action@5429efd3704d5ed3cd4d18cd62097269a8317726 # v3.1.0
+        uses: hadolint/hadolint-action@v3.1.0
+        # uses: hadolint/hadolint-action@5429efd3704d5ed3cd4d18cd62097269a8317726 # v3.1.0
         with:
           dockerfile: frontend/Dockerfile
