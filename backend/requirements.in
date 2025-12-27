@@ -25,7 +25,7 @@ bandit
 aiofiles==23.2.1
 cryptography==46.0.3
 python-json-logger==2.0.7
-apscheduler==3.10.4
+apscheduler==3.11.2
 
 # --- Security Pins (Snyk) ---
 dnspython>=2.6.1
