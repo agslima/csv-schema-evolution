@@ -2,7 +2,6 @@
 Application configuration settings.
 """
 
-import os
 from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
