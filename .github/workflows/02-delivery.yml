@@ -32,8 +32,9 @@ jobs:
             image_repo: csv-engine-frontend
 
     steps:
-      - uses: actions/checkout@b4ffde65f4633668828d0b93fc293753a9eb8d83 # v4.1.1
-
+      # - uses: actions/checkout@b4ffde65f4633668828d0b93fc293753a9eb8d83 # v4.1.1
+      - uses: actions/checkout@v4
+      
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
