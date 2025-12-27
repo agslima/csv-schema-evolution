@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   # ------------------------------------------------------------------
-  # JOB 1: Build & Publish Containers
+  # JOB 1: Build & Publish Containers (Trusted Builder)
   # ------------------------------------------------------------------
   build-push:
     name: Build & Push
@@ -19,96 +19,151 @@ jobs:
     permissions:
       contents: read
       packages: write
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          # FIX: Only put the repo name here, NOT the secret
           - name: backend
             context: ./backend
-            image_repo: csv-engine-backend 
+            image_repo: csv-engine-backend
           - name: frontend
             context: ./frontend
             image_repo: csv-engine-frontend
 
     steps:
-      # - uses: actions/checkout@b4ffde65f4633668828d0b93fc293753a9eb8d83 # v4.1.1
-      - uses: actions/checkout@v4
-      
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Build and Push (${{ matrix.name }})
-        uses: docker/build-push-action@v4
-        id: build-push
+      # --------------------------------------------------------------
+      # Unified Build Step (Simplifies logic)
+      # --------------------------------------------------------------
+      - name: Build & Push (${{ matrix.name }})
+        id: build
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
           context: ${{ matrix.context }}
           push: true
-          # FIX: Combine Secret + Matrix here
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.image_repo }}:${{ github.sha }}
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.image_repo }}:latest
             ${{ startsWith(github.ref, 'refs/tags/v') && format('{0}/{1}:{2}', secrets.DOCKER_HUB_USERNAME, matrix.image_repo, github.ref_name) || '' }}
 
-      - name: Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@master
+      # --------------------------------------------------------------
+      # Export Digest via Artifact (The Fix)
+      # --------------------------------------------------------------
+      - name: Export Digest
+        run: |
+          mkdir -p digests
+          echo "${{ steps.build.outputs.digest }}" > digests/digest-${{ matrix.name }}
+      
+      - name: Upload Digest Artifact
+        uses: actions/upload-artifact@v4
         with:
-          # FIX: Combine Secret + Matrix here
+          name: digest-${{ matrix.name }}
+          path: digests/digest-${{ matrix.name }}
+          retention-days: 1
+
+      # --------------------------------------------------------------
+      # Vulnerability Scan
+      # --------------------------------------------------------------
+      - name: Trivy Scan
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
+        with:
           image-ref: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.image_repo }}:${{ github.sha }}
           severity: "CRITICAL,HIGH"
           exit-code: "1"
 
   # ------------------------------------------------------------------
-  # JOB 2: Trust & Provenance (Keyless Signing)
+  # JOB 2: Sign, Attest & Provenance (Release Only)
   # ------------------------------------------------------------------
-  sign-artifacts:
-    name: Sign Artifacts (Keyless)
+  sign-and-attest:
+    name: Sign & Attest (SLSA)
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build-push
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       packages: write
-      id-token: write 
+      id-token: write          # OIDC for Cosign
+      attestations: write      # GitHub provenance upload
 
     strategy:
       matrix:
-        # FIX: Only list the repo names, NOT the secrets
-        image_repo:
-          - csv-engine-backend
-          - csv-engine-frontend
+        include:
+          - name: backend
+            image_repo: csv-engine-backend
+          - name: frontend
+            image_repo: csv-engine-frontend
 
     steps:
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # FIX: Construct the full image name inside the step
-      - name: Sign Image (${{ matrix.image_repo }})
-        run: |
-          # Define full image name using the secret
-          FULL_IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.image_repo }}:${{ github.sha }}"
-          
-          cosign sign --yes "$FULL_IMAGE"
-
-      - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+      # --------------------------------------------------------------
+      # Retrieve Digest (The Fix)
+      # --------------------------------------------------------------
+      - name: Download Digest Artifact
+        uses: actions/download-artifact@v4
         with:
-          # FIX: Combine Secret + Matrix here
-          image: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.image_repo }}:${{ github.sha }}
+          name: digest-${{ matrix.name }}
+          path: digests
+
+      - name: Read Digest
+        id: digest
+        run: |
+          DIGEST=$(cat digests/digest-${{ matrix.name }})
+          echo "DIGEST=$DIGEST" >> $GITHUB_ENV
+          echo "IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.image_repo }}@$DIGEST" >> $GITHUB_ENV
+
+      # --------------------------------------------------------------
+      # Keyless signing (digest-pinned)
+      # --------------------------------------------------------------
+      - name: Sign Image (Digest)
+        run: |
+          cosign sign --yes "$IMAGE"
+
+      - name: Verify Signature
+        run: |
+          cosign verify "$IMAGE" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.*"
+
+      # --------------------------------------------------------------
+      # SBOM generation & attestation
+      # --------------------------------------------------------------
+      - name: Generate SBOM
+        uses: anchore/sbom-action@f325610c9f50a54015d37c8d16cb3b0e2c8f4de0 # v0.17.9
+        with:
+          image: "$IMAGE"
           format: spdx-json
           artifact-name: sbom-${{ matrix.image_repo }}.spdx.json
 
       - name: Attest SBOM
         run: |
-          FULL_IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.image_repo }}:${{ github.sha }}"
-          
-          cosign attest --yes --predicate sbom-${{ matrix.image_repo }}.spdx.json --type spdx "$FULL_IMAGE"
+          cosign attest --yes \
+            --type spdx \
+            --predicate sbom-${{ matrix.image_repo }}.spdx.json \
+            "$IMAGE"
+
+      # --------------------------------------------------------------
+      # SLSA Provenance (Digest-Correct)
+      # --------------------------------------------------------------
+      - name: Attest Build Provenance (SLSA)
+        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.0
+        with:
+          subject-name: index.docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.image_repo }}
+          subject-digest: ${{ env.DIGEST }} # Uses the ENV var loaded from artifact
+          push-to-registry: true
