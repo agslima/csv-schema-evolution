@@ -15,10 +15,12 @@
   <a href="https://codecov.io/github/agslima/csv-schema-evolution" >
     <img alt="CodeCov" src="https://codecov.io/github/agslima/csv-schema-evolution/graph/badge.svg?token=776AEW3J4C"/>
   </a>
-  <!--<a href="https://www.bestpractices.dev/projects/11596">
+  <a href="https://www.bestpractices.dev/projects/11596">
     <img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/11596/badge">
-  </a>-->
-  <img alt="SLSA Level 3" src="https://img.shields.io/badge/SLSA-Level%203-blue?logo=linuxfoundation">
+  </a>
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-delivery.yml">
+    <img alt="SLSA Level 3" src="https://img.shields.io/badge/SLSA-Level%203-blue?logo=linuxfoundation">
+  </a>
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">  
