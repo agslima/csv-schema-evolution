@@ -6,7 +6,7 @@
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation"/>
     <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation/badge.svg">
   </a>
-  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/03-codeql.yml"/>
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml"/>
     <img alt="CodeQLe" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/03-codeql.yml/badge.svg">
   </a>
   <a href="https://codecov.io/github/agslima/csv-schema-evolution" >
@@ -15,11 +15,10 @@
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
-  <!--
   <a href="https://www.bestpractices.dev/projects/11596">
     <img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/11596/badge">
   </a>
-  <img src="https://img.shields.io/badge/SLSA-Level%202-brightgreen.svg">-->
+  <img src="https://img.shields.io/badge/SLSA-Level%202-brightgreen.svg">
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
