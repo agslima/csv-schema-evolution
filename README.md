@@ -6,8 +6,8 @@
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml">
     <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml/badge.svg">
   </a>
-  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-build-delivery.yml">
-    <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-build-delivery.yml/badge.svg">
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-delivery.yml">
+    <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-delivery.yml/badge.svg">
   </a>
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml">
     <img alt="CodeQL" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml/badge.svg">
