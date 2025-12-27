@@ -3,8 +3,11 @@
 ### Backend‑First Data Ingestion Service (FastAPI + MongoDB GridFS)
 
 <p align="left">
-  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/ci-cd.yml"/>
-    <img alt="CI/CD Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/ci-cd.yml/badge.svg">
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation"/>
+    <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation/badge.svg">
+  </a>
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/03-codeql.yml"/>
+    <img alt="CodeQLe" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/03-codeql.yml/badge.svg">
   </a>
   <a href="https://codecov.io/github/agslima/csv-schema-evolution" >
     <img src="https://codecov.io/github/agslima/csv-schema-evolution/graph/badge.svg?token=776AEW3J4C"/>
@@ -47,7 +50,7 @@ Existing online CSV tools were **not an option** due to:
 * Lack of transparency in processing pipelines
 * No guarantees around sanitization or secure storage
 
-This system was built to solve those problems in a **controlled, auditable backend service**.
+This system was designed to address these issues in a **controlled and auditable backend service**.
 
 ---
 
@@ -127,7 +130,7 @@ The engine ingests unstructured or semi‑structured CSV files and converts them
 
 ## High‑Level Architecture 
 
-The system follows **Clean Architecture** principles with a clear separation between API, business logic, and infrastructure.
+The system adheres to **Clean Architecture** principles, featuring a clear separation between API, business logic, and infrastructure.
 
 ```mermaid
 graph LR
@@ -183,7 +186,7 @@ The system is designed with LGPD principles in mind, including **data minimizati
 
 ## Testing & Quality 
 
-The project is developed using **Test-Driven Development (TDD)** and maintains **high test coverage** across all critical paths, with exclusions explicitly documented boilerplate.
+The project is developed using **Test-Driven Development (TDD)** and maintains **high test coverage** across all critical paths, with exclusions explicitly documented in the boilerplate.
 
 Test levels include:
 
@@ -207,7 +210,7 @@ Every commit and pull request triggers an automated workflow that performs:
 * **Container Hardening** — Validates Dockerfiles and scans container images for known vulnerabilities.
 * **Artifact Integrity & Provenance** — Built images are signed and accompanied by a Software Bill of Materials (SBOM).
 
-This pipeline reduces supply‑chain risk and provides traceability required for security reviews and compliance audits.
+This pipeline reduces supply‑chain risk and provides the traceability required for security reviews and compliance audits.
 
 <details><summary>Tooling used</summary>
   
@@ -258,7 +261,7 @@ For detailed implementation guides, please refer to:
 
 Planned enhancements aligned with real ingestion pipelines:
 
-* Chunked processing for very large datasets
+* Chunked processing for large datasets
 * RFC 4180‑compliant parsing
 * Export formats (Parquet, JSON, XLSX)
 * Background workers (Celery + Redis)
