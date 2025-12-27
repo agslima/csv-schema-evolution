@@ -39,7 +39,7 @@ Logical View (Control Flow + Trust Boundaries)
 flowchart TB
     Dev[Developer] --> PR[Pull Request]
 
-    subgraph PR_PIPELINE["PR Pipeline<br/>(Untrusted)"]
+    subgraph PR_PIPELINE["PR Pipeline(Untrusted)"]
         G[Gitleaks]
         B[Bandit]
         S[Snyk]
