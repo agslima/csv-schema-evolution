@@ -1,7 +1,7 @@
 # CI/CD Pipeline Documentation
 
 This document describes the CI/CD architecture, security controls, and
-supply-chain guarantees implemented in this project.
+Supply-chain guarantees are implemented in this project.
 
 The pipeline is designed to provide **fast developer feedback**, **strong security gates**, and **cryptographically verifiable release artifacts**, and aligns with **SLSA Level 3**.
 
