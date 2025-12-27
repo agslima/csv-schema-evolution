@@ -4,7 +4,7 @@
 
 <p align="left">
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml">
-    <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation/badge.svg">
+    <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml/badge.svg">
   </a>
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml">
     <img alt="CodeQLe" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml/badge.svg">
