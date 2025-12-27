@@ -94,6 +94,8 @@ jobs:
     name: Docker Linting
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@b4ffde65f4633668828d0b93fc293753a9eb8d83 # v4.1.1
 
