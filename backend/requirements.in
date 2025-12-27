@@ -1,6 +1,6 @@
 # --- Build Dependencies ---
 fastapi==0.124.0
-pymongo==4.6.3
+pymongo==4.15.5
 pydantic==2.5.0
 pydantic-settings
 python-multipart==0.0.18
