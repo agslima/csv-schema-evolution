@@ -35,7 +35,7 @@ The pipeline is divided into three independent stages, each with increasing trus
 
 Logical View (Control Flow + Trust Boundaries)
 
-```ermaid
+```Mermaid
 flowchart TB
     Dev[Developer] --> PR[Pull Request]
 
