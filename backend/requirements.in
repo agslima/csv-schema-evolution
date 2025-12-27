@@ -1,5 +1,5 @@
 # --- Build Dependencies ---
-fastapi==0.124.0
+fastapi==0.125.0
 pymongo==4.15.5
 pydantic==2.5.0
 pydantic-settings
