@@ -1,20 +1,23 @@
 # CI/CD Pipeline Documentation
 
-This document explains the Continuous Integration and Continuous Delivery (CI/CD) pipeline used in this project, the security guarantees it provides, and how it maps to the SLSA (Supply-chain Levels for Software Artifacts) framework.
+This document describes the CI/CD architecture, security controls, and
+supply-chain guarantees implemented in this project.
 
+The pipeline is designed to provide **fast developer feedback**, **strong security gates**, and **cryptographically verifiable release artifacts**, and aligns with **SLSA Level 3**.
 
 ---
 
-##  Pipeline Goals 🎯
+## Pipeline Goals 🎯
 
-The CI/CD pipeline is intentionally designed with clear trust boundaries, fast developer feedback, and strong supply‑chain security guarantees.
+The CI/CD system is intentionally designed around **trust separation** and **progressive assurance**.
 
 **Primary goals:**
 
-* Fast, blocking feedback on Pull Requests
-* Strong security gates before artifacts are built
-* Cryptographically verifiable release artifacts
-* Clear separation between build and release responsibilities
+- Fast, blocking feedback on Pull Requests
+- Prevent insecure code from reaching `main`
+- Ensure reproducible, auditable container builds
+- Establish cryptographic trust only at release time
+- Provide verifiable provenance for released artifacts
 
 ---
 
@@ -22,87 +25,74 @@ The CI/CD pipeline is intentionally designed with clear trust boundaries, fast d
 
 The pipeline is divided into three independent stages, each with increasing trust and responsibility.
 
-| Stage | Trigger |	Purpose |
-| --- | --- | --- |
-| PR Pipeline |	Pull Request |	Fast validation & security gates |
-| Main Branch Pipeline | Push to main |	Build & verify container artifacts |
-| Release Pipeline |	Git tag (vX.Y.Z) | Artifact signing & provenance |
+| Stage | Trigger | Purpose |
+|------|-------|---------|
+| PR Pipeline | Pull Request | Security & quality gates |
+| Build Pipeline | Push to `main` | Build & verify artifacts |
+| Release Pipeline | Git tag (`vX.Y.Z`) | Signing, SBOM & provenance |
 
 ## CI/CD Architecture Diagram
 
 Logical View (Control Flow + Trust Boundaries)
 
-```mermaid
+```ermaid
 flowchart TB
-    subgraph Dev["Developer"]
-        A[Git Push / PR]
+    Dev[Developer] --> PR[Pull Request]
+
+    subgraph PR_PIPELINE["PR Pipeline (Untrusted)"]
+        G[Gitleaks]
+        B[Bandit]
+        S[Snyk]
+        L[Pylint]
+        T[Pytest + Coverage]
+        D[Dockerfile Lint]
     end
 
-    subgraph GitHub["GitHub Repository"]
-        B[Pull Request]
-        C[Main Branch]
-        D[Version Tag vX.Y.Z]
+    PR --> PR_PIPELINE
+    PR_PIPELINE -->|Merge| MAIN[Main Branch]
+
+    subgraph BUILD["Build & Verify"]
+        H[Hadolint]
+        DB[Docker Build]
+        TR[Trivy Scan]
+        REG[(Docker Registry)]
     end
 
-    subgraph CI["GitHub Actions – CI"]
-        subgraph PR["PR Pipeline (Fast & Blocking)"]
-            P1[Gitleaks<br/>Secret Scanning]
-            P2[Bandit<br/>Python SAST]
-            P3[Snyk<br/>Dependency Scan]
-            P4[Pylint<br/>Code Quality Gate]
-            P5[Pytest<br/>Unit & Integration Tests]
-            P6[Codecov<br/>Coverage Enforcement]
-        end
+    MAIN --> BUILD
+    BUILD --> REG
 
-        subgraph Build["Build & Verify"]
-            B1[Hadolint<br/>Dockerfile Lint]
-            B2[Docker Build]
-            B3[Push Image<br/>Docker Hub]
-            B4[Trivy<br/>Container Scan]
-        end
-
-        subgraph Release["Release & Trust"]
-            R1[Cosign<br/>Image Signing]
-            R2[SBOM Generation<br/>SPDX]
-        end
+    subgraph RELEASE["Release & Trust"]
+        C[Cosign Sign (Digest)]
+        SB[SBOM (SPDX)]
+        P[Provenance Attestation]
     end
 
-    subgraph Registry["Artifact Registry"]
-        I1[(Docker Hub)]
-    end
-
-    %% Flow
-    A --> B
-    B --> PR
-    PR -->|Merge| C
-    C --> Build
-    D --> Build
-    Build --> I1
-    I1 --> Release
+    REG --> RELEASE
 ```
 
 ---
 
-### 1️⃣ PR Pipeline (Fast, Blocking)
+### 1️⃣ PR Pipeline — Fast & Blocking
 
 Trigger: `pull_request → main`
 
-This stage protects the codebase by preventing insecure or low-quality code from being merged.
+This stage prevents insecure or low-quality code from entering the trusted codebase.
 
-**Executed Steps**
+#### Executed Steps
 
-* **Secret Scanning:** Gitleaks
-* **Static Analysis:** Bandit (high severity, high confidence)
-* **Linting:** Pylint (minimum score enforced)
-* **Testing:** Unit + Integration tests (pytest)
-* **Coverage Gate:** Enforced via coverage.py + Codecov
+- **Secret Scanning:** Gitleaks
+- **Static Analysis:** Bandit (high severity, high confidence)
+- **Linting:** Pylint (minimum score enforced)
+- **Testing:** Unit + Integration tests (pytest)
+- **Coverage Gate:** Enforced via coverage.py + Codecov
+- **Infrastructure Linting:** Hadolint (Dockerfiles)
 
-**Guarantees**
+#### Guarantees
 
-* No secrets committed
-* No known high‑risk Python vulnerabilities
-* Code quality threshold enforced
-* Functional correctness validated
+- ✔ No leaked credentials
+- ✔ No known high-risk Python vulnerabilities
+- ✔ Code quality thresholds enforced
+- ✔ Functional correctness validated
 
 ---
 
@@ -110,20 +100,19 @@ This stage protects the codebase by preventing insecure or low-quality code from
 
 Trigger: `push → main`
 
-This stage builds deployable artifacts but does not yet establish trust.
+This stage produces container artifacts **without establishing trust**.
 
-**Executed Steps**
+#### Executed Steps
 
-* Dockerfile Linting: Hadolint
-* Container Build: Docker BuildKit
-* Container Registry Push: Docker Hub
-* Vulnerability Scan: Trivy (HIGH / CRITICAL block)
+- Reproducible container builds (Docker BuildKit)
+- Registry push (Docker Hub)
+- Vulnerability scanning (Trivy — HIGH / CRITICAL fail)
 
-**Guarantees**
+#### Guarantees
 
-* Reproducible container builds
-* No critical vulnerabilities at build time
-* Artifacts are verified but unsigned
+- ✔ Deterministic, repeatable builds
+- ✔ No critical vulnerabilities at build time
+- ✔ Artifacts are unsigned and untrusted
 
 ---
 
@@ -131,31 +120,37 @@ This stage builds deployable artifacts but does not yet establish trust.
 
 **Trigger:** Git tag (`vX.Y.Z`)
 
-This stage establishes artifact trust and supply‑chain integrity.
+This stage establishes cryptographic trust and supply-chain integrity.
 
-**Executed Steps**
+#### Executed Steps
 
-* Image Signing: `Cosign` (cryptographic signature)
-* SBOM Generation: `Syft` (SPDX‑JSON)
+- Keyless image signing (`Cosign` + `GitHub OIDC`)
+- Digest-pinned signing (no mutable tags)
+- SBOM generation & attestation (SPDX)
+- SLSA provenance attestation (GitHub native)
 
-**Guarantees**
+#### Guarantees
 
-* Image authenticity is cryptographically verifiable
-* Full dependency inventory available
-* Immutable, auditable release artifacts
+- ✔ Artifact authenticity is cryptographically verifiable
+- ✔ Dependencies are fully enumerated
+- ✔ Provenance binds source → build → artifact
+- ✔ Trust is only granted to reviewed, tagged releases
 
 ---
 
 ## Supply‑Chain Security Controls 🔐
 
-| Control | Tool |
-| --- | --- |
-| Secret Scanning | Gitleaks |
-| SAST (Python) | Bandit |
-|Linting | Pylint, Hadolint |
-| Dependency Analysis | Trivy |
-| Image Signing | Cosign |
-| SBOM | Syft |
+| Control            | Tool                |
+| ------------------ | ------------------- |
+| Secret Scanning    | Gitleaks            |
+| SAST               | Bandit              |
+| SCA                | Snyk                |
+| Code Quality       | Pylint              |
+| Container Linting  | Hadolint            |
+| Container Scanning | Trivy               |
+| Image Signing      | Cosign (OIDC)       |
+| SBOM               | Syft                |
+| Provenance         | GitHub Attestations |
 
 ---
 
@@ -163,22 +158,27 @@ This stage establishes artifact trust and supply‑chain integrity.
 
 This pipeline aligns with SLSA Level 2 and partially satisfies Level 3 controls.
 
-**SLSA Level 1 – Build Process**
+### SLSA Level 1 – Build Process
 
-✔ Fully automated build via GitHub Actions
+- ✔ Fully automated build via GitHub Actions
 
-**SLSA Level 2 – Build Service**
+### SLSA Level 2 – Build Service
 
-✔ Version‑controlled pipeline ✔ Authenticated source (GitHub) ✔ Tamper‑resistant build steps
+- ✔ Version-controlled pipelines
+- ✔ Authenticated source
+- ✔ Tamper-resistant build steps
 
-**SLSA Level 3 – Hardened Builds (Partial)**
+### SLSA Level 3 – Hardened Builds (Partial)
 
-⚠️ Isolated runners (GitHub‑hosted) ⚠️ No hermetic builds yet ✔ Signed artifacts (Cosign) ✔ Provenance metadata (SBOM)
+- ✔ Isolated, ephemeral GitHub runners
+- ✔ Review-based source control
+- ✔ Digest-pinned signing
+- ✔ Cryptographic provenance
+- ✔ Verifiable SBOM attestations
 
-> Current Level: SLSA 2 (strong)
+📄 Full audit explanation: [`docs/slsa.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/slsa.md)
 
-Path to Level 3: Self‑hosted runners, hermetic builds, provenance attestations
-
+<!--
 ---
 
 ## CI/CD Architecture Diagram 🏗️
@@ -219,20 +219,23 @@ Developer
           v
    Trusted Artifact
 ```
+-->
 
 ---
 
 ## Key Design Decisions 📌
 
-* Separation of trust levels prevents PRs from producing trusted artifacts
-* Security scans fail fast to reduce feedback time
-* Signing only on release avoids accidental trust escalation
-* SBOM generation enables compliance (LGPD, SOC‑2, ISO‑27001)
+- Separation of PR, build, and release trust boundaries
+- Security scans fail fast to reduce feedback time
+- Digest-based signing to prevent tag mutation attacks
+- Keyless OIDC signing to avoid long-lived secrets
+- Provenance attached at release, not build time
+- SBOM generation enables compliance (LGPD, SOC‑2, ISO‑27001)
 
 ---
 
 ## Future Improvements 📈
 
-* SLSA provenance attestations (cosign attest)
-* Hermetic builds with pinned dependencies
-* Admission policy enforcement (Kubernetes / OPA)
+- Hermetic builds with fully pinned dependencies
+- Policy enforcement (admission control / OPA)
+- Runtime signature verification

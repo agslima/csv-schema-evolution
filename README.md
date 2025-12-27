@@ -6,19 +6,22 @@
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml">
     <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml/badge.svg">
   </a>
+  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-build-delivery.yml">
+    <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-build-delivery.yml/badge.svg">
+  </a>
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml">
-    <img alt="CodeQLe" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml/badge.svg">
+    <img alt="CodeQL" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml/badge.svg">
   </a>
   <a href="https://codecov.io/github/agslima/csv-schema-evolution" >
-    <img src="https://codecov.io/github/agslima/csv-schema-evolution/graph/badge.svg?token=776AEW3J4C"/>
+    <img alt="CodeCov" src="https://codecov.io/github/agslima/csv-schema-evolution/graph/badge.svg?token=776AEW3J4C"/>
   </a>
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
-  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
-  <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">
   <!--<a href="https://www.bestpractices.dev/projects/11596">
     <img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/11596/badge">
   </a>-->
-  <img src="https://img.shields.io/badge/SLSA-Level%202-brightgreen.svg">
+  <img alt="SLSA Level 3" src="https://img.shields.io/badge/SLSA-Level%203-blue?logo=linuxfoundation">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
+  <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">  
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
