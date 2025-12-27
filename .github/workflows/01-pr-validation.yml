@@ -1,0 +1,109 @@
+name: "PR Validation"
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+# Concurrency Control
+# Cancels previous runs of the same PR to save resources
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ------------------------------------------------------------------
+  # JOB 1: Code Security & Quality (Python)
+  # ------------------------------------------------------------------
+  code-quality:
+    name: Code Quality & Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # Safety Timeout
+    permissions:
+      contents: read
+
+    services:
+      mongo:
+        image: mongo:6
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval=10s
+          --health-retries=5
+
+    env:
+      MONGODB_URI: mongodb://127.0.0.1:27017
+      PYTHON_VERSION: "3.11"
+
+    steps:
+      # SHA Pinning for Supply Chain Security
+      - name: Checkout Code
+        uses: actions/checkout@b4ffde65f4633668828d0b93fc293753a9eb8d83 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Secret Scanning (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install Dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install bandit pylint pytest pytest-cov
+
+      - name: SAST - Logic Analysis (Bandit)
+        run: bandit -r backend -ll -ii
+
+      - name: SCA - Dependency Analysis (Snyk)
+        if: vars.ENABLE_SNYK_SCANS == 'true'
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        # Use npx to run snyk without global install overhead
+        run: npx snyk test --file=backend/requirements.txt --package-manager=pip --severity-threshold=high
+
+      - name: Code Linting (Pylint)
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
+          pylint backend --fail-under=8.5 --output-format=colorized
+
+      - name: Unit & Integration Tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
+          pytest backend/tests \
+            --cov=backend/app \
+            --cov-report=xml \
+            --cov-config=.coveragerc \
+            --cov-fail-under=85
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+
+  # ------------------------------------------------------------------
+  # JOB 2: Infrastructure Linting (Docker)
+  # ------------------------------------------------------------------
+  docker-lint:
+    name: Docker Linting
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@b4ffde65f4633668828d0b93fc293753a9eb8d83 # v4.1.1
+
+      # Hadolint (Shift Left)
+      - name: Lint Backend Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: backend/Dockerfile
+
+      - name: Lint Frontend Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: frontend/Dockerfile
