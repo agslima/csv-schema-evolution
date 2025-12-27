@@ -1,4 +1,4 @@
-name: "02 - Build & Delivery"
+name: "Build & Delivery"
 
 on:
   push:
