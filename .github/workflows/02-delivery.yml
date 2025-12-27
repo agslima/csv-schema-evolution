@@ -19,6 +19,7 @@ jobs:
   # ------------------------------------------------------------------
   build-push:
     name: Build & Push
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: read
