@@ -1,1 +1,88 @@
 
+# For Python (FastAPI/Backend)
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '30 1 * * 0' # Run weekly (Sunday at 1:30 AM)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  analyze:
+    name: Analyze (Python)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+      pull-requests: write # Required for posting comments on PRs
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 1. Initialize CodeQL
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: none 
+        # Optional: Tuning queries for better results
+        queries: security-extended,security-and-quality
+
+    # 2. Dependency Setup (Helps CodeQL understand imports)
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        pip install -r backend/requirements.txt
+        # Installing dependencies helps CodeQL resolve external libraries
+        # to reduce false positives.
+
+    # 3. Perform Analysis
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{ matrix.language }}"
+
+    # 4. (Optional) Custom PR Commenter
+    # Note: GitHub Advanced Security usually does this natively in the "Files Changed" tab,
+    # but this script forces a visible comment.
+    - name: Post CodeQL Results to PR
+      if: github.event_name == 'pull_request'
+      run: |
+        # Get the PR number from the event context
+        PR_NUM=${{ github.event.number }}
+
+        # Fetch open alerts for this specific branch/ref
+        ALERTS=$(gh api "repos/${{ github.repository }}/code-scanning/alerts?tool_name=CodeQL&ref=${{ github.event.pull_request.head.ref }}&state=open" --jq 'length')
+
+        echo "Found $ALERTS open alerts."
+
+        # Logic: Only comment if there are alerts
+        if [[ "$ALERTS" -gt 0 ]]; then
+          REPORT="## 🛡️ CodeQL Analysis (Python)\n\n🚨 **Found $ALERTS security alert(s)**\n\nCodeQL has detected potential vulnerabilities in your Python code.\n\n🔗 [View Security Tab](https://github.com/${{ github.repository }}/security/code-scanning?query=is%3Aopen+branch%3A${{ github.head_ref }})"
+          
+          # Post the comment
+          echo -e "$REPORT" | gh pr comment "$PR_NUM" --body-file=-
+        else
+          echo "No security issues found - skipping PR comment."
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
