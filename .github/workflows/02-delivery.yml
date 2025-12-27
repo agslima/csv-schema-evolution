@@ -133,11 +133,11 @@ jobs:
       # --------------------------------------------------------------
       - name: Sign Image (Digest)
         run: |
-          cosign sign --yes "$IMAGE"
+          cosign sign --yes ${{ env.IMAGE }} 
 
       - name: Verify Signature
         run: |
-          cosign verify "$IMAGE" \
+          cosign verify ${{ env.IMAGE }} \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.*"
 
@@ -156,7 +156,7 @@ jobs:
           cosign attest --yes \
             --type spdx \
             --predicate sbom-${{ matrix.image_repo }}.spdx.json \
-            "$IMAGE"
+            ${{ env.IMAGE }}
 
       # --------------------------------------------------------------
       # SLSA Provenance (Digest-Correct)
