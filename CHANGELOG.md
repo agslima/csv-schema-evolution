@@ -91,3 +91,12 @@ This release represents a **major architectural evolution** of the project.
 - Release notes are written manually to ensure clarity
 - Notes focus on **what changed**, **why it matters**, and **upgrade impact**
 - Security and breaking changes are always explicitly documented
+
+## Security Fixes
+
+At the time of this release, there are **no publicly known run-time vulnerabilities
+with assigned CVEs** affecting this project.
+
+This release focuses on **preventive supply-chain security improvements**
+(SLSA Level 3 alignment, artifact signing, provenance, and SBOM generation),
+not remediation of previously disclosed vulnerabilities.
