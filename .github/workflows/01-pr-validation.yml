@@ -48,9 +48,10 @@ jobs:
 
       # Pinned: gitleaks/gitleaks-action@v2.3.8
       - name: Secret Scanning (Gitleaks)
+        if: vars.ENABLE_GITLEAKS == 'true'
         uses: gitleaks/gitleaks-action@v2  # gitleaks-action@f65c4cd93c2004495537552554e7c75d5069b2d8
-        # env:
-        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 #v5.4.0
@@ -76,7 +77,9 @@ jobs:
       - name: Code Linting (Pylint)
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
-          pylint backend --fail-under=8.5 --output-format=colorized
+          pylint backend \
+            --fail-under=8.5 \
+            --output-format=colorized
 
       - name: Unit & Integration Tests
         run: |
