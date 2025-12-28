@@ -2,9 +2,15 @@ name: "Build & Delivery"
 
 on:
   push:
-    branches: [ "main" ]
-    tags: [ "v*.*.*" ]
-
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag (e.g., v1.2.3)'
+        required: true
+        type: string
+        
 concurrency:
   group: delivery-${{ github.ref }}
   cancel-in-progress: false
@@ -16,6 +22,10 @@ jobs:
   build-push:
     name: Build & Push
     runs-on: ubuntu-latest
+
+    environment:
+      name: production   # 🔒 Environment Protection Rules
+      
     permissions:
       contents: read
       packages: write
@@ -84,12 +94,16 @@ jobs:
   # ------------------------------------------------------------------
   sign-and-attest:
     name: Sign & Attest (SLSA)
-    if: startsWith(github.ref, 'refs/tags/v')
+    # if: startsWith(github.ref, 'refs/tags/v')
+    # if: github.repository == 'agslima/csv-schema-evolution'
     needs: build-push
     runs-on: ubuntu-latest
 
+    environment:
+      name: production   # 🔒 Same protected environment
+
     permissions:
-      contents: read
+      # contents: read
       packages: write
       id-token: write          # OIDC for Cosign
       attestations: write      # GitHub provenance upload
@@ -113,7 +127,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       # --------------------------------------------------------------
-      # Retrieve Digest (The Fix)
+      # Retrieve Digest
       # --------------------------------------------------------------
       - name: Download Digest Artifact
         uses: actions/download-artifact@v4
