@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # 2. Environment Variables (Security & Performance)
 # Prevents Python from writing .pyc files (read-only filesystem compat)
