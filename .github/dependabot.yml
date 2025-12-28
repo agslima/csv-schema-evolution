@@ -1,10 +1,40 @@
 version: 2
 updates:
+  # 1. GitHub Actions (Maintains your CI/CD pipeline)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "ci"
+      - "dependencies"
+
+  # 2. Backend Dependencies (Python)
+  # Looks for requirements.txt in the backend folder
   - package-ecosystem: "pip"
     directory: "/backend"
     schedule:
       interval: "weekly"
-  # - package-ecosystem: "npm"
-  #   directory: "/frontend"
-  #   schedule:
-  #     interval: "weekly"
+    labels:
+      - "backend"
+      - "python"
+
+  # 3. Backend Docker Base Image
+  # Looks for Dockerfile in the backend folder to update the Python image
+  - package-ecosystem: "docker"
+    directory: "/backend"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "backend"
+      - "docker"
+
+  # 4. Frontend Docker Base Image
+  # Looks for Dockerfile in the frontend folder to update nginx:alpine
+  - package-ecosystem: "docker"
+    directory: "/frontend"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "frontend"
+      - "docker"
