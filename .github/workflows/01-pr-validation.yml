@@ -110,12 +110,12 @@ jobs:
 
       # Hadolint (Shift Left)
       - name: Lint Backend Dockerfile
-        uses: hadolint/hadolint-action@v3.1.0 # v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0 # v3.1.0
         with:
           dockerfile: backend/Dockerfile
 
       - name: Lint Frontend Dockerfile
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         # uses: hadolint/hadolint-action@5429efd3704d5ed3cd4d18cd62097269a8317726 # v3.1.0
         with:
           dockerfile: frontend/Dockerfile
