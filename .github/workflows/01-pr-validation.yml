@@ -2,12 +2,15 @@ name: "CI Pipeline"
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 # Concurrency Control
 # Cancels previous runs of the same PR to save resources
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }} # ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -16,15 +19,16 @@ jobs:
   # ------------------------------------------------------------------
   code-quality:
     name: Code Quality & Security
+    if: github.repository == 'agslima/csv-schema-evolution'
     runs-on: ubuntu-latest
     timeout-minutes: 15 # Safety Timeout
     permissions:
       contents: read
-
+    
     services:
       mongo:
         image: mongo:6
-        ports: ["27017:27017"]
+        # ports: ["27017:27017"]
         options: >-
           --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
           --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })'"
@@ -32,7 +36,7 @@ jobs:
           --health-retries=5
 
     env:
-      MONGODB_URI: mongodb://127.0.0.1:27017
+      MONGODB_URI: mongodb://mongo:27017
       PYTHON_VERSION: "3.11"
 
     steps:
@@ -45,8 +49,8 @@ jobs:
       # Pinned: gitleaks/gitleaks-action@v2.3.8
       - name: Secret Scanning (Gitleaks)
         uses: gitleaks/gitleaks-action@v2  # gitleaks-action@f65c4cd93c2004495537552554e7c75d5069b2d8
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # env:
+        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 #v5.4.0
@@ -67,7 +71,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         # Use npx to run snyk without global install overhead
-        run: npx snyk test --file=backend/requirements.txt --package-manager=pip --severity-threshold=high
+        run: npx snyk@1.1290.0 test --file=backend/requirements.txt --package-manager=pip --severity-threshold=high
 
       - name: Code Linting (Pylint)
         run: |
@@ -112,3 +116,19 @@ jobs:
         # uses: hadolint/hadolint-action@5429efd3704d5ed3cd4d18cd62097269a8317726 # v3.1.0
         with:
           dockerfile: frontend/Dockerfile
+
+  # ------------------------------------------------------------
+  # Docker Build (No Push)
+  # ------------------------------------------------------------
+  docker-build:
+    name: Docker Build (No Push)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Build Backend Image
+        run: docker build ./backend
+
+      - name: Build Frontend Image
+        run: docker build ./frontend
