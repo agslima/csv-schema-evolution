@@ -1,3 +1,9 @@
+/**
+ * API Abstraction Layer
+ * Handles communication with the FastAPI Backend
+ */
+// const API_BASE_URL = "http://localhost:8000/api/v1";
+
 const API_BASE_URL = "/api/v1";
 
 const API = {
