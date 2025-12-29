@@ -6,8 +6,18 @@ const app = {
         this.cacheDOM();
         this.bindEvents();
         this.loadFiles();
-        // Auto-refresh every 10 seconds to check for status updates
         setInterval(() => this.loadFiles(), 10000); 
+    },
+
+    // --- SECURITY FIX: HTML Escaping Utility ---
+    escapeHtml(unsafe) {
+        if (unsafe === null || unsafe === undefined) return "";
+        return String(unsafe)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     },
 
     cacheDOM() {
@@ -32,16 +42,16 @@ const app = {
         if (!file) return;
 
         this.setLoading(true);
-        this.showAlert(null); // Clear alerts
+        this.showAlert(null);
 
         try {
             await API.uploadFile(file, idField);
             this.showAlert("File uploaded successfully!", "success");
             this.uploadForm.reset();
-            this.loadFiles(); // Refresh list immediately
+            this.loadFiles();
         } catch (error) {
             console.error(error);
-            this.showAlert(`Error: ${error.message}`, "danger");
+            this.showAlert(`Error: ${this.escapeHtml(error.message)}`, "danger");
         } finally {
             this.setLoading(false);
         }
@@ -63,32 +73,37 @@ const app = {
         }
 
         const html = files.map(file => {
-            // 1. Status Badges
             let badgeClass = "bg-secondary";
             if (file.status === "processed") badgeClass = "bg-success";
             if (file.status === "error") badgeClass = "bg-danger";
             if (file.status === "pending") badgeClass = "bg-warning text-dark";
 
-            // 2. Format Fields (Truncate if too long)
             const fieldsList = file.fields || [];
-            const fieldsStr = fieldsList.slice(0, 5).join(", ") + (fieldsList.length > 5 ? "..." : "");
+            
+            const safeFields = fieldsList.map(f => this.escapeHtml(f)); 
+            const fieldsStr = safeFields.slice(0, 5).join(", ") + (safeFields.length > 5 ? "..." : "");
 
-            // 3. FIX: Use the actual creation date from the backend
             const dateStr = file.created_at 
                 ? new Date(file.created_at).toLocaleString() 
                 : "Just now";
+            
+            // --- SECURITY FIX: Sanitizing Variables ---
+            const safeFilename = this.escapeHtml(file.filename);
+            const safeStatus = this.escapeHtml(file.status || 'unknown').toUpperCase();
+            const safeId = this.escapeHtml(file.id);
 
             return `
                 <tr>
-                    <td class="fw-bold">${file.filename}</td>
+                    <td class="fw-bold">${safeFilename}</td>
                     <td class="small text-muted">${dateStr}</td> 
-                    <td><span class="badge ${badgeClass}">${(file.status || 'unknown').toUpperCase()}</span></td>
+                    <td><span class="badge ${badgeClass}">${safeStatus}</span></td>
                     <td>${(file.records_count || 0).toLocaleString()}</td>
-                    <td class="small text-muted" title="${fieldsList.join(", ")}">${fieldsStr}</td>
+                    <td class="small text-muted" title="${safeFields.join(", ")}">${fieldsStr}</td>
                     <td>
                         <div class="btn-group btn-group-sm">
-                            <a href="${API.getDownloadUrl(file.id)}" class="btn btn-outline-primary" target="_blank">Download</a>
-                            <button class="btn btn-outline-danger" onclick="app.deleteFile('${file.id}')">Delete</button>
+                            <a href="${API.getDownloadUrl(safeId)}" class="btn btn-outline-primary" target="_blank">Download</a>
+                            
+                            <button class="btn btn-outline-danger" onclick="app.deleteFile('${safeId}')">Delete</button>
                         </div>
                     </td>
                 </tr>
@@ -98,6 +113,14 @@ const app = {
         this.tableBody.innerHTML = html;
     },
 
+    async handleDownload(id, filename) {
+        try {
+            await API.downloadFile(id, filename);
+        } catch (error) {
+            this.showAlert(`Download failed: ${error.message}`, "danger");
+        }
+    },
+    
     async deleteFile(id) {
         if(!confirm("Are you sure you want to delete this file?")) return;
         
@@ -105,7 +128,7 @@ const app = {
             await API.deleteFile(id);
             this.loadFiles();
         } catch (error) {
-            alert(error.message);
+            alert(this.escapeHtml(error.message));
         }
     },
 
@@ -125,17 +148,15 @@ const app = {
             this.alertArea.innerHTML = "";
             return;
         }
+        
         this.alertArea.innerHTML = `
             <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
+                ${message} 
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         `;
     }
 };
 
-// Expose app to global scope so inline onclicks works (like in delete button)
 window.app = app;
-
-// Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => app.init());
