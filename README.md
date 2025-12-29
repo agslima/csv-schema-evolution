@@ -35,7 +35,7 @@ This project focuses on **data safety, correctness, and operational transparency
 
 - Secure backend service for ingesting untrusted CSVs
 - Focused on compliance, sanitization, and observability
-- Designed for real production pipelines, not ad-hoc scripts
+<!--- Designed for real production pipelines, not ad-hoc scripts-->
 - Best entry points: `/docs/architecture.md` and `/docs/processing-engine.md`
 
 ## Problem Statement
