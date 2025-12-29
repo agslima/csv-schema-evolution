@@ -7,7 +7,7 @@ import re
 from datetime import datetime, timezone
 from typing import Optional, List
 from bson import ObjectId
-from fastapi import UploadFile, HTTPException
+from fastapi import UploadFile
 from app.db.mongo import db_manager
 from app.core.config import settings
 from app.core.security import encrypt_data, decrypt_data
