@@ -3,6 +3,7 @@ Module for handling file storage operations using GridFS and MongoDB.
 Provides functionality to save, retrieve, and delete files.
 """
 
+import re
 from datetime import datetime, timezone
 from typing import Optional, List
 from bson import ObjectId
@@ -10,6 +11,9 @@ from fastapi import UploadFile
 from app.db.mongo import db_manager
 from app.core.config import settings
 from app.core.security import encrypt_data, decrypt_data
+
+# 1. Allow only safe characters (Alphanumeric, dot, dash, underscore, space)
+FILENAME_REGEX = re.compile(r"^[a-zA-Z0-9\.\-\_ ]+$")
 
 
 async def save_file_to_gridfs(file: UploadFile) -> ObjectId:

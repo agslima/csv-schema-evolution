@@ -7,43 +7,99 @@
 const API_BASE_URL = "/api/v1";
 
 const API = {
+    async _request(endpoint, options = {}) {
+        const url = `${API_BASE_URL}${endpoint}`;
+        
+        // merge headers (e.g., add Authorization)
+        const headers = {
+            ...options.headers,
+            // "Authorization": "Bearer " + localStorage.getItem("token") // Uncomment if using JWT
+        };
+        
+        const config = {
+            ...options,
+            headers
+        };
+
+        try {
+            const response = await fetch(url, config);
+
+            // Handle 401 (Unauthorized) globally
+            if (response.status === 401) {
+                // redirect to login or refresh token
+                window.location.href = "/login"; 
+                return;
+            }
+
+            if (!response.ok) {
+                // Try to parse detailed error from backend, fallback to status text
+                let errorMsg = response.statusText;
+                try {
+                    const data = await response.json();
+                    errorMsg = data.detail || errorMsg;
+                } catch (e) { /* ignore JSON parse fail */ }
+                
+                throw new Error(errorMsg);
+            }
+
+            // Return JSON by default, or the raw response if needed (for blobs)
+            if (options.returnRaw) return response;
+            return response.json();
+
+        } catch (error) {
+            console.error(`API Call Failed: ${endpoint}`, error);
+            throw error; // Re-throw so the UI can show the alert
+        }
+    },
+
     async uploadFile(file, idField = null) {
         const formData = new FormData();
         formData.append("file", file);
         
-        // Construct URL with query param if idField exists
-        let url = `${API_BASE_URL}/files/upload`;
+        let query = "";
         if (idField) {
-            url += `?id_field=${encodeURIComponent(idField)}`;
+            query = `?id_field=${encodeURIComponent(idField)}`;
         }
 
-        const response = await fetch(url, {
+        return this._request(`/files/upload${query}`, {
             method: "POST",
             body: formData
+            // Note: fetch automatically handles Content-Type for FormData
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || "Upload failed");
-        }
-        return response.json();
     },
 
     async listFiles() {
-        const response = await fetch(`${API_BASE_URL}/files/`);
-        if (!response.ok) throw new Error("Failed to fetch files");
-        return response.json();
+        return this._request("/files/");
     },
 
     async deleteFile(fileId) {
-        const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
+        if (!fileId) throw new Error("Missing File ID");
+        
+        return this._request(`/files/${encodeURIComponent(fileId)}`, {
             method: "DELETE"
         });
-        if (!response.ok) throw new Error("Failed to delete file");
-        return response.json();
     },
     
-    getDownloadUrl(fileId) {
-        return `${API_BASE_URL}/files/${fileId}/download`;
+    async downloadFile(fileId, filename) {
+        const response = await this._request(`/files/${encodeURIComponent(fileId)}/download`, {
+            method: "GET",
+            returnRaw: true 
+        });
+
+        const blob = await response.blob();
+        
+        // Create a temporary "Object URL" that points to the data in RAM
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename || "download.csv"; // Force the browser to download
+        document.body.appendChild(a); // Required for Firefox
+        a.click();
+        
+        // Cleanup: Release memory
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
     }
 };
