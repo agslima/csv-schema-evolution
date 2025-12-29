@@ -6,6 +6,7 @@ const app = {
         this.cacheDOM();
         this.bindEvents();
         this.loadFiles();
+        // Auto-refresh every 10 seconds to check for status updates
         setInterval(() => this.loadFiles(), 10000); 
     },
 
