@@ -62,51 +62,13 @@ Indexes:
 
 ```text
 .
-├── Dockerfile
 ├── app
 │   ├── api
-│   │   └── v1
-│   │       │── api.py
-│   │       └── endpoints
-│   │           ├── files.py
-│   │           └── health.py
-│   ├── core
-│   │   ├── config.py
-│   │   ├── logging.py
-│   │   ├── middleware.py
-│   │   └── security.py
+├── core
 │   ├── db
-│   │   ├── mongo.py
-│   ├── main.py
 │   ├── models
-│   │   ├── file.py
 │   ├── services
-│   │   ├── cleanup.py
-│   │   ├── csv_handler.py
-│   │   ├── dialect_detector.py
-│   │   └── transposer.py
 │   └── utils
-│       ├── sanitize.py
-│       ├── storage.py
-│       └── validators.py
-├── pyproject.toml
-├── requirements.txt
-├── scripts
-│   └── generate_key.py
 └── tests
-    ├── conftest.py
-    ├── integration
-    │   ├── test_api_errors.py
-    │   ├── test_api_files.py
-    │   └── test_messy_upload.py
-    └── unit
-        ├── test_cleanup.py
-        ├── test_dialect_detector.py
-        ├── test_edge_cases.py
-        ├── test_middleware.py
-        ├── test_models.py
-        ├── test_sanitize.py
-        ├── test_storage.py
-        └── test_validators.py
 ```
 
