@@ -32,9 +32,9 @@ astroid==4.0.2 \
     --hash=sha256:ac8fb7ca1c08eb9afec91ccc23edbd8ac73bb22cbdd7da1d488d9fb8d6579070 \
     --hash=sha256:d7546c00a12efc32650b19a2bb66a153883185d3179ab0d4868086f807338b9b
     # via pylint
-bandit==1.9.2 \
-    --hash=sha256:32410415cd93bf9c8b91972159d5cf1e7f063a9146d70345641cd3877de348ce \
-    --hash=sha256:bda8d68610fc33a6e10b7a8f1d61d92c8f6c004051d5e946406be1fb1b16a868
+bandit==1.9.3 \
+    --hash=sha256:4745917c88d2246def79748bde5e08b9d5e9b92f877863d43fab70cd8814ce6a \
+    --hash=sha256:ade4b9b7786f89ef6fc7344a52b34558caec5da74cb90373aed01de88472f774
     # via -r requirements.in
 black==25.12.0 \
     --hash=sha256:05dd459a19e218078a1f98178c13f861fe6a9a5f88fc969ca4d9b49eb1809783 \
