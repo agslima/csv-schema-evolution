@@ -9,6 +9,8 @@ from io import StringIO  # <--- Crucial Import
 from typing import List, Dict, Tuple
 from collections import OrderedDict
 
+from app.utils.sanitize import sanitize_cell_value
+
 logger = logging.getLogger(__name__)
 
 
@@ -31,9 +33,12 @@ def parse_vertical_csv(
             if not row:
                 continue
 
-            key = row[0].strip()
+            key = row[0].strip() if row[0] else ""
+            if not key:
+                continue
             # If line is "Key, Value", val is Value. If just "Key", val is empty.
-            val = row[1].strip() if len(row) > 1 else ""
+            raw_val = row[1] if len(row) > 1 else ""
+            val = sanitize_cell_value(raw_val)
 
             # Logic: If we see the first field again, it's a new record
             if fields and key == fields[0] and (key in current_record):
