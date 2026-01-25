@@ -11,11 +11,11 @@ This guide explains how to run the project locally or via Docker.
 ## 2. Clone the repository
 
 ```bash
-git clone https://github.com/agslima/csv_schema_evolution.git
-cd csv_schema_evolution
+git clone https://github.com/agslima/csv-schema-evolution.git
+cd csv-schema-evolution
+```
 
-
-##3. Local environment
+## 3. Local environment
 
 ```bash
 python -m venv venv

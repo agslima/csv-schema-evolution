@@ -63,7 +63,43 @@ def _is_vertical_layout(content: str, dialect: csv.Dialect) -> bool:
     return duplication_ratio > 0.3
 
 
-def _parse_csv_sync(content: str) -> Tuple[List[Dict], List[str]]:
+def _group_records_by_id(records: List[Dict], id_field: Optional[str]) -> List[Dict]:
+    """
+    Groups records by an id field, merging rows that share the same identifier.
+    """
+    if not id_field:
+        return records
+
+    clean_id_field = id_field.strip()
+    if not clean_id_field:
+        return records
+
+    grouped: "OrderedDict[str, OrderedDict]" = OrderedDict()
+    ordered_records: List[OrderedDict] = []
+
+    for record in records:
+        record_id = record.get(clean_id_field)
+        if not record_id:
+            ordered_records.append(OrderedDict(record))
+            continue
+
+        if record_id not in grouped:
+            grouped[record_id] = OrderedDict(record)
+            ordered_records.append(grouped[record_id])
+            continue
+
+        for field, value in record.items():
+            if field == clean_id_field:
+                continue
+            if value not in ("", None):
+                grouped[record_id][field] = value
+
+    return [dict(record) for record in ordered_records]
+
+
+def _parse_csv_sync(
+    content: str, id_field: Optional[str] = None
+) -> Tuple[List[Dict], List[str]]:
     """
     Synchronous logic to parse, sanitize, and extract schema from CSV content.
     """
@@ -75,7 +111,8 @@ def _parse_csv_sync(content: str) -> Tuple[List[Dict], List[str]]:
     # Adaptive Strategy
     if _is_vertical_layout(content, dialect):
         logger.info("Delegating to Vertical Transposer...")
-        return parse_vertical_csv(content, dialect)
+        records, fields = parse_vertical_csv(content, dialect)
+        return _group_records_by_id(records, id_field), fields
 
     text_io = StringIO(content)
     records: List[Dict] = []
@@ -103,7 +140,7 @@ def _parse_csv_sync(content: str) -> Tuple[List[Dict], List[str]]:
     except csv.Error as error:
         logger.error("CSV Parsing Error: %s", error)
 
-    return records, ordered_fields
+    return _group_records_by_id(records, id_field), ordered_fields
 
 
 async def process_csv_content(
@@ -112,6 +149,4 @@ async def process_csv_content(
     """
     Asynchronous wrapper for the CPU-bound CSV parsing logic.
     """
-    # id_field is kept for interface compatibility but unused in parsing logic
-    _ = id_field
-    return await run_in_threadpool(_parse_csv_sync, content)
+    return await run_in_threadpool(_parse_csv_sync, content, id_field)
