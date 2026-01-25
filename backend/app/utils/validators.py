@@ -21,6 +21,10 @@ def validate_csv_file(file: UploadFile):
         raise HTTPException(
             status_code=400, detail="Invalid file type. Only CSV allowed."
         )
-    if file.content_type not in ["text/csv", "application/vnd.ms-excel"]:
+    content_type = (file.content_type or "").lower()
+    if not (
+        content_type.startswith("text/csv")
+        or content_type == "application/vnd.ms-excel"
+    ):
         raise HTTPException(status_code=400, detail="Invalid CSV content type.")
     # size check will be done after reading file bytes in memory

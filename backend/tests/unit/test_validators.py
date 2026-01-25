@@ -19,6 +19,18 @@ def test_validate_valid_csv():
     validate_csv_file(file)
 
 
+def test_validate_csv_with_charset():
+    """Test that CSV content type with charset parameter is accepted."""
+    file = UploadFile(
+        file=BytesIO(b"data"),
+        filename="data.csv",
+        headers={"content-type": "text/csv; charset=utf-8"},
+    )
+
+    # Should not raise exception
+    validate_csv_file(file)
+
+
 def test_validate_invalid_extension():
     """Test that non-csv extension raises error."""
     file = UploadFile(

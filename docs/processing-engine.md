@@ -17,7 +17,7 @@ The primary goal is **correct structure inference**, not blind syntactic validit
 
 ## 1. Processing Pipeline Overview
 
-The engine follows a deterministic, multi-stage pipeline:Detect → Decide → Parse → Sanitize
+The engine follows a deterministic, multi-stage pipeline: Detect → Decide → Parse → Sanitize
 
 
 ### Stages
@@ -165,7 +165,7 @@ Treat the CSV as untrusted user input.
 * ​Trigger Detection: Check if cell starts with `=, +, -, @`.
 * ​Neutralization: Prepend a single quote '.
     * ​Input: `=SUM(1+1)`
-    * ​Output: `=SUM(1+1)` (Rendered as literal text by spreadsheets).
+    * ​Output: `'=SUM(1+1)` (Rendered as literal text by spreadsheets).
 
 ---
 
