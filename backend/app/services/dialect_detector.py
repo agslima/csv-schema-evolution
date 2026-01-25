@@ -67,7 +67,6 @@ class DialectDetector:
                     best_score = consistency_score
                     best_dialect = (delimiter, quotechar)
             except Exception:
-                # If parsing fails for a specific candidate, we simply skip it.
                 continue
 
         # Fallback to standard Excel dialect if nothing works
@@ -75,7 +74,6 @@ class DialectDetector:
             return csv.get_dialect("excel")
 
         # Register and return the detected dialect
-        # We use a dynamic name to avoid conflicts
         dialect_name = f"auto_{ord(best_dialect[0])}_{ord(best_dialect[1])}"
         try:
             csv.register_dialect(
@@ -89,7 +87,7 @@ class DialectDetector:
     def _get_potential_dialects(self) -> List[Tuple[str, str]]:
         """
         Construct potential dialects (Theta_x).
-        The paper suggests filtering this list, but we use a fixed common set for efficiency.
+        The paper suggests filtering this list, but use a fixed common set for efficiency.
         """
         delimiters = [",", ";", "\t", "|"]
         quotechars = ['"', "'"]
@@ -104,7 +102,7 @@ class DialectDetector:
     ) -> List[List[str]]:
         f = StringIO(sample)
         try:
-            # We use strict=True to fail fast on bad parsing (e.g. unclosed quotes)
+            # Use strict=True to fail fast on bad parsing (e.g. unclosed quotes)
             reader = csv.reader(
                 f, delimiter=delimiter, quotechar=quotechar, strict=True
             )
