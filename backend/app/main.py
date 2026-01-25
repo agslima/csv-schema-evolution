@@ -14,8 +14,6 @@ from app.db.mongo import db_manager
 from app.api.v1.endpoints import files, health
 from app.core.middleware import RequestLogMiddleware
 from app.services.cleanup import delete_expired_files
-
-# FIX: Import the logging setup function we created
 from app.core.logging import setup_logging
 
 # Initialize Scheduler
@@ -60,7 +58,7 @@ app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan, version="1.1.0")
 app.add_middleware(RequestLogMiddleware)
 
 # Configure CORS
-# WARNING: In production, replace ["*"] with specific domains
+# In production, replace ["*"] with specific domains
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
