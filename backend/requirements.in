@@ -9,7 +9,6 @@ motor==3.7.1
 
 # --- Testing & Quality ---
 pylint>=3.0.0
-flake8==7.3.0
 black==26.1.0
 
 # Pin pytest to prevent breaking changes in CI
