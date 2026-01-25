@@ -79,6 +79,11 @@ const API = {
             method: "DELETE"
         });
     },
+
+    getDownloadUrl(fileId) {
+        if (!fileId) throw new Error("Missing File ID");
+        return `${API_BASE_URL}/files/${encodeURIComponent(fileId)}/download`;
+    },
     
     async downloadFile(fileId, filename) {
         const response = await this._request(`/files/${encodeURIComponent(fileId)}/download`, {

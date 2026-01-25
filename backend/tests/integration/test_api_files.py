@@ -178,3 +178,6 @@ async def test_download_file(api_client, mock_db_manager):
         "attachment; filename=cleaned_download.csv"
         in response.headers["content-disposition"]
     )
+    body = response.text
+    assert "col1,col2" in body
+    assert "val1,val2" in body
