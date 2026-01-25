@@ -48,6 +48,7 @@ def test_transposer_malformed_lines():
     content = (
         "Name,John\n"
         "\n"  # Empty line (should be skipped)
+        ",Ignored\n"  # Empty key (should be skipped)
         "Age\n"  # Missing value (should be empty string)
         "City,   \n"  # Empty value with whitespace
     )
@@ -57,6 +58,16 @@ def test_transposer_malformed_lines():
     assert records[0]["Name"] == "John"
     assert records[0]["Age"] == ""
     assert records[0]["City"] == ""
+
+
+def test_transposer_sanitizes_values():
+    """Test that transposed values are sanitized to prevent CSV injection."""
+    content = "Name,=1+1\nAge,25"
+    dialect = csv.get_dialect("excel")
+
+    records, _ = parse_vertical_csv(content, dialect)
+
+    assert records[0]["Name"] == "'=1+1"
 
 
 def test_transposer_error_handling():
