@@ -1,4 +1,3 @@
-# Use an official Python runtime as a parent image
 FROM python:3.14-slim
 
 # 2. Environment Variables (Security & Performance)
@@ -11,7 +10,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # 4. Security: Create a non-root user
-# We create a system group 'appgroup' and user 'appuser'
+# Create a system group 'appgroup' and user 'appuser'
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
 # Copy the requirements file first to leverage Docker cache
@@ -21,12 +20,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 6. Copy Application Code
-# We copy the 'backend' folder content into '/app'
-# CRITICAL: We change ownership to the non-root user immediately
+# Change ownership to the non-root user immediately
 COPY --chown=appuser:appgroup . .
 
 # 7. Security: Switch to Non-Root User
-# From this point on, the container runs as 'appuser'
 USER appuser
 
 # Make port 8000 available to the world outside this container
