@@ -98,7 +98,7 @@ def _group_records_by_id(records: List[Dict], id_field: Optional[str]) -> List[D
 
 
 def _parse_csv_sync(
-    content: str, id_field: Optional[str]
+    content: str, id_field: Optional[str] = None
 ) -> Tuple[List[Dict], List[str]]:
     """
     Synchronous logic to parse, sanitize, and extract schema from CSV content.
