@@ -4,11 +4,9 @@ to achieve 100% code coverage.
 """
 
 import csv
-from io import BytesIO
 from unittest.mock import patch
 
 import pytest
-from fastapi import UploadFile
 
 from app.services.csv_handler import (
     _parse_csv_sync,
@@ -16,7 +14,7 @@ from app.services.csv_handler import (
     process_csv_content,
 )
 from app.services.dialect_detector import DialectDetector
-from app.utils.storage import save_file_to_gridfs
+from app.repositories import file_repository
 
 # --- 1. CSV Handler Edge Cases ---
 
@@ -143,18 +141,18 @@ def test_detector_empty_cells_score():
 @pytest.mark.asyncio
 async def test_storage_max_size_exceeded():
     """Hits: if len(content) > settings.max_file_size_bytes"""
-    # Create a small file
-    file = UploadFile(file=BytesIO(b"12345"), filename="test.txt")
+    content = b"12345"
+    filename = "test.txt"
 
-    # FIX: Patch the 'settings' object imported in app.utils.storage
+    # FIX: Patch the 'settings' object imported in app.repositories.file_repository
     # This bypasses Pydantic property restrictions entirely
-    with patch("app.utils.storage.settings") as mock_settings:
+    with patch("app.repositories.file_repository.settings") as mock_settings:
         # Set the mock to have a tiny max size
         mock_settings.max_file_size_bytes = 1
 
         with pytest.raises(ValueError) as exc:
             # We explicitly await the function using the file variable
-            await save_file_to_gridfs(file)
+            await file_repository.save_file(content, filename)
 
         assert "exceeds maximum size" in str(exc.value)
 

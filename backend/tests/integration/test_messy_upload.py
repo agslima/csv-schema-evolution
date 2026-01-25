@@ -37,7 +37,7 @@ async def test_upload_messy_csv_end_to_end():
 
     # 2. Setup Manual Mocks
     # Ensure this patch path matches your actual file structure
-    with patch("app.utils.storage.db_manager") as mock_db_manager:
+    with patch("app.repositories.file_repository.db_manager") as mock_db_manager:
 
         # Setup GridFS Mocks
         mock_fs = MagicMock()
@@ -66,8 +66,10 @@ async def test_upload_messy_csv_end_to_end():
 
         # 3. Perform the Request
         # We also patch encryption to be a pass-through identity function
-        with patch("app.utils.storage.encrypt_data", side_effect=lambda x: x), patch(
-            "app.utils.storage.decrypt_data", side_effect=lambda x: x
+        with patch(
+            "app.repositories.file_repository.encrypt_data", side_effect=lambda x: x
+        ), patch(
+            "app.repositories.file_repository.decrypt_data", side_effect=lambda x: x
         ):
 
             async with AsyncClient(

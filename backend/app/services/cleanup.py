@@ -5,9 +5,7 @@ Background cleanup service for expired files.
 import logging
 from datetime import datetime, timedelta, timezone
 from app.db.mongo import db_manager
-
-# FIX E0611: Import storage from the correct location (utils)
-from app.utils import storage
+from app.repositories import file_repository
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +37,7 @@ async def delete_expired_files():
             file_id = str(doc["_id"])
             try:
                 # Reuse our robust delete logic (which handles GridFS + Metadata)
-                await storage.delete_file(file_id)
+                await file_repository.delete_file(file_id)
                 deleted_count += 1
                 logger.info("Auto-deleted expired file: %s", file_id)
             # pylint: disable=broad-exception-caught

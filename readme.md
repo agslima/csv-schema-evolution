@@ -1,6 +1,6 @@
 # CSV Ingestion & Processing Engine
 
-### Backend‑First Data Ingestion Service (FastAPI + MongoDB GridFS)
+## Backend‑First Data Ingestion Service (FastAPI + MongoDB GridFS)
 
 <p align="left">
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml">
@@ -42,17 +42,17 @@ This project focuses on **data safety, correctness, and operational transparency
 
 In real production environments, CSV files are rarely clean or standardized. Users frequently upload files with:
 
-* Inconsistent schemas and repeated keys
-* Missing or optional fields
-* Unknown delimiters and quoting rules
-* Data that may trigger **CSV / Formula Injection** when opened in spreadsheet software
+- Inconsistent schemas and repeated keys
+- Missing or optional fields
+- Unknown delimiters and quoting rules
+- Data that may trigger **CSV / Formula Injection** when opened in spreadsheet software
 
 Existing online CSV tools were **not an option** due to:
 
-* LGPD and data protection constraints
-* Sensitive client information
-* Lack of transparency in processing pipelines
-* No guarantees around sanitization or secure storage
+- LGPD and data protection constraints
+- Sensitive client information
+- Lack of transparency in processing pipelines
+- No guarantees around sanitization or secure storage
 
 This system was designed to address these issues in a **controlled and auditable backend service**.
 
@@ -62,9 +62,9 @@ This system was designed to address these issues in a **controlled and auditable
 
 ### Prerequisites
 
-* Docker & Docker Compose
+- Docker & Docker Compose
 
-##### 1. Clone the repository
+#### 1. Clone the repository
 
 ```bash
 git clone https://github.com/agslima/csv-schema-evolution.git
@@ -79,8 +79,8 @@ docker-compose up -d --build
 
 #### 2. Access the Interfaces
 
-* **Web UI:** http://localhost:3000
-* **API Docs (Swagger):** http://localhost:8000/docs
+- **Web UI:** http://localhost:3000
+- **API Docs (Swagger):** http://localhost:8000/docs
 
 ---
 
@@ -115,7 +115,7 @@ Processed Table Preview
 ---
 -->
 
-## What the Engine Does 
+## What the Engine Does
 
 The engine ingests unstructured or semi‑structured CSV files and converts them into **normalized, user‑friendly tabular data**.
 
@@ -125,10 +125,10 @@ The engine ingests unstructured or semi‑structured CSV files and converts them
 
 ### Key Outcomes
 
-* Safe ingestion of untrusted CSV files
-* Automatic schema inference without user configuration
-* Protection against spreadsheet‑based attacks
-* Structured output suitable for analytics, migration, or reporting pipelines
+- Safe ingestion of untrusted CSV files
+- Automatic schema inference without user configuration
+- Protection against spreadsheet‑based attacks
+- Structured output suitable for analytics, migration, or reporting pipelines
 
 ---
 
@@ -148,10 +148,10 @@ graph LR
 
 ### Design Tradeoffs
 
-* **FastAPI + async I/O** for high concurrency during file uploads
-* **MongoDB GridFS** was chosen to simplify transactional consistency between file storage and metadata during early ingestion stages, with future support for object storage planned.
-* **Heuristic dialect detection** to avoid forcing users to configure CSV formats
-* **Encryption at rest** to minimize exposure of sensitive data
+- **FastAPI + async I/O** for high concurrency during file uploads
+- **MongoDB GridFS** was chosen to simplify transactional consistency between file storage and metadata during early ingestion stages, with future support for object storage planned.
+- **Heuristic dialect detection** to avoid forcing users to configure CSV formats
+- **Encryption at rest** to minimize exposure of sensitive data
 
 > [!NOTE]
 > When **dialect detection** confidence falls below a defined threshold, the engine **fails fast** with an explicit error rather than producing ambiguous output.
@@ -168,21 +168,49 @@ Detailed architecture documentation is available in `/docs`.
 | GET    | `/api/v1/files/`              | List uploaded files and metadata         |
 | GET    | `/api/v1/files/{id}/download` | Download decrypted CSV                   |
 | DELETE | `/api/v1/files/{id}`          | Permanently delete file and metadata     |
-| GET    | `/api/v1/health`              | Health check                             |
+| GET    | `/api/v1/health`              | Liveness check (legacy)                  |
+| GET    | `/api/v1/health/live`         | Liveness check                           |
+| GET    | `/api/v1/health/ready`        | Readiness check (Mongo + GridFS)         |
 
 Full request/response payloads and error models are documented in `docs/api-reference.md`.
 
 ---
 
-## Security & Compliance (Summary) 
+## Health Checks
+
+- Liveness: `/api/v1/health/live` (or `/api/v1/health` for legacy) returns `{"status":"ok"}`.
+- Readiness: `/api/v1/health/ready` returns dependency status and responds with `503` when Mongo/GridFS is unavailable.
+- Docker Compose: backend healthcheck calls `/api/v1/health/ready` (see `docker-compose.yml`).
+
+### Kubernetes probes (example)
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /api/v1/health/live
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /api/v1/health/ready
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 10
+```
+
+---
+
+## Security & Compliance (Summary)
 
 Security is enforced **by design**, not as an afterthought:
 
-* Encryption at rest using AES (Fernet)
-* Strict file type and size validation (default 50MB)
-* Active mitigation of CSV / Formula Injection (`=`, `+`, `-`, `@`)
-* No third‑party data processing services
-* Clear separation between raw file storage and metadata
+- Encryption at rest using AES (Fernet)
+- Strict file type and size validation (default 50MB)
+- Active mitigation of CSV / Formula Injection (`=`, `+`, `-`, `@`)
+- No third‑party data processing services
+- Clear separation between raw file storage and metadata
 
 The system is designed with LGPD principles in mind, including **data minimization**, **purpose limitation**, and **access control**. Full details are available in `docs/security.md`.
 
@@ -194,9 +222,9 @@ The project is developed using **Test-Driven Development (TDD)** and maintains *
 
 Test levels include:
 
-* Unit tests for core algorithms (dialect detection, sanitization)
-* Integration tests covering full HTTP request lifecycles
-* Storage and database interaction tests
+- Unit tests for core algorithms (dialect detection, sanitization)
+- Integration tests covering full HTTP request lifecycles
+- Storage and database interaction tests
 
 Coverage is continuously measured via **Codecov** and enforced in CI. See `docs/testing.md` for details.
 
@@ -208,11 +236,11 @@ The CI/CD pipeline is designed to detect security issues early and ensure **arti
 
 Every commit and pull request triggers an automated workflow that performs:
 
-* **Secret Scanning** — Prevents accidental leakage of credentials and sensitive values before code is merged.
-* **Static Analysis & Dependency Scanning** — Identifies vulnerable dependencies and insecure code patterns in both application code and third‑party libraries.
-* **Automated Testing & Coverage Enforcement** — Ensures correctness, guards against regressions, and enforces coverage thresholds.
-* **Container Hardening** — Validates Dockerfiles and scans container images for known vulnerabilities.
-* **Artifact Integrity & Provenance** — Built images are signed and accompanied by a Software Bill of Materials (SBOM).
+- **Secret Scanning** — Prevents accidental leakage of credentials and sensitive values before code is merged.
+- **Static Analysis & Dependency Scanning** — Identifies vulnerable dependencies and insecure code patterns in both application code and third‑party libraries.
+- **Automated Testing & Coverage Enforcement** — Ensures correctness, guards against regressions, and enforces coverage thresholds.
+- **Container Hardening** — Validates Dockerfiles and scans container images for known vulnerabilities.
+- **Artifact Integrity & Provenance** — Built images are signed and accompanied by a Software Bill of Materials (SBOM).
 
 This pipeline reduces supply‑chain risk and provides the traceability required for security reviews and compliance audits.
 
@@ -246,18 +274,18 @@ Logging configuration and operational guidance are documented in `docs/logging.m
 
 ---
 
-## Documentation Index 
+## Documentation Index
 
 For detailed implementation guides, please refer to:
 
-* 📡 API Reference — [`docs/api-reference.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/api-reference.md)
-* 🏗 Architecture — [`docs/architecture.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/architecture.md)
-* ⚙ Processing Engine — [`docs/processing-engine.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/processing-engine.md)
-* 🔁 CI/CD & Supply Chain Security — [`docs/ci-cd.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/ci-cd.md)
-* 🔒 Security & Compliance — [`docs/security.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/security.md)
-* 🧪 Testing Strategy — [`docs/testing.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/testing.md)
-* 📝 Logging & Observability — [`docs/logging.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/logging.md)
-* 🚀 Setup & Installation Guide — [`docs/setup.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/setup.md)
+- 📡 API Reference — [`docs/api-reference.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/api-reference.md)
+- 🏗 Architecture — [`docs/architecture.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/architecture.md)
+- ⚙ Processing Engine — [`docs/processing-engine.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/processing-engine.md)
+- 🔁 CI/CD & Supply Chain Security — [`docs/ci-cd.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/ci-cd.md)
+- 🔒 Security & Compliance — [`docs/security.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/security.md)
+- 🧪 Testing Strategy — [`docs/testing.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/testing.md)
+- 📝 Logging & Observability — [`docs/logging.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/logging.md)
+- 🚀 Setup & Installation Guide — [`docs/setup.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/setup.md)
   
 ---
 
@@ -265,11 +293,11 @@ For detailed implementation guides, please refer to:
 
 Planned enhancements aligned with real ingestion pipelines:
 
-* Chunked processing for large datasets
-* RFC 4180‑compliant parsing
-* Export formats (Parquet, JSON, XLSX)
-* Background workers (Celery + Redis)
-* Role‑based access control (RBAC)
+- Chunked processing for large datasets
+- RFC 4180‑compliant parsing
+- Export formats (Parquet, JSON, XLSX)
+- Background workers (Celery + Redis)
+- Role‑based access control (RBAC)
 
 <!--
 ---
@@ -283,6 +311,6 @@ Planned enhancements aligned with real ingestion pipelines:
 -->
 ---
 
-## License 
+## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.

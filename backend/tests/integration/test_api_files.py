@@ -32,6 +32,25 @@ async def test_health_check(api_client):
 
 
 @pytest.mark.asyncio
+async def test_liveness_check(api_client):
+    """Test liveness check endpoint."""
+    response = await api_client.get("/api/v1/health/live")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
+
+@pytest.mark.asyncio
+async def test_readiness_check(api_client):
+    """Test readiness check endpoint."""
+    response = await api_client.get("/api/v1/health/ready")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ok"
+    assert data["dependencies"]["mongo"]["status"] == "ok"
+    assert data["dependencies"]["gridfs"]["status"] == "ok"
+
+
+@pytest.mark.asyncio
 async def test_upload_valid_csv(api_client, mock_db_manager):
     """Test basic CSV file upload and processing."""
     # 1. Setup Data
@@ -129,6 +148,7 @@ async def test_upload_process_delete_flow(api_client, mock_db_manager):
     assert any(f["id"] == file_id for f in all_files)
 
     # 3. Delete
+    mock_db_manager.db.files.find_one = AsyncMock(return_value=mock_file_doc)
     mock_db_manager.db.files.delete_one.return_value.deleted_count = 1
     delete_res = await api_client.delete(f"{BASE_URL}/{file_id}")
     assert delete_res.status_code == 200
@@ -145,6 +165,7 @@ async def test_delete_nonexistent_file(api_client, mock_db_manager):
     fake_id = str(ObjectId())
 
     # Mock delete_one to return 0 deleted documents
+    mock_db_manager.db.files.find_one = AsyncMock(return_value=None)
     mock_db_manager.db.files.delete_one.return_value.deleted_count = 0
 
     response = await api_client.delete(f"{BASE_URL}/{fake_id}")
@@ -158,16 +179,21 @@ async def test_download_file(api_client, mock_db_manager):
     """Test downloading a file."""
     # 1. Setup Mock
     file_id = str(ObjectId())
-    mock_doc = {"_id": ObjectId(file_id), "filename": "download.csv"}
+    mock_doc = {
+        "_id": ObjectId(file_id),
+        "filename": "download.csv",
+        "processed_fs_id": ObjectId(),
+    }
     # AsyncMock for find_one since Motor is async here, but usually we mock the result directly
     # Ideally find_one returns a coroutine.
     mock_db_manager.db.files.find_one = AsyncMock(return_value=mock_doc)
 
-    # Mock content retrieval from storage util
+    # Mock content retrieval from repository
     with patch(
-        "app.utils.storage.get_file_content_as_string", new_callable=AsyncMock
+        "app.repositories.file_repository.get_file_content_as_bytes",
+        new_callable=AsyncMock,
     ) as mock_get_content:
-        mock_get_content.return_value = "col1,col2\nval1,val2"
+        mock_get_content.return_value = b"col1,col2\nval1,val2"
 
         # 2. Request
         response = await api_client.get(f"{BASE_URL}/{file_id}/download")

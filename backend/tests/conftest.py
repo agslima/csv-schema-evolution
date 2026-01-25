@@ -33,6 +33,7 @@ def mock_db_manager():
     """
     # 1. Create Mocks
     mock_fs = MagicMock()
+    mock_fs.bucket_name = "fs"
 
     # Configure Upload Stream
     mock_upload_stream = AsyncMock()
@@ -51,8 +52,13 @@ def mock_db_manager():
     mock_fs.delete = AsyncMock()
     mock_files_coll = AsyncMock()
 
+    mock_gridfs_files = MagicMock()
+    mock_gridfs_files.find_one = AsyncMock(return_value=None)
+
     mock_db_obj = MagicMock()
     mock_db_obj.files = mock_files_coll
+    mock_db_obj.command = AsyncMock(return_value={"ok": 1})
+    mock_db_obj.__getitem__.return_value = mock_gridfs_files
 
     # 2. Save Original State
     original_fs = db_manager.fs_bucket
@@ -63,10 +69,9 @@ def mock_db_manager():
     db_manager.db = mock_db_obj
 
     # 4. Patch Encryption to be Pass-through
-    # FIX: Updated paths to point to 'app.utils.storage' instead of 'app.services.storage'
-    with patch("app.utils.storage.encrypt_data", side_effect=lambda x: x), patch(
-        "app.utils.storage.decrypt_data", side_effect=lambda x: x
-    ):
+    with patch(
+        "app.repositories.file_repository.encrypt_data", side_effect=lambda x: x
+    ), patch("app.repositories.file_repository.decrypt_data", side_effect=lambda x: x):
 
         yield db_manager
 
