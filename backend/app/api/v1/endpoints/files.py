@@ -24,12 +24,12 @@ async def upload_file(
     """
     try:
         return await file_service.save_upload(file, id_field)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    except Exception as e:
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err)) from err
+    except Exception as err:
         raise HTTPException(
-            status_code=500, detail=f"Internal Server Error: {str(e)}"
-        ) from e
+            status_code=500, detail=f"Internal Server Error: {str(err)}"
+        ) from err
 
 
 @router.get("/")
@@ -55,14 +55,14 @@ async def download_file(file_id: str):
             media_type="text/csv",
             headers={"Content-Disposition": f"attachment; filename=cleaned_{filename}"},
         )
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail="File not found") from e
+    except FileNotFoundError as err:
+        raise HTTPException(status_code=404, detail="File not found") from err
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception as err:
         raise HTTPException(
-            status_code=500, detail=f"Error generating download: {e}"
-        ) from e
+            status_code=500, detail=f"Error generating download: {err}"
+        ) from err
 
 
 @router.delete("/{file_id}")

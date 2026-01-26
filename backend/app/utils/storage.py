@@ -52,9 +52,14 @@ async def update_file_status(
     Updates the file processing status, fields, count, and error messages.
     """
     _warn_deprecated()
-    await file_repository.update_file_status(
-        file_id, status, fields=fields, count=count, error_msg=error_msg
-    )
+    updates = {}
+    if fields is not None:
+        updates["fields"] = fields
+    if count is not None:
+        updates["records_count"] = count
+    if error_msg:
+        updates["error_message"] = error_msg
+    await file_repository.update_file_status(file_id, status, updates=updates)
 
 
 async def delete_file(file_id: str) -> bool:

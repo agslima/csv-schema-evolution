@@ -12,6 +12,7 @@ from app.services.csv_handler import (
     _parse_csv_sync,
     _detect_dialect,
     process_csv_content,
+    _sanitize_row,
 )
 from app.services.dialect_detector import DialectDetector
 from app.repositories import file_repository
@@ -74,6 +75,18 @@ def test_handler_malformed_rows():
     # FIX: Expect 'val' (stripped) instead of ' val '
     # The sanitize_cell_value function uses .strip(), so this is the correct expected behavior.
     assert records[0]["col2"] == "val"
+
+
+def test_handler_sanitize_row_empty():
+    """Hits: _sanitize_row returning None when no usable fields exist."""
+    sanitized = _sanitize_row({None: "value"})
+    assert sanitized is None
+
+
+def test_handler_sanitize_row_strips_fields():
+    """Hits: field/value cleanup in _sanitize_row."""
+    sanitized = _sanitize_row({" col ": " value "})
+    assert sanitized["col"] == "value"
 
 
 @pytest.mark.asyncio

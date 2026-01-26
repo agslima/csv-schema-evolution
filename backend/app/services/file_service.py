@@ -35,8 +35,8 @@ async def save_upload(file: UploadFile, id_field: Optional[str] = None) -> Dict:
         await file_repository.create_file_metadata(file_id, file.filename)
         try:
             content_str = content.decode("utf-8-sig")
-        except Exception as e:
-            raise ValueError(f"Could not decode file content: {e}") from e
+        except Exception as err:
+            raise ValueError(f"Could not decode file content: {err}") from err
 
         records, fields = await csv_handler.process_csv_content(content_str, id_field)
         clean_csv_content = _build_sanitized_csv(records, fields)
@@ -47,9 +47,11 @@ async def save_upload(file: UploadFile, id_field: Optional[str] = None) -> Dict:
         await file_repository.update_file_status(
             str(file_id),
             status="processed",
-            fields=fields,
-            count=len(records),
-            processed_fs_id=processed_file_id,
+            updates={
+                "fields": fields,
+                "records_count": len(records),
+                "processed_fs_id": processed_file_id,
+            },
         )
 
         return {
@@ -60,17 +62,21 @@ async def save_upload(file: UploadFile, id_field: Optional[str] = None) -> Dict:
             "fields": fields,
         }
 
-    except ValueError as e:
+    except ValueError as err:
         if file_id:
             await file_repository.update_file_status(
-                str(file_id), status="error", error_msg=str(e)
+                str(file_id),
+                status="error",
+                updates={"error_message": str(err)},
             )
         raise
 
     except Exception:
         if file_id:
             await file_repository.update_file_status(
-                str(file_id), status="error", error_msg="Internal Processing Error"
+                str(file_id),
+                status="error",
+                updates={"error_message": "Internal Processing Error"},
             )
         raise
 
@@ -123,9 +129,11 @@ async def download_processed_file(file_id: str) -> Tuple[bytes, str]:
     await file_repository.update_file_status(
         file_id,
         status="processed",
-        fields=fields,
-        count=len(records),
-        processed_fs_id=processed_file_id,
+        updates={
+            "fields": fields,
+            "records_count": len(records),
+            "processed_fs_id": processed_file_id,
+        },
     )
 
     return processed_bytes, doc["filename"]

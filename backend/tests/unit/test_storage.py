@@ -109,3 +109,41 @@ async def test_delete_file_not_found_in_metadata(mock_db_manager):
     mock_db_manager.db.files.delete_one.assert_not_called()
     # GridFS delete should NOT be called if metadata wasn't found
     mock_db_manager.fs_bucket.delete.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_update_file_status_sets_only_status(mock_db_manager):
+    """Ensures update_file_status handles no extra updates."""
+    file_id = str(ObjectId())
+
+    await file_repository.update_file_status(file_id, status="pending", updates=None)
+
+    args, _ = mock_db_manager.db.files.update_one.call_args
+    assert args[0] == {"_id": ObjectId(file_id)}
+    assert args[1] == {"$set": {"status": "pending"}}
+
+
+@pytest.mark.asyncio
+async def test_update_file_status_normalizes_updates(mock_db_manager):
+    """Ensures update_file_status normalizes update payloads."""
+    file_id = str(ObjectId())
+    processed_id = ObjectId()
+
+    await file_repository.update_file_status(
+        file_id,
+        status="processed",
+        updates={
+            "fields": ["col1"],
+            "records_count": 1,
+            "processed_fs_id": str(processed_id),
+            "error_message": "",
+        },
+    )
+
+    args, _ = mock_db_manager.db.files.update_one.call_args
+    update_payload = args[1]["$set"]
+    assert update_payload["status"] == "processed"
+    assert update_payload["fields"] == ["col1"]
+    assert update_payload["records_count"] == 1
+    assert update_payload["processed_fs_id"] == processed_id
+    assert "error_message" not in update_payload

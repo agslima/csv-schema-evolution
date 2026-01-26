@@ -46,7 +46,7 @@ async def readiness_check(response: Response):
         try:
             await db_manager.db.command("ping")
             dependencies["mongo"] = {"status": "ok"}
-        # pylint: disable=broad-exception-caught
+        # pylint: disable=broad-except
         except Exception as exc:
             dependencies["mongo"] = {"status": "error", "detail": str(exc)}
             ready = False
@@ -62,7 +62,7 @@ async def readiness_check(response: Response):
             bucket_name = db_manager.fs_bucket.bucket_name
             await db_manager.db[f"{bucket_name}.files"].find_one({})
             dependencies["gridfs"] = {"status": "ok", "bucket": bucket_name}
-        # pylint: disable=broad-exception-caught
+        # pylint: disable=broad-except
         except Exception as exc:
             dependencies["gridfs"] = {"status": "error", "detail": str(exc)}
             ready = False

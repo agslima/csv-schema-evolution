@@ -60,6 +60,21 @@ def _ensure_object_id(value: Union[str, ObjectId]) -> ObjectId:
     return ObjectId(value)
 
 
+def _normalize_status_updates(updates: Optional[dict]) -> dict:
+    if not updates:
+        return {}
+
+    normalized = dict(updates)
+    processed_fs_id = normalized.get("processed_fs_id")
+    if processed_fs_id is not None:
+        normalized["processed_fs_id"] = _ensure_object_id(processed_fs_id)
+
+    if "error_message" in normalized and not normalized["error_message"]:
+        normalized.pop("error_message")
+
+    return normalized
+
+
 async def get_file_content_as_bytes(file_id: Union[str, ObjectId]) -> bytes:
     """Retrieves file bytes from GridFS and decrypts."""
     try:
@@ -67,8 +82,8 @@ async def get_file_content_as_bytes(file_id: Union[str, ObjectId]) -> bytes:
         grid_out = await db_manager.fs_bucket.open_download_stream(oid)
         encrypted_content = await grid_out.read()
         return decrypt_data(encrypted_content)
-    except Exception as e:
-        raise ValueError(f"Could not read/decrypt file from storage: {e}") from e
+    except Exception as err:
+        raise ValueError(f"Could not read/decrypt file from storage: {err}") from err
 
 
 async def get_file_content_as_string(file_id: Union[str, ObjectId]) -> str:
@@ -80,24 +95,13 @@ async def get_file_content_as_string(file_id: Union[str, ObjectId]) -> str:
 async def update_file_status(
     file_id: str,
     status: str,
-    fields: Optional[List[str]] = None,
-    count: Optional[int] = 0,
-    error_msg: Optional[str] = None,
-    processed_fs_id: Optional[Union[str, ObjectId]] = None,
+    updates: Optional[dict] = None,
 ) -> None:
     """
     Updates the file processing status, fields, count, and error messages.
     """
     update_data = {"status": status}
-
-    if fields is not None:
-        update_data["fields"] = fields
-    if count is not None:
-        update_data["records_count"] = count
-    if error_msg:
-        update_data["error_message"] = error_msg
-    if processed_fs_id is not None:
-        update_data["processed_fs_id"] = _ensure_object_id(processed_fs_id)
+    update_data.update(_normalize_status_updates(updates))
 
     await db_manager.db.files.update_one(
         {"_id": ObjectId(file_id)},

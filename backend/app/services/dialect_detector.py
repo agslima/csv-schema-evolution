@@ -50,7 +50,7 @@ class DialectDetector:
         best_score = -1.0
 
         for delimiter, quotechar in candidates:
-            # pylint: disable=broad-exception-caught
+            # pylint: disable=broad-except
             try:
                 rows = self._parse_sample(sample, delimiter, quotechar)
                 if not rows:
@@ -92,19 +92,19 @@ class DialectDetector:
         delimiters = [",", ";", "\t", "|"]
         quotechars = ['"', "'"]
         candidates = []
-        for d in delimiters:
-            for q in quotechars:
-                candidates.append((d, q))
+        for delimiter in delimiters:
+            for quotechar in quotechars:
+                candidates.append((delimiter, quotechar))
         return candidates
 
     def _parse_sample(
         self, sample: str, delimiter: str, quotechar: str
     ) -> List[List[str]]:
-        f = StringIO(sample)
+        sample_io = StringIO(sample)
         try:
             # Use strict=True to fail fast on bad parsing (e.g. unclosed quotes)
             reader = csv.reader(
-                f, delimiter=delimiter, quotechar=quotechar, strict=True
+                sample_io, delimiter=delimiter, quotechar=quotechar, strict=True
             )
             return list(reader)
         except csv.Error:

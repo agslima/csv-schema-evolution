@@ -18,7 +18,7 @@ class DatabaseManager:
     """
 
     client: AsyncIOMotorClient = None
-    db = None
+    db = None  # pylint: disable=invalid-name
     # FIX: Update type hint to AsyncIOMotorGridFSBucket
     fs_bucket: AsyncIOMotorGridFSBucket = None
 
@@ -26,16 +26,16 @@ class DatabaseManager:
         """Establishes the connection to MongoDB."""
         try:
             self.client = AsyncIOMotorClient(settings.MONGO_URI)
-            self.db = self.client[settings.DB_NAME]
+            self.db = self.client[settings.DB_NAME]  # pylint: disable=invalid-name
 
             # FIX: Initialize the Async Bucket
             # The standard 'GridFSBucket(self.db)' fails because self.db is async
             self.fs_bucket = AsyncIOMotorGridFSBucket(self.db)
 
             logger.info("Successfully connected to MongoDB at %s", settings.MONGO_URI)
-        # pylint: disable=broad-exception-caught
-        except Exception as e:
-            logger.error("Failed to connect to MongoDB: %s", e)
+        # pylint: disable=broad-except
+        except Exception as err:
+            logger.error("Failed to connect to MongoDB: %s", err)
             raise
 
     def close(self):

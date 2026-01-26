@@ -40,15 +40,15 @@ async def delete_expired_files():
                 await file_repository.delete_file(file_id)
                 deleted_count += 1
                 logger.info("Auto-deleted expired file: %s", file_id)
-            # pylint: disable=broad-exception-caught
-            except Exception as e:
-                logger.error("Failed to auto-delete file %s: %s", file_id, e)
+            # pylint: disable=broad-except
+            except Exception as err:
+                logger.error("Failed to auto-delete file %s: %s", file_id, err)
 
         if deleted_count > 0:
             logger.info("Cleanup complete. Removed %d expired files.", deleted_count)
         else:
             logger.info("Cleanup complete. No expired files found.")
 
-    # pylint: disable=broad-exception-caught
-    except Exception as e:
-        logger.error("Error during scheduled cleanup: %s", e)
+    # pylint: disable=broad-except
+    except Exception as err:
+        logger.error("Error during scheduled cleanup: %s", err)
