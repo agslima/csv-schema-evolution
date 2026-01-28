@@ -1,6 +1,3 @@
-from app.utils import storage
-
-
 [run]
 branch = True
 source = app
