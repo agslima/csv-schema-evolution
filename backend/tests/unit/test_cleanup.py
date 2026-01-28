@@ -30,9 +30,9 @@ async def test_cleanup_deletes_old_files(mock_db_manager):
     # instead of returning a coroutine (which AsyncMock does by default).
     mock_db_manager.db.files.find = MagicMock(return_value=mock_cursor_generator())
 
-    # 2. Execute intercepting storage.delete_file
+    # 2. Execute intercepting file_repository.delete_file
     with patch(
-        "app.services.cleanup.storage.delete_file", new_callable=AsyncMock
+        "app.services.cleanup.file_repository.delete_file", new_callable=AsyncMock
     ) as mock_delete_fn:
         await delete_expired_files()
 

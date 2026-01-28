@@ -2,14 +2,11 @@
 Unit tests for storage security (Encryption/Decryption).
 """
 
-from io import BytesIO
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import patch, AsyncMock, MagicMock, call
 import pytest
 from bson import ObjectId
-from fastapi import UploadFile
 
-from app.utils import storage
-from app.utils.storage import delete_file
+from app.repositories import file_repository
 
 
 @pytest.mark.asyncio
@@ -21,9 +18,6 @@ async def test_save_file_encrypts_data(mock_db_manager):
     filename = "test_secure.csv"
     raw_content = b"user,email\n1,test@test.com"
 
-    # Simulate a FastAPI UploadFile
-    file_obj = UploadFile(filename=filename, file=BytesIO(raw_content))
-
     # Mock the GridFS upload stream
     grid_in_mock = AsyncMock()
     # pylint: disable=protected-access
@@ -33,10 +27,10 @@ async def test_save_file_encrypts_data(mock_db_manager):
     mock_db_manager.fs_bucket.open_upload_stream.return_value = grid_in_mock
 
     # 2. Execute and Intercept Encryption
-    with patch("app.utils.storage.encrypt_data") as mock_encrypt:
+    with patch("app.repositories.file_repository.encrypt_data") as mock_encrypt:
         mock_encrypt.return_value = b"ENCRYPTED_BYTES"
 
-        file_id = await storage.save_file_to_gridfs(file_obj)
+        file_id = await file_repository.save_file(raw_content, filename)
 
         # 3. Asserts
         mock_encrypt.assert_called_once_with(raw_content)
@@ -68,10 +62,10 @@ async def test_get_file_decrypts_data(mock_db_manager):
     # --- FIX END ---
 
     # 2. Execute
-    with patch("app.utils.storage.decrypt_data") as mock_decrypt:
+    with patch("app.repositories.file_repository.decrypt_data") as mock_decrypt:
         mock_decrypt.return_value = b"original,content"
 
-        result = await storage.get_file_content_as_string(file_id)
+        result = await file_repository.get_file_content_as_string(file_id)
 
         # 3. Asserts
         mock_decrypt.assert_called_once_with(encrypted_content)
@@ -82,16 +76,23 @@ async def test_get_file_decrypts_data(mock_db_manager):
 async def test_delete_file_success(mock_db_manager):
     """Test successful deletion of metadata and gridfs content."""
     fake_id = str(ObjectId())
+    processed_id = ObjectId()
+    mock_doc = {"_id": ObjectId(fake_id), "processed_fs_id": processed_id}
+
+    mock_db_manager.db.files.find_one = AsyncMock(return_value=mock_doc)
 
     # Mock delete_one to return deleted_count=1
     mock_db_manager.db.files.delete_one.return_value.deleted_count = 1
 
     # Execute
-    result = await delete_file(fake_id)
+    result = await file_repository.delete_file(fake_id)
 
     assert result is True
     # Ensure GridFS delete was called
-    mock_db_manager.fs_bucket.delete.assert_called_once()
+    mock_db_manager.fs_bucket.delete.assert_has_calls(
+        [call(ObjectId(fake_id)), call(processed_id)],
+        any_order=True,
+    )
 
 
 @pytest.mark.asyncio
@@ -99,12 +100,50 @@ async def test_delete_file_not_found_in_metadata(mock_db_manager):
     """Test deletion when file does not exist in metadata."""
     fake_id = str(ObjectId())
 
-    # Mock delete_one to return deleted_count=0
-    mock_db_manager.db.files.delete_one.return_value.deleted_count = 0
+    mock_db_manager.db.files.find_one = AsyncMock(return_value=None)
 
     # Execute
-    result = await delete_file(fake_id)
+    result = await file_repository.delete_file(fake_id)
 
     assert result is False
+    mock_db_manager.db.files.delete_one.assert_not_called()
     # GridFS delete should NOT be called if metadata wasn't found
     mock_db_manager.fs_bucket.delete.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_update_file_status_sets_only_status(mock_db_manager):
+    """Ensures update_file_status handles no extra updates."""
+    file_id = str(ObjectId())
+
+    await file_repository.update_file_status(file_id, status="pending", updates=None)
+
+    args, _ = mock_db_manager.db.files.update_one.call_args
+    assert args[0] == {"_id": ObjectId(file_id)}
+    assert args[1] == {"$set": {"status": "pending"}}
+
+
+@pytest.mark.asyncio
+async def test_update_file_status_normalizes_updates(mock_db_manager):
+    """Ensures update_file_status normalizes update payloads."""
+    file_id = str(ObjectId())
+    processed_id = ObjectId()
+
+    await file_repository.update_file_status(
+        file_id,
+        status="processed",
+        updates={
+            "fields": ["col1"],
+            "records_count": 1,
+            "processed_fs_id": str(processed_id),
+            "error_message": "",
+        },
+    )
+
+    args, _ = mock_db_manager.db.files.update_one.call_args
+    update_payload = args[1]["$set"]
+    assert update_payload["status"] == "processed"
+    assert update_payload["fields"] == ["col1"]
+    assert update_payload["records_count"] == 1
+    assert update_payload["processed_fs_id"] == processed_id
+    assert "error_message" not in update_payload

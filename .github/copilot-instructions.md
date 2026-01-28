@@ -2,83 +2,82 @@
 
 # Agent Instructions — csv_schema_evolution
 
-Resumo curto: este repositório expõe uma API de upload/processing de CSVs (backend em FastAPI, armazenamento em MongoDB GridFS, frontend JS simples). As instruções abaixo destacam a arquitetura, padrões e comandos concretos que ajudam um agente a ser produtivo imediatamente.
+Resumo curto: este repositorio expoe uma API de upload/processing de CSVs
+(FastAPI + MongoDB/GridFS) e um frontend estatico em JS. As instrucoes abaixo
+refletem o codigo atual.
 
 ## Arquitetura (big picture)
-- **Frontend**: arquivos estáticos em `frontend/` (`upload.js`, `files_list.js`) chamam a API REST para upload/listagem/download.
-- **Backend**: FastAPI no diretório `backend/app/`.
-  - Entrypoint: `backend/app/main.py` (routers montados em `/api/v1/files` e `/api/v1/health`).
-  - Rotas: `backend/app/api/v1/files.py` (upload, list, download, delete) e `backend/app/api/v1/health.py`.
-- **Serviços**: separação clara em `backend/app/services/`:
-  - `csv_processor.py`: lê CSV a partir do GridFS, aplica sanitização e gera registros.
-  - `storage.py`: grava/recupera arquivos no GridFS e gerencia metadados em `db.files`.
-  - `sanitize.py`: proteção contra CSV Injection (`sanitize_value`).
-- **DB**: MongoDB + GridFS abstraídos em `backend/app/db/mongo.py`.
+- **Frontend**: arquivos estaticos em `frontend/` (`frontend/js/api.js`,
+  `frontend/js/app.js`) consomem a API REST.
+- **Backend**: FastAPI em `backend/app/`.
+  - Entrypoint: `backend/app/main.py` (routers em `/api/v1/files` e
+    `/api/v1/health`).
+  - Rotas: `backend/app/api/v1/endpoints/files.py` e
+    `backend/app/api/v1/endpoints/health.py`.
+- **Servicos**:
+  - `backend/app/services/file_service.py`: orquestra upload/list/download/delete.
+  - `backend/app/services/csv_handler.py`: parsing, sanitizacao, deteccao de
+    dialeto e suporte a layout vertical.
+  - `backend/app/services/cleanup.py`: job de limpeza (APScheduler).
+- **Repositorios**:
+  - `backend/app/repositories/file_repository.py`: GridFS, metadados e criptografia.
+  - `backend/app/utils/storage.py` esta **deprecated**.
+- **Utils**:
+  - `backend/app/utils/sanitize.py`: `sanitize_cell_value` (CSV injection).
+  - `backend/app/utils/validators.py`: validacoes de CSV (extensao/content-type).
+- **DB**: `backend/app/db/mongo.py` usa `AsyncIOMotorClient` e
+  `AsyncIOMotorGridFSBucket`.
 
-## Padrões e convenções específicos
-- Arquivo máximo: 50 MB (constante `MAX_FILE_SIZE` em `backend/app/utils/validators.py`). Validação básica é feita em `validate_csv_file` e checagem de tamanho no `storage.save_file`.
-- CSV Injection: qualquer campo que comece com `=`, `+`, `-` ou `@` é prefixado com `'` por `sanitize_value` em `backend/app/services/sanitize.py`.
-- Flow de processamento:
-  1. Upload via rota API (`/api/v1/files`) → `storage.save_file` salva bytes no GridFS e registra metadados com `status: "pending"`.
-  2. `csv_processor.process_csv(file_id, id_field=None)` lê do GridFS, aplica `sanitize_value`, constrói registros dinamicamente e atualiza metadados (`status: "processed"`, `fields`, `records_count`).
-- Naming / structure: mantenha a lógica síncrona/assíncrona dos serviços (as funções `save_file`, `process_csv` são `async`).
-- Erros: o backend usa `fastapi.HTTPException` para validações (veja `validators.py`) e lança `ValueError` em casos internos que o agente deve propagar ou traduzir para 5xx/4xx conforme contexto.
+## Padroes e convencoes especificos
+- Tamanho maximo: `settings.MAX_FILE_SIZE_MB` em
+  `backend/app/core/config.py`, validado em `file_repository.save_file`.
+- Fluxo de upload:
+  1. `file_service.save_upload` le bytes e salva o arquivo bruto no GridFS
+     (`raw_fs_id`).
+  2. Processa e sanitiza com `csv_handler.process_csv_content`.
+  3. Salva o CSV sanitizado no GridFS (`processed_fs_id`) e atualiza metadados
+     (`fields`, `records_count`, `status`).
+- Fluxo de download:
+  - `file_service.download_processed_file` streama o CSV sanitizado via
+    `processed_fs_id`.
+  - Se nao existir `processed_fs_id`, reprocessa, salva o sanitizado e atualiza
+    metadados.
+- CSV Injection: `sanitize_cell_value` prefixa `'` quando a celula comeca com
+  `=`, `+`, `-` ou `@`.
+- Criptografia: `app/core/security.py` usa Fernet. Hoje a chave e gerada em
+  runtime (nao persistente) — para producao, use uma chave estavel via config/env.
 
-## Comandos úteis / workflows
-- Rodar testes simples (sem pytest hanging): `python run_tests.py` (testes básicos de sanitização e validadores).
-- Rodar todos os testes com pytest: `pytest -v` (pasta `tests/` com `unit/` e `integration/`).
-  - **Nota**: testes de integração requerem MongoDB rodando; use `docker-compose up` para ambiente completo.
-- Subir ambiente completo (recomendado para desenvolvimento):
-  - `docker-compose up --build` (arquivo na raiz `docker-compose.yml`).
-- Executar localmente o backend (se preferir sem Docker): usar Uvicorn apontando para o módulo FastAPI:
-  - `cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000` (ambiente Python ativado, MongoDB acessível).
-- CI: referência `.github/workflows/ci.yml` (instala dependências e roda `pytest` + build docker). Alinhe mudanças de dependência com `backend/requirements.txt`.
+## Comandos uteis / workflows
+- Testes: `pytest -v backend/tests` (integracao requer MongoDB).
+- Backend local: `cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`
+- Stack completo: `docker-compose up --build`
+- CI: workflows em `.github/workflows/01-pr-validation.yml` e
+  `.github/workflows/02-delivery.yml`.
 
-## Dependências (backend/requirements.txt)
-- **fastapi** (0.104.1): framework web async.
-- **uvicorn[standard]** (0.24.0): ASGI server.
-- **pymongo** (4.6.1): driver MongoDB síncrono.
-- **motor** (3.3.2): driver MongoDB async.
-- **pydantic** (2.5.0): validação de dados.
-- **python-multipart** (0.0.6): suporte para upload de formulários.
+## Integracoes e pontos de atencao
+- GridFS: operacoes centralizadas em `backend/app/repositories/file_repository.py`.
+- Frontend ↔ Backend: `frontend/js/api.js` e `frontend/js/app.js`.
+- Validacao: `validate_csv_file` existe, mas o upload atual valida apenas
+  extensao; use a funcao se precisar validar content-type.
 
-Para testes locais, instale também: `pip install pytest pytest-asyncio httpx`
-
-## Integrações e pontos de atenção
-- GridFS: `backend/app/services/storage.py` usa `fs_bucket.open_upload_stream` / `open_download_stream_by_name` e mantém metadados em `db.files`.
-- Frontend ↔ Backend: `frontend/js/upload.js` e `frontend/js/files_list.js` chamam endpoints sob `/api/v1/files`; adaptar nomes de rota e payloads conforme esses arquivos.
-- Validação de upload: ver `validate_csv_file` (extensão `.csv` e content-type esperados). O tamanho é verificado após leitura dos bytes em `storage.save_file`.
-
-## Exemplos concretos que o agente pode editar/usar
-- Para neutralizar CSV injection, use `from app.services.sanitize import sanitize_value` e aplique antes de persistir ou responder.
-- Para salvar um `UploadFile` async e respeitar tamanho máximo:
+## Exemplos rapidos
+- Upload via service:
 
 ```py
-from app.services.storage import save_file
-file_id = await save_file(uploaded_file)
+from app.services.file_service import save_upload
+result = await save_upload(uploaded_file, id_field=None)
 ```
 
-- Para processar um CSV já gravado (id: `file_id`):
+- Download sanitizado:
 
 ```py
-from app.services.csv_processor import process_csv
-records = await process_csv(file_id, id_field=None)
+from app.services.file_service import download_processed_file
+payload, filename = await download_processed_file(file_id)
 ```
-
-## Onde adicionar novos recursos / como integrar
-- Novas validações → `backend/app/utils/validators.py`.
-- Lógica de processamento → `backend/app/services/csv_processor.py`.
-- Acesso a GridFS / mudanças de schema → `backend/app/db/mongo.py` e `backend/app/services/storage.py`.
-
-## Testes e debugging rápidos
-- Testes básicos sem DB: `python run_tests.py` — valida `sanitize_value`, tamanho máximo e constantes.
-- Unit tests: `tests/unit/` — testes isolados de sanitização e processamento CSV (com mocks).
-- Integration tests: `tests/integration/test_api_files.py` — cenários upload → process → delete/download (requer MongoDB).
-- Logs: adicione `print()` ou `logging` no serviço alterado e rode `docker-compose up` ou `uvicorn` com `--reload` para reproduzir.
 
 ## Exemplos de Requests HTTP
 
-Todos os exemplos usam `BASE_URL=http://localhost:8000` (ajuste conforme necessário).
+Todos os exemplos usam `BASE_URL=http://localhost:8000`.
 
 ### Upload (POST /api/v1/files/upload)
 ```bash
@@ -91,7 +90,7 @@ curl -X POST "http://localhost:8000/api/v1/files/upload?id_field=record_id" \
   -F "file=@myfile.csv"
 ```
 
-**Resposta (200 OK)**
+**Resposta (200/201)**
 ```json
 {
   "id": "654f7a2b9c1e4b3a...",
@@ -107,19 +106,6 @@ curl -X POST "http://localhost:8000/api/v1/files/upload?id_field=record_id" \
 curl "http://localhost:8000/api/v1/files/"
 ```
 
-**Resposta**
-```json
-[
-  {
-    "id": "654f7a2b9c1e4b3a...",
-    "filename": "myfile.csv",
-    "status": "processed",
-    "records_count": 12,
-    "fields": ["name","email","created_at"]
-  }
-]
-```
-
 ### Download (GET /api/v1/files/{file_id}/download)
 ```bash
 curl -OJ "http://localhost:8000/api/v1/files/654f7a2b9c1e4b3a.../download"
@@ -130,57 +116,24 @@ curl -OJ "http://localhost:8000/api/v1/files/654f7a2b9c1e4b3a.../download"
 curl -X DELETE "http://localhost:8000/api/v1/files/654f7a2b9c1e4b3a..."
 ```
 
-**Resposta (200 OK)**
-```json
-{"status":"deleted"}
-```
-
 ### Health Check (GET /api/v1/health/)
 ```bash
 curl "http://localhost:8000/api/v1/health/"
 ```
 
-**Resposta**
-```json
-{"status":"ok"}
+### Liveness (GET /api/v1/health/live)
+```bash
+curl "http://localhost:8000/api/v1/health/live"
 ```
 
-### JavaScript (Browser) — Upload com FormData
-```javascript
-const BASE_URL = "http://localhost:8000";
-
-async function uploadFile(file, idField = null) {
-  const form = new FormData();
-  form.append("file", file);
-
-  const url = new URL(`${BASE_URL}/api/v1/files/upload`);
-  if (idField) url.searchParams.append("id_field", idField);
-
-  const res = await fetch(url.toString(), { method: "POST", body: form });
-  if (!res.ok) throw new Error(`Upload failed: ${res.statusText}`);
-  return res.json();
-}
-
-// Uso:
-// uploadFile(fileInput.files[0], "record_id").then(console.log);
+### Readiness (GET /api/v1/health/ready)
+```bash
+curl "http://localhost:8000/api/v1/health/ready"
 ```
 
-### Node.js — Upload com axios + FormData
-```javascript
-const axios = require("axios");
-const fs = require("fs");
-const FormData = require("form-data");
-
-async function uploadFile(path, idField) {
-  const form = new FormData();
-  form.append("file", fs.createReadStream(path));
-  const url = `http://localhost:8000/api/v1/files/upload${idField ? `?id_field=${idField}` : ""}`;
-  const res = await axios.post(url, form, { headers: form.getHeaders() });
-  return res.data;
-}
-```
-
-## Observações / Detalhes Técnicos
-- O upload é processado **sincronamente** — o endpoint aguarda `process_csv` terminar antes de retornar, bloqueando para arquivos grandes.
-- CSV Injection: células com prefixo `=`, `+`, `-`, `@` são sanitizadas com `'` em `sanitize.py`; veja fluxo em `csv_processor.py`.
-- GridFS: metadados são salvos na coleção `db.files` com campos `status`, `fields`, `records_count`. 
+## Observacoes / Detalhes Tecnicos
+- O upload e processado de forma sincrona no endpoint (processa antes de
+  responder).
+- Parsing roda em threadpool (`csv_handler.process_csv_content`).
+- Metadados ficam em `db.files`: `status`, `fields`, `records_count`,
+  `raw_fs_id`, `processed_fs_id`.

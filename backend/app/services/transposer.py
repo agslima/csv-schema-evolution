@@ -61,6 +61,6 @@ def parse_vertical_csv(
 
         return records, fields
 
-    except csv.Error as e:
-        logger.error("Error during transposition: %s", e)
+    except csv.Error as err:
+        logger.error("Error during transposition: %s", err)
         return [], []

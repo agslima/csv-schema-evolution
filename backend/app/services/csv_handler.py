@@ -23,7 +23,7 @@ def _detect_dialect(content: str) -> csv.Dialect:
     try:
         dialect = detector.detect(content)
         return dialect
-    # pylint: disable=broad-exception-caught
+    # pylint: disable=broad-except
     except Exception as error:
         logger.warning("Dialect detection failed: %s. Defaulting to Excel.", error)
         return csv.get_dialect("excel")
@@ -97,6 +97,20 @@ def _group_records_by_id(records: List[Dict], id_field: Optional[str]) -> List[D
     return [dict(record) for record in ordered_records]
 
 
+def _sanitize_row(row: Dict) -> Optional[OrderedDict]:
+    sanitized_row = OrderedDict()
+
+    for field, value in row.items():
+        if field:
+            clean_field = field.strip()
+            raw_value = value if value is not None else ""
+            sanitized_row[clean_field] = sanitize_cell_value(raw_value)
+
+    if sanitized_row:
+        return sanitized_row
+    return None
+
+
 def _parse_csv_sync(
     content: str, id_field: Optional[str] = None
 ) -> Tuple[List[Dict], List[str]]:
@@ -114,26 +128,17 @@ def _parse_csv_sync(
         records, fields = parse_vertical_csv(content, dialect)
         return _group_records_by_id(records, id_field), fields
 
-    text_io = StringIO(content)
     records: List[Dict] = []
     ordered_fields: List[str] = []
 
     try:
-        reader = csv.DictReader(text_io, dialect=dialect)
+        reader = csv.DictReader(StringIO(content), dialect=dialect)
 
         if reader.fieldnames:
             ordered_fields = [f.strip() for f in reader.fieldnames if f]
 
         for row in reader:
-            sanitized_row = OrderedDict()
-
-            for field, value in row.items():
-                if field:
-                    clean_field = field.strip()
-                    raw_value = value if value is not None else ""
-                    clean_value = sanitize_cell_value(raw_value)
-                    sanitized_row[clean_field] = clean_value
-
+            sanitized_row = _sanitize_row(row)
             if sanitized_row:
                 records.append(sanitized_row)
 

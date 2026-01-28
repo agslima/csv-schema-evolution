@@ -48,6 +48,9 @@ omit =
     
     # Cleanup script (Ran as a cron job, not app logic)
     app/services/cleanup.py
+
+    # Deprecated code
+    app/utils/storage.py
     
     # Init files
     */__init__.py

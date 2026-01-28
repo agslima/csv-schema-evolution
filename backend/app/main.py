@@ -75,7 +75,7 @@ app.include_router(
 app.include_router(files.router, prefix=f"{settings.API_V1_STR}/files", tags=["Files"])
 
 if __name__ == "__main__":
-    import uvicorn
+    import uvicorn  # pylint: disable=import-error
 
     # nosec B104: 0.0.0.0 bind is required for Docker container accessibility
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)  # nosec B104

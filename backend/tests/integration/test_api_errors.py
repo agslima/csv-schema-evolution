@@ -47,7 +47,7 @@ async def test_upload_storage_failure(api_client):
     """Test upload endpoint when storage service fails (e.g., corrupt file)."""
     # Simulate a ValueError during GridFS save
     with patch(
-        "app.utils.storage.save_file_to_gridfs",
+        "app.repositories.file_repository.save_file",
         side_effect=ValueError("Simulated Storage Error"),
     ):
         files = {"file": ("test.csv", "col1,col2", "text/csv")}
@@ -63,7 +63,8 @@ async def test_upload_general_exception(api_client):
     """Test upload endpoint when an unexpected error occurs (500)."""
     # Simulate a generic unexpected exception
     with patch(
-        "app.utils.storage.save_file_to_gridfs", side_effect=Exception("Database Down")
+        "app.repositories.file_repository.save_file",
+        side_effect=Exception("Database Down"),
     ):
         files = {"file": ("test.csv", "col1,col2", "text/csv")}
         response = await api_client.post(f"{BASE_URL}/upload", files=files)
@@ -90,12 +91,16 @@ async def test_download_file_not_found(api_client, mock_db_manager):
 async def test_download_storage_read_error(api_client, mock_db_manager):
     """Test downloading a file where storage retrieval fails."""
     fake_id = str(ObjectId())
-    mock_doc = {"_id": ObjectId(fake_id), "filename": "test.csv"}
+    mock_doc = {
+        "_id": ObjectId(fake_id),
+        "filename": "test.csv",
+        "processed_fs_id": ObjectId(),
+    }
 
     mock_db_manager.db.files.find_one = AsyncMock(return_value=mock_doc)
 
     with patch(
-        "app.utils.storage.get_file_content_as_string",
+        "app.repositories.file_repository.get_file_content_as_bytes",
         side_effect=Exception("Read Error"),
     ):
         response = await api_client.get(f"{BASE_URL}/{fake_id}/download")
@@ -110,8 +115,10 @@ async def test_delete_file_not_found(api_client):
     """Test deleting a file that returns False from storage (not found)."""
     fake_id = str(ObjectId())
 
-    # Simulate storage.delete_file returning False
-    with patch("app.utils.storage.delete_file", new_callable=AsyncMock) as mock_delete:
+    # Simulate repository.delete_file returning False
+    with patch(
+        "app.repositories.file_repository.delete_file", new_callable=AsyncMock
+    ) as mock_delete:
         mock_delete.return_value = False
 
         response = await api_client.delete(f"{BASE_URL}/{fake_id}")

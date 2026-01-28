@@ -4,19 +4,18 @@ to achieve 100% code coverage.
 """
 
 import csv
-from io import BytesIO
 from unittest.mock import patch
 
 import pytest
-from fastapi import UploadFile
 
 from app.services.csv_handler import (
     _parse_csv_sync,
     _detect_dialect,
     process_csv_content,
+    _sanitize_row,
 )
 from app.services.dialect_detector import DialectDetector
-from app.utils.storage import save_file_to_gridfs
+from app.repositories import file_repository
 
 # --- 1. CSV Handler Edge Cases ---
 
@@ -76,6 +75,18 @@ def test_handler_malformed_rows():
     # FIX: Expect 'val' (stripped) instead of ' val '
     # The sanitize_cell_value function uses .strip(), so this is the correct expected behavior.
     assert records[0]["col2"] == "val"
+
+
+def test_handler_sanitize_row_empty():
+    """Hits: _sanitize_row returning None when no usable fields exist."""
+    sanitized = _sanitize_row({None: "value"})
+    assert sanitized is None
+
+
+def test_handler_sanitize_row_strips_fields():
+    """Hits: field/value cleanup in _sanitize_row."""
+    sanitized = _sanitize_row({" col ": " value "})
+    assert sanitized["col"] == "value"
 
 
 @pytest.mark.asyncio
@@ -143,18 +154,18 @@ def test_detector_empty_cells_score():
 @pytest.mark.asyncio
 async def test_storage_max_size_exceeded():
     """Hits: if len(content) > settings.max_file_size_bytes"""
-    # Create a small file
-    file = UploadFile(file=BytesIO(b"12345"), filename="test.txt")
+    content = b"12345"
+    filename = "test.txt"
 
-    # FIX: Patch the 'settings' object imported in app.utils.storage
+    # FIX: Patch the 'settings' object imported in app.repositories.file_repository
     # This bypasses Pydantic property restrictions entirely
-    with patch("app.utils.storage.settings") as mock_settings:
+    with patch("app.repositories.file_repository.settings") as mock_settings:
         # Set the mock to have a tiny max size
         mock_settings.max_file_size_bytes = 1
 
         with pytest.raises(ValueError) as exc:
             # We explicitly await the function using the file variable
-            await save_file_to_gridfs(file)
+            await file_repository.save_file(content, filename)
 
         assert "exceeds maximum size" in str(exc.value)
 
