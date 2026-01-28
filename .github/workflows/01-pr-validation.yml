@@ -1,4 +1,4 @@
-name: "CI Pipeline"
+name: "PR Validation"
 
 on:
   pull_request:
@@ -87,7 +87,7 @@ jobs:
           pytest backend/tests \
             --cov=backend/app \
             --cov-report=xml \
-            --cov-config=.coveragerc \
+            --cov-config=backend/.coveragerc \
             --cov-fail-under=85
 
       - name: Upload Coverage
