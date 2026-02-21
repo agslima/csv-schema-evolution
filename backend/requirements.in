@@ -1,10 +1,10 @@
 # --- Build Dependencies ---
-fastapi==0.129.0
+fastapi==0.129.2
 pymongo==4.16.0
 pydantic==2.12.5
 pydantic-settings
 python-multipart==0.0.22
-uvicorn[standard]==0.40.0
+uvicorn[standard]==0.41.0
 motor==3.7.1
 
 # --- Testing & Quality ---
@@ -15,7 +15,7 @@ black==26.1.0
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
 pytest-cov==7.0.0
-responses==0.25.8
+responses==0.26.0
 coverage==7.13.4
 
 # --- Utilities ---
