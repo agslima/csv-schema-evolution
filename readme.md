@@ -1,16 +1,17 @@
+<div align="center">
+
+<a name="back-to-top"></a>
+
 # CSV Ingestion & Processing Engine
 
 ## Backend‑First Data Ingestion Service (FastAPI + MongoDB GridFS)
 
-<p align="left">
+<p align="center">
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml">
     <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml/badge.svg">
   </a>
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-delivery.yml">
     <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-delivery.yml/badge.svg">
-  </a>
-  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml">
-    <img alt="CodeQL" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/codeql.yml/badge.svg">
   </a>
   <a href="https://codecov.io/github/agslima/csv-schema-evolution" >
     <img alt="CodeCov" src="https://codecov.io/github/agslima/csv-schema-evolution/graph/badge.svg?token=776AEW3J4C"/>
@@ -21,9 +22,13 @@
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
+
+
 > **A backend‑centric engine for securely ingesting, sanitizing, and normalizing heterogeneous CSV files.**
 
 This project focuses on **data safety, correctness, and operational transparency**. It was designed to process sensitive CSV files **without relying on third‑party online tools**, ensuring full control over data handling and compliance requirements.
+
+</div>
 
 ## TL;DR
 
@@ -307,3 +312,6 @@ Planned enhancements aligned with real ingestion pipelines:
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
+
+<br><hr>
+[🔼 Back to top](#back-to-top)
