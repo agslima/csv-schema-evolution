@@ -1,5 +1,5 @@
 # --- Build Dependencies ---
-fastapi==0.135.1
+fastapi==0.135.2
 pymongo==4.16.0
 pydantic==2.12.5
 pydantic-settings
@@ -22,7 +22,7 @@ coverage==7.13.5
 httpx==0.28.1
 bandit
 aiofiles==25.1.0
-cryptography==46.0.5
+cryptography==46.0.6
 python-json-logger==4.0.0
 apscheduler==3.11.2
 
