@@ -1,10 +1,10 @@
 # --- Build Dependencies ---
-fastapi==0.136.0
-pymongo==4.16.0
-pydantic==2.13.2
+fastapi==0.136.1
+pymongo==4.17.0
+pydantic==2.13.3
 pydantic-settings
 python-multipart==0.0.26
-uvicorn[standard]==0.44.0
+uvicorn[standard]==0.46.0
 motor==3.7.1
 
 # --- Testing & Quality ---
@@ -22,7 +22,7 @@ coverage==7.13.5
 httpx==0.28.1
 bandit
 aiofiles==25.1.0
-cryptography==46.0.7
+cryptography==47.0.0
 python-json-logger==4.1.0
 apscheduler==3.11.2
 
