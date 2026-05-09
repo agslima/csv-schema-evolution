@@ -1,7 +1,7 @@
 # --- Build Dependencies ---
 fastapi==0.136.1
 pymongo==4.17.0
-pydantic==2.13.3
+pydantic==2.13.4
 pydantic-settings
 python-multipart==0.0.27
 uvicorn[standard]==0.46.0
@@ -22,7 +22,7 @@ coverage==7.13.5
 httpx==0.28.1
 bandit
 aiofiles==25.1.0
-cryptography==47.0.0
+cryptography==48.0.0
 python-json-logger==4.1.0
 apscheduler==3.11.2
 
@@ -32,4 +32,4 @@ zipp>=3.19.1
 h11>=0.16.0
 anyio>=4.4.0
 requests>=2.32.4
-urllib3>=2.6.0
+urllib3>=2.7.0
