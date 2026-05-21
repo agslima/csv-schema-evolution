@@ -1,40 +1,29 @@
 <div align="center">
 
-<a name="back-to-top"></a>
-
 # CSV Ingestion & Processing Engine
 
-## Backend‑First Data Ingestion Service (FastAPI + MongoDB GridFS)
-
 <p align="center">
-  <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml">
-    <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/01-pr-validation.yml/badge.svg">
-  </a>
   <a href="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-delivery.yml">
     <img alt="CI Pipeline" src="https://github.com/agslima/csv-schema-evolution/actions/workflows/02-delivery.yml/badge.svg">
   </a>
   <a href="https://codecov.io/github/agslima/csv-schema-evolution" >
     <img alt="CodeCov" src="https://codecov.io/github/agslima/csv-schema-evolution/graph/badge.svg?token=776AEW3J4C"/>
   </a>
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-blue">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-async-green">
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-GridFS-brightgreen">  
   <img alt="License" src="https://img.shields.io/badge/License-MIT-lightgrey">
 </p>
 
+⚡️ **A backend engine for securely ingesting, sanitizing, and normalizing heterogeneous CSV files.** ⚡️
 
-
-> **A backend‑centric engine for securely ingesting, sanitizing, and normalizing heterogeneous CSV files.**
-
-This project focuses on **data safety, correctness, and operational transparency**. It was designed to process sensitive CSV files **without relying on third‑party online tools**, ensuring full control over data handling and compliance requirements.
+This project focuses on **data safety, and operational transparency**. It was designed to process sensitive CSV files **without relying on third‑party online tools**.
 
 </div>
 
 ## TL;DR
 
-- Secure backend service for ingesting untrusted CSVs
-- Focused on compliance, sanitization, and observability
-- Best entry points: `/docs/architecture.md` and `/docs/processing-engine.md`
+- Backend service for ingesting untrusted CSVs
+- Best entry points: [`docs/architecture.md`](/docs/architecture.md) and [`docs/processing-engine.md`](/docs/processing-engine.md)
 
 ## Problem Statement
 
@@ -111,7 +100,6 @@ Processed Table Preview
 ![CSV Ingestion Demo](docs/demo/csv_ingestion_demo.gif)
 
 ---
--->
 
 ## What the Engine Does
 
@@ -128,11 +116,9 @@ The engine ingests unstructured or semi‑structured CSV files and converts them
 - Protection against spreadsheet‑based attacks
 - Structured output suitable for analytics, migration, or reporting pipelines
 
----
+-->
 
-## High‑Level Architecture
-
-The system adheres to **Clean Architecture** principles, featuring a clear separation between API, business logic, and infrastructure.
+## Architecture
 
 ```mermaid
 graph LR
@@ -144,6 +130,7 @@ graph LR
     C -->|Malicious Input| X[Reject Request]
 ```
 
+<!--
 ### Design Tradeoffs
 
 - **FastAPI + async I/O** for high concurrency during file uploads
@@ -198,7 +185,7 @@ readinessProbe:
   periodSeconds: 10
 ```
 
----
+<!--
 
 ## Security & Compliance (Summary)
 
@@ -242,18 +229,6 @@ Every commit and pull request triggers an automated workflow that performs:
 
 This pipeline reduces supply‑chain risk and provides the traceability required for security reviews and compliance audits.
 
-<details><summary>Tooling used</summary>
-  
-- Secret scanning: Gitleaks
-- SAST / SCA: Snyk, Bandit, Pylint  
-- Test coverage: Pytest + Codecov  
-- Docker linting: Hadolint  
-- Container scanning: Trivy  
-- Image signing: Cosign  
-- SBOM generation: Syft
-
-</details>
-
 ---
 
 ## Observability
@@ -269,6 +244,7 @@ Example:
 ```
 
 Logging configuration and operational guidance are documented in `docs/logging.md`.
+-->
 
 ---
 
@@ -284,9 +260,8 @@ For detailed implementation guides, please refer to:
 - 🧪 Testing Strategy — [`docs/testing.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/testing.md)
 - 📝 Logging & Observability — [`docs/logging.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/logging.md)
 - 🚀 Setup & Installation Guide — [`docs/setup.md`](https://github.com/agslima/csv-schema-evolution/blob/main/docs/setup.md)
-  
----
 
+<!--
 ## Roadmap
 
 Planned enhancements aligned with real ingestion pipelines:
@@ -296,22 +271,10 @@ Planned enhancements aligned with real ingestion pipelines:
 - Export formats (Parquet, JSON, XLSX)
 - Background workers (Celery + Redis)
 - Role‑based access control (RBAC)
-
-<!--
----
-## Contributing 
-
-1. ​Fork the project
-2. ​Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. ​Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. ​Push to the Branch (`git push origin feature/AmazingFeature`)
-5. ​Open a Pull Request
 -->
+
 ---
 
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-
-<br><hr>
-[🔼 Back to top](#back-to-top)
