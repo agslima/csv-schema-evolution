@@ -1,21 +1,21 @@
 # --- Build Dependencies ---
-fastapi==0.136.1
+fastapi==0.136.3
 pymongo==4.17.0
 pydantic==2.13.4
 pydantic-settings
-python-multipart==0.0.28
+python-multipart==0.0.29
 uvicorn[standard]==0.47.0
 motor==3.7.1
 
 # --- Testing & Quality ---
 pylint>=3.0.0
-black==26.5.0
+black==26.5.1
 
 # Pin pytest to prevent breaking changes in CI
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
 pytest-cov==7.1.0
-responses==0.26.0
+responses==0.26.1
 coverage==7.14.0
 
 # --- Utilities ---
@@ -28,7 +28,7 @@ apscheduler==3.11.2
 
 # --- Security Pins (Snyk) ---
 dnspython>=2.6.1
-zipp>=3.19.1
+zipp>=4.1.0
 h11>=0.16.0
 anyio>=4.4.0
 requests>=2.34.2
