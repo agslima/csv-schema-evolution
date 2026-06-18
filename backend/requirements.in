@@ -22,7 +22,7 @@ coverage==7.14.1
 httpx==0.28.1
 bandit
 aiofiles==25.1.0
-cryptography==48.0.0
+cryptography==48.0.1
 python-json-logger==4.1.0
 apscheduler==3.11.2
 
