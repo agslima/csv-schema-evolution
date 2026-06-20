@@ -1,5 +1,5 @@
 # --- Build Dependencies ---
-fastapi==0.137.1
+fastapi==0.138.0
 pymongo==4.17.0
 pydantic==2.13.4
 pydantic-settings
@@ -12,11 +12,11 @@ pylint>=4.0.6
 black==26.5.1
 
 # Pin pytest to prevent breaking changes in CI
-pytest>=9.1.0
+pytest>=9.1.1
 pytest-asyncio>=1.4.0
 pytest-cov==7.1.0
 responses==0.26.1
-coverage==7.14.1
+coverage==7.14.2
 
 # --- Utilities ---
 httpx==0.28.1
