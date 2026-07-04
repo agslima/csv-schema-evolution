@@ -1,10 +1,10 @@
 # --- Build Dependencies ---
-fastapi==0.138.1
+fastapi==0.139.0
 pymongo==4.17.0
 pydantic==2.13.4
 pydantic-settings
 python-multipart==0.0.32
-uvicorn[standard]==0.49.0
+uvicorn[standard]==0.50.0
 motor==3.7.1
 
 # --- Testing & Quality ---
@@ -15,8 +15,8 @@ black==26.5.1
 pytest>=9.1.1
 pytest-asyncio>=1.4.0
 pytest-cov==7.1.0
-responses==0.26.1
-coverage==7.14.3
+responses==0.26.2
+coverage==7.15.0
 
 # --- Utilities ---
 httpx==0.28.1
@@ -24,7 +24,7 @@ bandit
 aiofiles==25.1.0
 cryptography==49.0.0
 python-json-logger==4.1.0
-apscheduler==3.11.2
+apscheduler==3.11.3
 
 # --- Security Pins (Snyk) ---
 dnspython>=2.6.1
