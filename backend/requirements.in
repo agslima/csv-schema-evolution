@@ -1,5 +1,5 @@
 # --- Build Dependencies ---
-fastapi==0.139.0
+fastapi==0.139.2
 pymongo==4.17.0
 pydantic==2.13.4
 pydantic-settings
@@ -16,7 +16,7 @@ pytest>=9.1.1
 pytest-asyncio>=1.4.0
 pytest-cov==7.1.0
 responses==0.26.2
-coverage==7.15.0
+coverage==7.15.2
 
 # --- Utilities ---
 httpx==0.28.1
@@ -30,6 +30,6 @@ apscheduler==3.11.3
 dnspython>=2.6.1
 zipp>=4.1.0
 h11>=0.16.0
-anyio>=4.14.1
+anyio>=4.14.2
 requests>=2.34.2
 urllib3>=2.7.0
