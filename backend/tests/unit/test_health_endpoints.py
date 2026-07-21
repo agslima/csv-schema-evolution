@@ -49,7 +49,7 @@ async def test_readiness_check_mongo_ping_failure_marks_gridfs_unavailable(
 
     assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert payload["dependencies"]["mongo"]["status"] == "error"
-    assert "ping failed" in payload["dependencies"]["mongo"]["detail"]
+    assert payload["dependencies"]["mongo"]["detail"] == "dependency check failed"
     assert payload["dependencies"]["gridfs"]["detail"] == "mongo unavailable"
 
 
@@ -74,7 +74,7 @@ async def test_readiness_check_gridfs_query_failure(monkeypatch):
     assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert payload["dependencies"]["mongo"]["status"] == "ok"
     assert payload["dependencies"]["gridfs"]["status"] == "error"
-    assert "gridfs down" in payload["dependencies"]["gridfs"]["detail"]
+    assert payload["dependencies"]["gridfs"]["detail"] == "dependency check failed"
 
 
 @pytest.mark.asyncio
