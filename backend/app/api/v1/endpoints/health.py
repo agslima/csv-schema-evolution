@@ -2,11 +2,14 @@
 Health check API endpoints.
 """
 
+import logging
+
 from fastapi import APIRouter, Response, status
 
 from app.db.mongo import db_manager
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/")
@@ -48,7 +51,8 @@ async def readiness_check(response: Response):
             dependencies["mongo"] = {"status": "ok"}
         # pylint: disable=broad-except
         except Exception as exc:
-            dependencies["mongo"] = {"status": "error", "detail": str(exc)}
+            logger.exception("Mongo readiness check failed", exc_info=exc)
+            dependencies["mongo"] = {"status": "error", "detail": "dependency check failed"}
             ready = False
 
     if db_manager.fs_bucket is None:
@@ -64,7 +68,8 @@ async def readiness_check(response: Response):
             dependencies["gridfs"] = {"status": "ok", "bucket": bucket_name}
         # pylint: disable=broad-except
         except Exception as exc:
-            dependencies["gridfs"] = {"status": "error", "detail": str(exc)}
+            logger.exception("GridFS readiness check failed", exc_info=exc)
+            dependencies["gridfs"] = {"status": "error", "detail": "dependency check failed"}
             ready = False
 
     if not ready:
