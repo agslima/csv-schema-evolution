@@ -1,10 +1,10 @@
 # --- Build Dependencies ---
-fastapi==0.140.0
+fastapi==0.141.1
 pymongo==4.17.0
 pydantic==2.13.4
 pydantic-settings
 python-multipart==0.0.32
-uvicorn[standard]==0.51.0
+uvicorn[standard]==0.52.0
 motor==3.7.1
 
 # --- Testing & Quality ---
