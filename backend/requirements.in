@@ -8,7 +8,7 @@ uvicorn[standard]==0.52.1
 motor==3.7.1
 
 # --- Testing & Quality ---
-pylint>=4.0.6
+pylint>=4.0.7
 black==26.5.1
 
 # Pin pytest to prevent breaking changes in CI
@@ -16,7 +16,7 @@ pytest>=9.1.1
 pytest-asyncio>=1.4.0
 pytest-cov==7.1.0
 responses==0.26.2
-coverage==7.15.3
+coverage==7.15.4
 
 # --- Utilities ---
 httpx==0.28.1
