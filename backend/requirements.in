@@ -1,14 +1,14 @@
 # --- Build Dependencies ---
 fastapi==0.141.1
 pymongo==4.17.0
-pydantic==2.13.4
+pydantic==2.13.5
 pydantic-settings
 python-multipart==0.0.32
 uvicorn[standard]==0.52.4
 motor==3.7.1
 
 # --- Testing & Quality ---
-pylint>=4.0.7
+pylint>=4.0.8
 black==26.5.1
 
 # Pin pytest to prevent breaking changes in CI
@@ -16,7 +16,7 @@ pytest>=9.1.1
 pytest-asyncio>=1.4.0
 pytest-cov==7.1.0
 responses==0.26.3
-coverage==7.15.4
+coverage==7.16.0
 
 # --- Utilities ---
 httpx==0.28.1
@@ -30,6 +30,6 @@ apscheduler==3.11.3
 dnspython>=2.6.1
 zipp>=4.1.0
 h11>=0.16.0
-anyio>=4.14.2
+anyio>=4.15.0
 requests>=2.34.2
 urllib3>=2.7.0
