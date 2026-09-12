@@ -1,6 +1,6 @@
 # --- Build Dependencies ---
 fastapi==0.141.1
-pymongo==4.17.0
+pymongo==4.18.0
 pydantic==2.13.5
 pydantic-settings
 python-multipart==0.0.32
@@ -30,6 +30,6 @@ apscheduler==3.11.3
 dnspython>=2.6.1
 zipp>=4.1.0
 h11>=0.16.0
-anyio>=4.15.0
+anyio>=4.15.1
 requests>=2.34.2
 urllib3>=2.7.0
