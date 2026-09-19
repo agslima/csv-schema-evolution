@@ -1,10 +1,10 @@
 # --- Build Dependencies ---
 fastapi==0.141.1
-pymongo==4.18.0
+pymongo==4.18.1
 pydantic==2.13.5
 pydantic-settings
 python-multipart==0.0.32
-uvicorn[standard]==0.52.4
+uvicorn[standard]==0.53.0
 motor==3.7.1
 
 # --- Testing & Quality ---
@@ -16,7 +16,7 @@ pytest>=9.1.1
 pytest-asyncio>=1.4.0
 pytest-cov==7.1.0
 responses==0.26.3
-coverage==7.16.0
+coverage==7.16.1
 
 # --- Utilities ---
 httpx==0.28.1
@@ -32,4 +32,4 @@ zipp>=4.1.0
 h11>=0.16.0
 anyio>=4.15.1
 requests>=2.34.2
-urllib3>=2.7.0
+urllib3>=2.8.0
