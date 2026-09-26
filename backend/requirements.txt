@@ -1020,9 +1020,9 @@ pygments==2.20.0 \
     # via
     #   pytest
     #   rich
-pylint==4.0.8 \
-    --hash=sha256:1c1b2128bde5ff5e966801413080b6384d42a5782718d528c906dbb6beab94ed \
-    --hash=sha256:3341c08c0aabaa4adc71516de0969f3ba5c692b56c75af4dcb4d242823fbe363
+pylint==4.0.9 \
+    --hash=sha256:6f1305780229ae720e89b8aff2b3ff857cbb268fbab98c8b586960267667ad34 \
+    --hash=sha256:c4ba5bbaf1e70ecf05f08cd7d6091ea04824b79a2b2d9f5b10dc25fc34cb1124
     # via -r requirements.in
 pymongo==4.18.1 \
     --hash=sha256:016d21e7fbf55ac89f419daa48da95314896205d902ed9aa4058f26a436e789c \
