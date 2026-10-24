@@ -1,5 +1,5 @@
 # --- Build Dependencies ---
-fastapi==0.143.1
+fastapi==0.159.1
 pymongo==4.19.0
 pydantic==2.14.1
 pydantic-settings
@@ -28,7 +28,7 @@ apscheduler==3.11.3
 
 # --- Security Pins (Snyk) ---
 dnspython>=2.9.0
-zipp>=4.1.1
+zipp>=4.1.2
 h11>=0.16.0
 anyio>=4.15.1
 requests>=2.34.2
