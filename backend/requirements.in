@@ -1,9 +1,9 @@
 # --- Build Dependencies ---
 fastapi==0.162.0
 pymongo==4.19.0
-pydantic==2.14.1
+pydantic==2.14.2
 pydantic-settings
-python-multipart==0.0.32
+python-multipart==0.0.33
 uvicorn[standard]==0.54.0
 motor==3.7.1
 
@@ -13,10 +13,10 @@ black==26.10.1
 
 # Pin pytest to prevent breaking changes in CI
 pytest>=9.2.0
-pytest-asyncio>=1.4.1
+pytest-asyncio>=1.4.1.post1
 pytest-cov==7.1.0
 responses==0.26.3
-coverage==7.17.0
+coverage==7.17.2
 
 # --- Utilities ---
 httpx==0.28.1
@@ -27,9 +27,9 @@ python-json-logger==4.2.0
 apscheduler==3.11.3
 
 # --- Security Pins (Snyk) ---
-dnspython>=2.9.0
+dnspython>=2.9.2
 zipp>=4.1.2
 h11>=0.16.0
-anyio>=4.15.1
+anyio>=4.16.0
 requests>=2.34.2
 urllib3>=2.8.0
